@@ -120,9 +120,6 @@ button=digitalRead(buttonPin);
   else if(millis()>timeoutCounter+timeoutMillis-500){     //logic low state 0.5s before timeout to volumedown
       if(!soundcycle){myDFPlayer.volume(1);}//bonus
   }
-  
-  //timeoutCounter=millis()MISTAKE!!
-
 
 //////////////////////////////////////////////////////////////GÁNYOLÁS,dont know what xactly happen
   
@@ -140,12 +137,6 @@ button=digitalRead(buttonPin);
           timeouti = 0;
         }
         else timeouti++;
-        
-        /*if(millis() - timeoutshit > 7000){
-          digitalWrite(mutePin,1);
-          myDFPlayer.pause();
-          setTargetColor(9);
-        }*/
       }
   }
   else timeoutflag = 0;

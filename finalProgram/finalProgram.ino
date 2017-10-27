@@ -216,11 +216,6 @@ void rgbIncrement()
   dB=(0<(finB-curB))?(1):(-1);
   dB=(0==(finB-curB))?(0):(dB);
 
-  if(!dR && !dG && !dB)
-  {
-    targetReached=true;
-  }
-
   curR=nextVal(curR, dR);
   curG=nextVal(curG, dG);
   curB=nextVal(curB, dB);
@@ -238,54 +233,12 @@ void setTargetColor(int x)
      else
      {
      colorNum=x;
-     targetReached=(curR==finR&&curG==finG&&curB==finB)?(1):(0); 
      finR = rgb[colorPalette][x][0];
      finG = rgb[colorPalette][x][1];
      finB = rgb[colorPalette][x][2];
      }
 }
 
-/////////////////////DEMONSTRATION FUNCTIONALITY///////////////////////////////
-
-void circularColor()
-{//JUST FOR TEST PURPOSE, simple FadeTest.
-  if( targetReached )// && (millis()<(setpointReachedSince+setpointWait)))
-  {
-  int nextColor=(6 == colorNum)?(0):(colorNum+1);
-        //Serial.print("Circular color, next:\t");
-        //Serial.println(nextColor);
-  setTargetColor(nextColor);
-  }
-}
-
-void fadeTest()
-{//just working properly in library1, ith the color names
-    //TCCR2B = TCCR2B & 0b11111001; //set divider to 1 on pin3, not working at first glance
-    
-    Serial.println("set the target color to red");
-    setTargetColor(red);
-    Timer1.setPeriod(25000);
-    delay(10000);
-
-    Serial.println("set the target color to green, fast transition");
-    Timer1.setPeriod(1000);
-    setTargetColor(green);
-    delay(3000);
-    Serial.println("set the target color to black");
-   
-    Timer1.setPeriod(5000);
-    //setTargetColor(black);
-    delay(100);
-
-    Serial.println("set the target color to blue");
-    setTargetColor(blue);
-    delay(3000);
-    Serial.println("set the target color to yellow, slow transition");
-
-    Timer1.setPeriod(5000);
-    setTargetColor(yellow);
-    delay(6000);
-}
 /////////////////////////////////////////////////////////////////////////////////
 //            NECESSARY FUNCTIONS:
 /////////////////////////////////////////////////////////////////////////////////
@@ -327,10 +280,10 @@ void setup() {
     //Serial.println(F("2.Please insert the SD card!"));
     while(true);
    }
-   // DELAY 2 SEC & UNMUTE HERE:
+   // DELAY 3 SEC & UNMUTE HERE:
    delay(3000);
-   Serial.println("disable mute");
    digitalWrite(mutePin,0);
+   Serial.println("disable mute");
    Serial.println(F("DFPlayer Mini online."));
 
    
@@ -347,9 +300,7 @@ void setup() {
 }
 
 void loop() {
-    //fadeTest(); //test purpose
-  
-    
+      
     if(millis() - currenttime >100){  // hülye név..
         ADChandler();
         currenttime=millis();

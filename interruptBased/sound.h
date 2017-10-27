@@ -1,0 +1,52 @@
+void inline sound(void){
+    
+    if(prevsensorstate<sensorstate){                       // rising edge
+      digitalWrite(mutePin,0);  //unmute
+      if(millis()>timeoutCounter+timeStopMillis)
+      { //stop timeout volt --> elorol kezd
+            myDFPlayer.enableLoopAll();
+      }
+      else
+      {
+        myDFPlayer.start(); //must be in else branch!
+        started=true;
+      }
+    }
+    
+    if(sensorstate){
+      finVol=map(max_adc,0,511,0,15);
+      timeoutCounter=millis();
+    }
+    else if (prevsensorstate>sensorstate)                 // falling edge
+    {
+      timeoutCounter=millis(); //redundant...
+    }
+    else if (millis()>timeoutCounter+timeoutMillis){               // timeout happened
+      finVol=0;
+    }
+/////////////////////////////   SOUND FADING   ////////////////////////////////
+  
+    if(curVol<finVol){
+      myDFPlayer.volume(curVol);
+      curVol++;
+      Serial.println("vol++");
+    }
+    else if(curVol>finVol){
+      myDFPlayer.volume(curVol);
+      curVol--;
+      Serial.println("vol--");
+    }
+  
+    if(0==curVol){
+            myDFPlayer.pause();
+            digitalWrite(mutePin,1);
+            //paused=true;
+    }
+
+
+    prevsensorstate=sensorstate;
+  
+
+
+}
+

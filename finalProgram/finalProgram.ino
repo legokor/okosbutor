@@ -254,9 +254,15 @@ void setTargetColor(int x)
 
 /////////////////////Led color change///////////////////////////////
 
-inline void circularColor()
-{ //believe me! 
-  setTargetColor(((6 == colorNum)?(0):(colorNum++))*targetReached);  
+void circularColor()
+{
+  if( targetReached )// && (millis()<(setpointReachedSince+setpointWait)))
+  {
+  int nextColor=(6 == colorNum)?(0):(colorNum+1);
+        //Serial.print("Circular color, next:\t");
+        //Serial.println(nextColor);
+  setTargetColor(nextColor);
+  }
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -269,9 +275,6 @@ inline void circularColor()
  *    target color (from predefined set):          setTargetColor(byte setC[3]);
  * 
  *  Sound:
- *    myDFPlayer.loop(1);
- *    myDFPlayer.volume(16);
- *    myDFPlayer.pause();
  * 
  * 
  */

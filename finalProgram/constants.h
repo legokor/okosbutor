@@ -83,6 +83,8 @@ bool reachedSetpoint = false;
 
 //////////////////////////TIMING CONSTANTS//////////////////////////
 
+
+unsigned long currenttime;    //  while(1) loopban
 int timeoutCounter = 0;
 int timeoutCounterLong = 0;
 int setpointReachedSince=0;

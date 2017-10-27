@@ -1,8 +1,11 @@
 /////////////////////////////////////////RELEASE NOTES//////////////////////////////////
 //
-//    Cleanup @ oct 22, but this version does not include the music change for button press.
+//    Cleanup @ oct 27
+//      - color fading is bad
+//      - recseges eltunt
 //
-//    check with higher PWM & baud rates necessary
+//    next versions:
+//        check with higher PWM & baud rates necessary
 //
 
 // Set initial color
@@ -10,10 +13,6 @@
 //#include <avr/io.h>
 //#include <util/delay.h>
 
-unsigned long currenttime;        //
-unsigned long timeoutshit;        //
-byte timeouti;                   //
-byte timeoutflag=0;               // GÁNYOLÁSHOZ
 
 DFRobotDFPlayerMini myDFPlayer;
 SoftwareSerial mySoftwareSerial(10, 11); // RX, TX
@@ -23,8 +22,8 @@ void ADChandler()
 { //read sensors and compute sensorstate
   //first handle buttons
   soundcycle=(8==soundcycle)?(0):(soundcycle+1);
-  
-button=digitalRead(buttonPin);
+
+  button=digitalRead(buttonPin);
   if(prevButton<button) 
       {
         buttonTimer=millis();                     // rise edge start buttonTimer
@@ -72,7 +71,6 @@ button=digitalRead(buttonPin);
             myDFPlayer.enableLoopAll();
             paused=false;
           }
-          //myDFPlayer.volume(10);                  //initial volume visszateres kikapcsbol->ne, a sensorstate-ben beall.
       }
       myDFPlayer.start();
       digitalWrite(mutePin,0);  //???low level, no mute
@@ -86,30 +84,32 @@ button=digitalRead(buttonPin);
       if(max_adc>350)                             //near
       {
           Timer1.setPeriod(8000);
-          if(!soundcycle&&(20!=finVol)){        //maybe wirte an inline function
-            finVol=23;
+          if(!soundcycle&&(17!=finVol)){        //maybe wirte an inline function
+            finVol=17;
           } //just in every 5 cycles      
       }
       else if (max_adc>200)                       //mid range
       {
           Timer1.setPeriod(16001);
-          if(!soundcycle)if(!soundcycle&&(19!=finVol)){
-            finVol=17;
+          if(!soundcycle)if(!soundcycle&&(15!=finVol)){
+            finVol=15;
           }
       }
       else if (max_adc>80)
       {
           Timer1.setPeriod(25001);
-          if(!soundcycle&&(15!=finVol)){
-            finVol=15;
+          if(!soundcycle&&(10!=finVol)){
+            finVol=10;
           }
       }
+      circularColor();
       timeoutCounter=millis();  
   }
   else if (prevsensorstate>sensorstate)                 // falling edge
   {
-      timeoutCounter=millis();
+      timeoutCounter=millis(); //redundant...
   }
+  ////////////////////////////////////// TIMEOUTING ///////////////////////////////////
  //order of evaluation is important -> first is the longest time - else the longer never be evaluated
   else if (millis()>timeoutCounter+timeStopMillis){     
       if(!paused){
@@ -119,7 +119,7 @@ button=digitalRead(buttonPin);
       digitalWrite(mutePin,1);
       Timer1.setPeriod(5001);
       setTargetColor(9); //black
-         //  Serial.println("Big timeout: \t Mp3 stopped, black value set");
+      Serial.println("Big timeout: \t Mp3 stopped, black value set");
   } 
   else if (millis()>timeoutCounter+timeoutMillis){               // timeout happened
       if(!paused){
@@ -129,7 +129,7 @@ button=digitalRead(buttonPin);
       digitalWrite(mutePin,1);
       setTargetColor(9);
       Timer1.setPeriod(50000); //very slow to black transition
-      //Serial.println("Timeout: \t Mp3 paused, period 50ms, time:");
+      Serial.println("Timeout: \t Mp3 paused, period 50ms, time:");
 
   }
   else if(millis()>timeoutCounter+timeoutMillis-500){     //logic low state 0.5s before timeout to volumedown
@@ -138,37 +138,28 @@ button=digitalRead(buttonPin);
       }//bonus
   }
 
-//////////////////////////   SOUND FADING   ////////////////////////////////
+/////////////////////////////   SOUND FADING   ////////////////////////////////
   
-  if(curVol<finVol){
+  if(curVol<finVol && 0==soundcycle){
     myDFPlayer.volumeUp();
     curVol++;
     Serial.println("vol++");
   }
-  else if(curVol>finVol){
+  else if(curVol>finVol && 0==soundcycle){
     myDFPlayer.volumeDown();
     curVol--;
     Serial.println("vol--");
   }
 
-
-
 ////////////////////////SERIAL - JUST THE MOST IMPORTANT/////////////////////
 
            if(0==lastread)
            {
-          //    Serial.print("adc values:");
               Serial.print(s1_adc);
               Serial.print("\t");
               Serial.print(s2_adc);
               Serial.print("\t");
               Serial.println(s3_long_adc); 
-              //Serial.print("\t max_adc|long_adc: ");
-              //Serial.print(max_adc);Serial.print("  ");
-              //Serial.print("\t long_adc ");
-              //Serial.println(s3_long_adc);
-            //  Serial.print("\n \t \t senstate|  ");
-           //   Serial.println(sensorstate); 
            }
            
 ////////////////////////////////////////////////////////////////////////////
@@ -253,7 +244,7 @@ void setTargetColor(int x)
 
 inline void circularColor()
 { //believe me! 
-  setTargetColor(((6 == colorNum)?(0):(++colorNum))*targetReached);  
+  setTargetColor(((6 == colorNum)?(0):(colorNum++))*targetReached);  
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -276,9 +267,6 @@ inline void circularColor()
 
 void setup() {
   pinMode(redPin, OUTPUT);
-  //TCCR2A = B00110011;   //_BV(COM2A1) | _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
-  //TCCR2B = B00000001;   //_BV(WGM22) | _BV(CS20);
-  
   pinMode(grnPin, OUTPUT);   
   pinMode(bluPin, OUTPUT);
   pinMode(mutePin, OUTPUT);
@@ -316,5 +304,4 @@ void loop() {
         ADChandler();
         currenttime=millis();
     }
-    circularColor();
 }

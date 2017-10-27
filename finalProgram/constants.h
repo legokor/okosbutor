@@ -14,6 +14,7 @@ bool targetReached=true;
 bool button=false;
 bool prevButton=false;
 bool paused=false;
+bool started=false;
 
 
 int DEBUG = 1;      // DEBUG counter; if set to 1, will write values back via serial

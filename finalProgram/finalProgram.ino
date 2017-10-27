@@ -21,7 +21,7 @@ SoftwareSerial mySoftwareSerial(10, 11); // RX, TX
 void ADChandler()
 { //read sensors and compute sensorstate
   //first handle buttons
-  soundcycle=(8==soundcycle)?(0):(soundcycle+1);
+  soundcycle=(1==soundcycle)?(0):(soundcycle+1);
 
   button=digitalRead(buttonPin);
   if(prevButton<button) 
@@ -73,7 +73,8 @@ void ADChandler()
       }
       else
       {
-      myDFPlayer.start(); //must be in else branch!
+        myDFPlayer.start(); //must be in else branch!
+        started=true;
       }
       digitalWrite(mutePin,0);  //unmute
       timeoutCounter = millis();                    // timeout frissites
@@ -82,11 +83,10 @@ void ADChandler()
   }
 
   if(sensorstate){
-      //logic high state
-      if(digitalRead(mutePin)) // biztosan ne legyen mutolva
-      {
-        digitalWrite(mutePin,0);      
-      }
+      
+      //TODO: is unmuted? Is started?
+
+      
       if(max_adc>350)                             //near
       {
           Timer1.setPeriod(8000);

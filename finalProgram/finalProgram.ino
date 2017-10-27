@@ -251,15 +251,9 @@ void setTargetColor(int x)
 
 /////////////////////Led color change///////////////////////////////
 
-void circularColor()
-{
-  if( targetReached )// && (millis()<(setpointReachedSince+setpointWait)))
-  {
-  int nextColor=(6 == colorNum)?(0):(colorNum+1);
-        //Serial.print("Circular color, next:\t");
-        //Serial.println(nextColor);
-  setTargetColor(nextColor);
-  }
+inline void circularColor()
+{ //believe me! 
+  setTargetColor(((6 == colorNum)?(0):(++colorNum))*targetReached);  
 }
 
 /////////////////////////////////////////////////////////////////////////////////

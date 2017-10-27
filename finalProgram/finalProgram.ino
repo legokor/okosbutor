@@ -49,14 +49,15 @@ void ADChandler()
   s3_long_adc=0;
   for(avg_i=0;avg_i<4;avg_i++)
   {
-    s1_adc+=t_s1_adc[avg_i];
+    s1_adc+=t_s1_adc[avg_i]; //not allow values such as 60000
     s2_adc+=t_s2_adc[avg_i];
     s3_long_adc+=t_s3_long_adc[avg_i];
+    //s3_long_adc+=(t_s3_long_adc[avg_i]<1000)?(t_s3_long_adc[avg_i]):(0);
   }
   //compute averages
   s1_adc=s1_adc>>2; //divide by 4
   s2_adc=s2_adc>>2; 
-  s3_long_adc=(s3_long_adc>>3)-10;
+  s3_long_adc=(s3_long_adc>>3);
   //take the maxima of the averaged values
   max_adc=max(s1_adc,max(s2_adc,s3_long_adc));
   //max_adc=max(s1_adc,s2_adc);
@@ -66,42 +67,46 @@ void ADChandler()
 
   if(prevsensorstate<sensorstate)                       // rising edge
   {//reset volume, amplitude, freq, timeoutCounter
-      if(millis()>timeoutCounter+timeStopMillis){ //stop timeout volt --> elorol kezd
-          if(paused){
+      if(millis()>timeoutCounter+timeStopMillis)
+      { //stop timeout volt --> elorol kezd
             myDFPlayer.enableLoopAll();
-            paused=false;
-          }
       }
+      
       myDFPlayer.start();
-      digitalWrite(mutePin,0);  //???low level, no mute
+      digitalWrite(mutePin,0);  //unmute
       timeoutCounter = millis();                    // timeout frissites
       Timer1.setPeriod(20001); //frequency slow
 
-   //   Serial.println("Rising edge!");
+      Serial.println("Rising!");
   }
 
-  if(sensorstate){                                    //logic high state      
+  if(sensorstate){
+      //logic high state
+      if(digitalRead(mutePin)) // biztosan ne legyen mutolva
+      {
+        digitalWrite(mutePin,0);      
+      }
       if(max_adc>350)                             //near
       {
           Timer1.setPeriod(8000);
-          if(!soundcycle&&(17!=finVol)){        //maybe wirte an inline function
-            finVol=17;
+          if(!soundcycle&&(15!=finVol)){        //maybe wirte an inline function
+            finVol=15;
             Serial.println("finv17");
           } //just in every 5 cycles      
       }
       else if (max_adc>200)                       //mid range
       {
           Timer1.setPeriod(16001);
-          if(!soundcycle)if(!soundcycle&&(15!=finVol)){
-            finVol=15;
+          if(!soundcycle)if(!soundcycle&&(10!=finVol)){
+            finVol=10;
             Serial.println("finv15");
           }
       }
       else if (max_adc>80)
       {
           Timer1.setPeriod(25001);
-          if(!soundcycle&&(10!=finVol)){
-            finVol=10;
+          if(!soundcycle&&(8!=finVol)){
+            finVol=8;
           }
       }
       circularColor();
@@ -113,16 +118,18 @@ void ADChandler()
   }
   ////////////////////////////////////// TIMEOUTING ///////////////////////////////////
  //order of evaluation is important -> first is the longest time - else the longer never be evaluated
-  else if (millis()>timeoutCounter+timeStopMillis){     
-      if(!paused){
+ // pause and stop working @10.27_21:33
+ 
+ else if (millis()>timeoutCounter+timeStopMillis){     
+      /*if(!paused){
           myDFPlayer.pause();
-          paused=true;
-          finVol=0; //equal with mute
-      }
+          paused=true;*/
+      finVol=0; //equal with mute
+      //}//!paused
       //mute just if vol==0
       Timer1.setPeriod(5001);
       setTargetColor(9); //black
-      Serial.println("Big timeout: \t Mp3 stopped, black value set");
+      Serial.println("Big");
   } 
   else if (millis()>timeoutCounter+timeoutMillis){               // timeout happened
       //NO pause, no mute
@@ -130,7 +137,7 @@ void ADChandler()
       Timer1.setPeriod(50000); //very slow to black transition
       if(soundcycle)
       {
-        Serial.println("Timeout: \t Mp3 paused, period 50ms, volume");
+        Serial.println("smol");
       }
       
 
@@ -142,9 +149,6 @@ void ADChandler()
   }
 
 /////////////////////////////   SOUND FADING   ////////////////////////////////
-
-  
-  //curVol=(curVol<finVol)?(curVol+1):((
   
   if(curVol<finVol && 0==soundcycle){
     myDFPlayer.volume(curVol);
@@ -157,11 +161,12 @@ void ADChandler()
     Serial.println("vol--");
   }
 
-  if(!paused && 0==curVol){
+  if(0==curVol){
           myDFPlayer.pause();
           digitalWrite(mutePin,1);
-          paused=true;
+          //paused=true;
   }
+
 
 ////////////////////////SERIAL - JUST THE MOST IMPORTANT/////////////////////
 
@@ -279,6 +284,8 @@ void circularColor()
  * 
  */
 /////////////////////////////////////////////////////////////////////////////////
+int printi=0;
+
 
 void setup() {
   pinMode(redPin, OUTPUT);
@@ -311,15 +318,21 @@ void setup() {
    Timer1.setPeriod(10001);
    
    currenttime=millis();
+
 }
 
 void loop() {
       
-    if(millis() - currenttime >100){  // hülye név..
+    if(millis() - currenttime >100){ 
         ADChandler();
         currenttime=millis();
-        Serial.print("finv: ");
-        Serial.println(finVol);
+        printi=(printi>15)?(printi++):(0);
+        if(0==printi){
+              Serial.print("\t\t finv, curv: ");
+              Serial.print(finVol);
+              Serial.print("\t");
+              Serial.println(curVol);         
+        }
     }
 
 }

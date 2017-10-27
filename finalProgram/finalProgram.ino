@@ -68,8 +68,10 @@ button=digitalRead(buttonPin);
   if(prevsensorstate<sensorstate)                       // rising edge
   {//reset volume, amplitude, freq, timeoutCounter
       if(millis()>timeoutCounter+timeStopMillis){ //stop timeout volt --> elorol kezd
-          myDFPlayer.enableLoopAll();
-          paused=false;
+          if(paused){
+            myDFPlayer.enableLoopAll();
+            paused=false;
+          }
           //myDFPlayer.volume(10);                  //initial volume visszateres kikapcsbol->ne, a sensorstate-ben beall.
       }
       myDFPlayer.start();
@@ -84,7 +86,7 @@ button=digitalRead(buttonPin);
       if(max_adc>350)                             //near
       {
           Timer1.setPeriod(8000);
-          if(!soundcycle&&(23!=volume)){
+          if(!soundcycle&&(23!=volume)){        //maybe wirte an inline function
             myDFPlayer.volume(23);
             volume=23;
           } //just in every 5 cycles      
@@ -141,18 +143,25 @@ button=digitalRead(buttonPin);
   }
 
 //////////////////////////////////////////////////////////////GÁNYOLÁS,dont know what xactly happen
-  
+   // fadeout es lekapcsolas
    if(s1_adc <=30 && s2_adc <=30 && s3_long_adc <=30){
       if(timeoutflag==0){
         timeoutflag = 1;
         timeoutshit = millis();
         timeouti = 0;
-        myDFPlayer.volumeDown();
-        //ha mar kicsi az ertek de meg 0 a flag, minden ciklusban csökkentünk
+        if(volume){
+              myDFPlayer.volumeDown();
+              volume=volume-1;
+        }
+        
+      //ha mar kicsi az ertek de meg 0 a flag, minden ciklusban csökkentünk
       }
       else{
         if(timeouti>=7){
-          myDFPlayer.volumeDown();
+          if(volume){
+              myDFPlayer.volumeDown();
+              volume=volume-1;
+          }
           timeouti = 0;
         }
         else timeouti++;

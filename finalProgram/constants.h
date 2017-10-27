@@ -14,7 +14,6 @@ bool targetReached=true;
 bool button=false;
 bool prevButton=false;
 bool paused=true;
-int volume=0;
 
 
 int DEBUG = 1;      // DEBUG counter; if set to 1, will write values back via serial
@@ -32,8 +31,8 @@ int lastread = 0;
 int soundcycle=0;
 int avg_i = 0;
 int vol_i = 0;
-volatile int curVol=5;
-volatile int finVol=5;
+volatile int curVol=0;
+volatile int finVol=0;
 
 
 volatile word s1_adc = 0;

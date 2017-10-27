@@ -86,25 +86,22 @@ button=digitalRead(buttonPin);
       if(max_adc>350)                             //near
       {
           Timer1.setPeriod(8000);
-          if(!soundcycle&&(23!=volume)){        //maybe wirte an inline function
-            myDFPlayer.volume(23);
-            volume=23;
+          if(!soundcycle&&(23!=finVol)){        //maybe wirte an inline function
+            finVol=23;
           } //just in every 5 cycles      
       }
       else if (max_adc>200)                       //mid range
       {
           Timer1.setPeriod(16001);
-          if(!soundcycle)if(!soundcycle&&(19!=volume)){
-            myDFPlayer.volume(19);
-            volume=19;
+          if(!soundcycle)if(!soundcycle&&(19!=finVol)){
+            finVol=19;
           }
       }
       else if (max_adc>80)
       {
           Timer1.setPeriod(25001);
-          if(!soundcycle&&(15!=volume)){
-            myDFPlayer.volume(15);
-            volume=15;
+          if(!soundcycle&&(15!=finVol)){
+            finVol=15;
           }
       }
       timeoutCounter=millis();  
@@ -113,19 +110,8 @@ button=digitalRead(buttonPin);
   {
       timeoutCounter=millis();
   }
-  else if (millis()>timeoutCounter+timeoutMillis){               // timeout happened
-      if(!paused){
-          myDFPlayer.pause();
-          paused=true;
-      }
-      
-      digitalWrite(mutePin,1);
-      setTargetColor(9);
-      Timer1.setPeriod(50000); //very slow to black transition
-      Serial.println("Timeout: \t Mp3 paused, period 50ms, time:");
-
-  }
-  else if (millis()>timeoutCounter+timeStopMillis){
+ //order of evaluation is important -> first is the longest time - else the longer never be evaluated
+  else if (millis()>timeoutCounter+timeStopMillis){     
       if(!paused){
           myDFPlayer.pause();
           paused=true;
@@ -135,44 +121,33 @@ button=digitalRead(buttonPin);
       setTargetColor(9); //black
          //  Serial.println("Big timeout: \t Mp3 stopped, black value set");
   } 
+  else if (millis()>timeoutCounter+timeoutMillis){               // timeout happened
+      if(!paused){
+          myDFPlayer.pause();
+          paused=true;
+      }
+      digitalWrite(mutePin,1);
+      setTargetColor(9);
+      Timer1.setPeriod(50000); //very slow to black transition
+      Serial.println("Timeout: \t Mp3 paused, period 50ms, time:");
+
+  }
   else if(millis()>timeoutCounter+timeoutMillis-500){     //logic low state 0.5s before timeout to volumedown
-      if(!soundcycle&&(1!=volume)){
-            myDFPlayer.volume(1);
-            volume=1;
+      if(!soundcycle&&(1!=finVol)){
+            finVol=1;
       }//bonus
   }
 
-//////////////////////////////////////////////////////////////GÁNYOLÁS,dont know what xactly happen
-   // fadeout es lekapcsolas
-   if(s1_adc <=30 && s2_adc <=30 && s3_long_adc <=30){
-      if(timeoutflag==0){
-        timeoutflag = 1;
-        timeoutshit = millis();
-        timeouti = 0;
-        if(volume){
-              myDFPlayer.volumeDown();
-              volume=volume-1;
-        }
-        
-      //ha mar kicsi az ertek de meg 0 a flag, minden ciklusban csökkentünk
-      }
-      else{
-        if(timeouti>=7){
-          if(volume){
-              myDFPlayer.volumeDown();
-              volume=volume-1;
-          }
-          timeouti = 0;
-        }
-        else timeouti++;
-      }
+//////////////////////////   SOUND FADING   ////////////////////////////////
+  
+  if(curVol<finVol){
+    myDFPlayer.volumeUp();
+    curVol++;
   }
-  else timeoutflag = 0;
-  
-  
-////////////////////////////////////////////////////////////////GÁNYOLÁS VÉGE
-
-
+  else if(curVol>finVol){
+    myDFPlayer.volumeDown();
+    curVol--;
+  }
 
 
 
@@ -309,9 +284,6 @@ void setup() {
    Serial.println("disable mute");
    Serial.println(F("DFPlayer Mini online."));
 
-   
-   myDFPlayer.volume(15);  //Just only one time
-   volume=15;
    myDFPlayer.enableLoopAll();  //Play the first mp3 and loop all
    paused=false;
    Timer1.initialize(20000);

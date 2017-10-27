@@ -4,6 +4,7 @@
 #include "TimerOne.h"
 
 
+
 bool uled=false;
 bool uadc=false;
 bool usound=false;
@@ -55,4 +56,23 @@ bool prevButton=0;
 
 //for color/music changes
 int buttonTimer = 0;
-////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*                      Sound                      */
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define mutePin 13
+
+unsigned long currenttime;    //  while(1) loopban
+int timeoutCounter = 0;
+int timeoutCounterLong = 0;
+int setpointReachedSince=0;
+
+int timeoutMillis = 4000;
+int timeStopMillis = 10000;
+
+int finVol=0;
+int curVol=0;

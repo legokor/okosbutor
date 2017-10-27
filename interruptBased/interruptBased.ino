@@ -1,6 +1,8 @@
 #include "main.h"
 
-
+DFRobotDFPlayerMini myDFPlayer;
+SoftwareSerial mySoftwareSerial(10, 11); // RX, TX
+  
 void timingISR(void)
 {
 	iISR++;
@@ -71,25 +73,114 @@ void ADCread()
 	
   //MAXIMUM calculation, sensorstate
   max_adc=max(s1_adc,max(s2_adc,s3_long_adc));
-  prevsensorstate=sensorstate;
+  //prevsensorstate=sensorstate;
   sensorstate= (sense_radius < max_adc)?(true):(false); //true if people there
 
  ///////////////////////FOR DEBUG AND INFORMATION//////////////////////////// 
   
   if(0==lastread)
            {
-              /*Serial.print(s1_adc);
-              //Serial.print("\t");
+              Serial.print(s1_adc);
+              Serial.print("\t");
               Serial.print(s2_adc);
-              //Serial.print("\t");
-              Serial.println(s3_long_adc); */
+              Serial.print("\t");
+              Serial.println(s3_long_adc); 
            }
 }//END OF ADCread
+///////////////////////////////////////  SOUND   /////////////////////////////////////////////
 
+//    input variables:nextSound
+//                    sensorstate
+//                    max_adc
+//
+//   output variables:music               
+//                    prevsensorstate
+//                    timeoutCounter
+//                    started
+//                    finVol
+//                    curVol
+//                    
+//
+
+
+
+    
+void inline sound(void){
+    if(nextSound){                                         //change to next music
+       myDFPlayer.next();
+    }
+    if(prevsensorstate<sensorstate){                       // rising edge
+      digitalWrite(mutePin,0);  //unmute
+      if(millis()>timeoutCounter+timeStopMillis)           //if there was a big low sensorstate
+      { //stop timeout volt --> elorol kezd
+            myDFPlayer.enableLoopAll();
+      }
+      else                                                 
+      {
+        myDFPlayer.start(); //must be in else branch!
+        //started=true;
+      }
+    }
+    
+    if(sensorstate){
+      finVol=map(max_adc,0,511,0,15);
+      timeoutCounter=millis();
+    }
+    else if (prevsensorstate>sensorstate)                 // falling edge
+    {
+      timeoutCounter=millis(); //redundant...
+    }
+    else if (millis()>timeoutCounter+timeoutMillis){               // timeout happened
+      finVol=0;
+    }
+
+    
+/////////////////////////////   SOUND FADING   ////////////////////////////////
+  
+    if(curVol<finVol){
+      myDFPlayer.volume(curVol);
+      curVol++;
+      Serial.println("vol++");
+    }
+    else if(curVol>finVol){
+      myDFPlayer.volume(curVol);
+      curVol--;
+      Serial.println("vol--");
+    }
+  
+    if(0==curVol){
+            myDFPlayer.pause();
+            digitalWrite(mutePin,1);
+            //paused=true;
+    }
+    //to be handled here:
+    prevsensorstate=sensorstate;
+}
 
 
 void setup()
 {
+  /*pinMode(redPin, OUTPUT);
+  pinMode(grnPin, OUTPUT);   
+  pinMode(bluPin, OUTPUT);*/
+  pinMode(mutePin, OUTPUT);
+  digitalWrite(mutePin,1);
+  
+  Serial.begin(9600);
+  Serial.println("ena mute");
+   mySoftwareSerial.begin(9600); // maybe higher baud leads to less noise?!
+   Serial.println(F("Initializing, DFPlayer"));
+   if (!myDFPlayer.begin(mySoftwareSerial)) {  //Use softwareSerial to communicate with mp3.
+    Serial.println(F("Unable to connect"));
+    while(true);
+   }
+   // DELAY 3 SEC & UNMUTE HERE:
+   delay(3000);
+   digitalWrite(mutePin,0);
+   Serial.println("disable mute");
+   Serial.println(F("DFPlayer Mini online."));
+
+   
   Timer1.initialize(50000);
   delay(100);
   Timer1.attachInterrupt(timingISR);
@@ -106,13 +197,13 @@ void loop()
 	//handle adc
 	if(uadc)
 	{
-		//TODO: write adc read
+		ADCread();
 	}
 	
 	//handle sound
 	if(usound)
 	{
-		//TODO: write sound fade
+		sound();
 	}
 	
 	//handle button pushes? with adc.

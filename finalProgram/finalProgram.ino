@@ -71,12 +71,13 @@ void ADChandler()
       { //stop timeout volt --> elorol kezd
             myDFPlayer.enableLoopAll();
       }
-      
-      myDFPlayer.start();
+      else
+      {
+      myDFPlayer.start(); //must be in else branch!
+      }
       digitalWrite(mutePin,0);  //unmute
       timeoutCounter = millis();                    // timeout frissites
       Timer1.setPeriod(20001); //frequency slow
-
       Serial.println("Rising!");
   }
 

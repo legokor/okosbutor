@@ -1,3 +1,5 @@
+#include "adc.h"
+
 void ADCread()
 //
 //		2017.10.27. 23:58: ready to be tested.

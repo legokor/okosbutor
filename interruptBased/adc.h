@@ -1,4 +1,5 @@
 
+
 int lastread = 0;
 int avg_i = 0;
 

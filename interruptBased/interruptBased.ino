@@ -1,4 +1,7 @@
 #include "main.h"
+#include "adc.c"
+#include "led.c"
+#include "sound.c"
 
 void timingISR(void)
 {

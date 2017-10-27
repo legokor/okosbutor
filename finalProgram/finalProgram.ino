@@ -86,7 +86,7 @@ button=digitalRead(buttonPin);
       if(max_adc>350)                             //near
       {
           Timer1.setPeriod(8000);
-          if(!soundcycle&&(23!=finVol)){        //maybe wirte an inline function
+          if(!soundcycle&&(20!=finVol)){        //maybe wirte an inline function
             finVol=23;
           } //just in every 5 cycles      
       }
@@ -94,7 +94,7 @@ button=digitalRead(buttonPin);
       {
           Timer1.setPeriod(16001);
           if(!soundcycle)if(!soundcycle&&(19!=finVol)){
-            finVol=19;
+            finVol=17;
           }
       }
       else if (max_adc>80)
@@ -129,7 +129,7 @@ button=digitalRead(buttonPin);
       digitalWrite(mutePin,1);
       setTargetColor(9);
       Timer1.setPeriod(50000); //very slow to black transition
-      Serial.println("Timeout: \t Mp3 paused, period 50ms, time:");
+      //Serial.println("Timeout: \t Mp3 paused, period 50ms, time:");
 
   }
   else if(millis()>timeoutCounter+timeoutMillis-500){     //logic low state 0.5s before timeout to volumedown
@@ -143,10 +143,12 @@ button=digitalRead(buttonPin);
   if(curVol<finVol){
     myDFPlayer.volumeUp();
     curVol++;
+    Serial.println("vol++");
   }
   else if(curVol>finVol){
     myDFPlayer.volumeDown();
     curVol--;
+    Serial.println("vol--");
   }
 
 

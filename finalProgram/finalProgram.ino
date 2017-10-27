@@ -208,7 +208,6 @@ byte nextVal(word curX, double dX)
 return curX;
 }
 
-
 void rgbIncrement()
 {//not too long interrupt routine?!
   //may increase an int to perform other tasks
@@ -220,6 +219,11 @@ void rgbIncrement()
   
   dB=(0<(finB-curB))?(1):(-1);
   dB=(0==(finB-curB))?(0):(dB);
+
+  if(!dR && !dG && !dB)
+  {
+    targetReached=true;
+  }
 
   curR=nextVal(curR, dR);
   curG=nextVal(curG, dG);
@@ -238,10 +242,24 @@ void setTargetColor(int x)
      else
      {
      colorNum=x;
+     targetReached=(curR==finR&&curG==finG&&curB==finB)?(1):(0); 
      finR = rgb[colorPalette][x][0];
      finG = rgb[colorPalette][x][1];
      finB = rgb[colorPalette][x][2];
      }
+}
+
+/////////////////////Led color change///////////////////////////////
+
+void circularColor()
+{
+  if( targetReached )// && (millis()<(setpointReachedSince+setpointWait)))
+  {
+  int nextColor=(6 == colorNum)?(0):(colorNum+1);
+        //Serial.print("Circular color, next:\t");
+        //Serial.println(nextColor);
+  setTargetColor(nextColor);
+  }
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -304,5 +322,5 @@ void loop() {
         ADChandler();
         currenttime=millis();
     }
-    
+    circularColor();
 }

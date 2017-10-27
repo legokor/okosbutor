@@ -11,16 +11,16 @@
 //
     
 void inline sound(void){
-    if(nextSound){
+    if(nextSound){                                         //change to next music
     myDFPlayer.play((music==3)?(0):(++music));
     }
     if(prevsensorstate<sensorstate){                       // rising edge
       digitalWrite(mutePin,0);  //unmute
-      if(millis()>timeoutCounter+timeStopMillis)
+      if(millis()>timeoutCounter+timeStopMillis)           //if there was a big low sensorstate
       { //stop timeout volt --> elorol kezd
             myDFPlayer.enableLoopAll();
       }
-      else
+      else                                                 
       {
         myDFPlayer.start(); //must be in else branch!
         started=true;
@@ -38,6 +38,8 @@ void inline sound(void){
     else if (millis()>timeoutCounter+timeoutMillis){               // timeout happened
       finVol=0;
     }
+
+    
 /////////////////////////////   SOUND FADING   ////////////////////////////////
   
     if(curVol<finVol){

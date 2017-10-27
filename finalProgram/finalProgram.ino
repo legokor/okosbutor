@@ -22,7 +22,7 @@ SoftwareSerial mySoftwareSerial(10, 11); // RX, TX
 void ADChandler()
 { //read sensors and compute sensorstate
   //first handle buttons
-  soundcycle=(5==soundcycle)?(0):(soundcycle+1);
+  soundcycle=(8==soundcycle)?(0):(soundcycle+1);
   
 button=digitalRead(buttonPin);
   if(prevButton<button) 
@@ -76,7 +76,6 @@ button=digitalRead(buttonPin);
       digitalWrite(mutePin,0);  //???low level, no mute
       timeoutCounter = millis();                    // timeout frissites
       Timer1.setPeriod(20001); //frequency slow
-      periodSet=20001;
 
    //   Serial.println("Rising edge!");
   }
@@ -85,17 +84,26 @@ button=digitalRead(buttonPin);
       if(max_adc>350)                             //near
       {
           Timer1.setPeriod(8000);
-          if(!soundcycle){myDFPlayer.volume(23);} //just in every 5 cycles      
+          if(!soundcycle&&(23!=volume)){
+            myDFPlayer.volume(23);
+            volume=23;
+          } //just in every 5 cycles      
       }
       else if (max_adc>200)                       //mid range
       {
           Timer1.setPeriod(16001);
-          if(!soundcycle){myDFPlayer.volume(19);}
+          if(!soundcycle)if(!soundcycle&&(19!=volume)){
+            myDFPlayer.volume(19);
+            volume=19;
+          }
       }
       else if (max_adc>80)
       {
           Timer1.setPeriod(25001);
-          if(!soundcycle){myDFPlayer.volume(15);}
+          if(!soundcycle&&(15!=volume)){
+            myDFPlayer.volume(15);
+            volume=15;
+          }
       }
       timeoutCounter=millis();  
   }
@@ -126,7 +134,10 @@ button=digitalRead(buttonPin);
          //  Serial.println("Big timeout: \t Mp3 stopped, black value set");
   } 
   else if(millis()>timeoutCounter+timeoutMillis-500){     //logic low state 0.5s before timeout to volumedown
-      if(!soundcycle){myDFPlayer.volume(1);}//bonus
+      if(!soundcycle&&(1!=volume)){
+            myDFPlayer.volume(1);
+            volume=1;
+      }//bonus
   }
 
 //////////////////////////////////////////////////////////////GÁNYOLÁS,dont know what xactly happen
@@ -291,6 +302,7 @@ void setup() {
 
    
    myDFPlayer.volume(15);  //Just only one time
+   volume=15;
    myDFPlayer.enableLoopAll();  //Play the first mp3 and loop all
    paused=false;
    Timer1.initialize(20000);
@@ -305,7 +317,7 @@ void setup() {
 
 void loop() {
       
-    if(millis() - currenttime >50){  // hülye név..
+    if(millis() - currenttime >100){  // hülye név..
         ADChandler();
         currenttime=millis();
     }

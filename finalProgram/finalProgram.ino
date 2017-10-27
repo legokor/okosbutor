@@ -69,10 +69,11 @@ button=digitalRead(buttonPin);
   {//reset volume, amplitude, freq, timeoutCounter
       if(millis()>timeoutCounter+timeStopMillis){ //stop timeout volt --> elorol kezd
           myDFPlayer.enableLoopAll();
+          paused=false;
           //myDFPlayer.volume(10);                  //initial volume visszateres kikapcsbol->ne, a sensorstate-ben beall.
       }
       myDFPlayer.start();
-      digitalWrite(mutePin,0);  //low level, no mute
+      digitalWrite(mutePin,0);  //???low level, no mute
       timeoutCounter = millis();                    // timeout frissites
       Timer1.setPeriod(20001); //frequency slow
       periodSet=20001;
@@ -103,15 +104,22 @@ button=digitalRead(buttonPin);
       timeoutCounter=millis();
   }
   else if (millis()>timeoutCounter+timeoutMillis){               // timeout happened
-      myDFPlayer.pause();
+      if(!paused){
+          myDFPlayer.pause();
+          paused=true;
+      }
+      
       digitalWrite(mutePin,1);
       setTargetColor(9);
       Timer1.setPeriod(50000); //very slow to black transition
-        //  Serial.println("Timeout: \t Mp3 paused, period 50ms, time:");
+      Serial.println("Timeout: \t Mp3 paused, period 50ms, time:");
 
   }
   else if (millis()>timeoutCounter+timeStopMillis){
-      myDFPlayer.pause();
+      if(!paused){
+          myDFPlayer.pause();
+          paused=true;
+      }
       digitalWrite(mutePin,1);
       Timer1.setPeriod(5001);
       setTargetColor(9); //black
@@ -150,7 +158,7 @@ button=digitalRead(buttonPin);
 
 ////////////////////////SERIAL - JUST THE MOST IMPORTANT/////////////////////
 
-           if(0==lastread && DEBUG)
+           if(0==lastread)
            {
           //    Serial.print("adc values:");
               Serial.print(s1_adc);
@@ -271,13 +279,8 @@ void setup() {
   Serial.println("ena mute");
    mySoftwareSerial.begin(9600); // maybe higher baud leads to less noise?!
    Serial.println(F("Initializing, DFPlayer"));
-   //Serial.println("enable mute");
-   //digitalWrite(mutePin,1);
-  // MUTE HERE!!
    if (!myDFPlayer.begin(mySoftwareSerial)) {  //Use softwareSerial to communicate with mp3.
     Serial.println(F("Unable to connect"));
-    //Serial.println(F("1.Please recheck the connection!"));
-    //Serial.println(F("2.Please insert the SD card!"));
     while(true);
    }
    // DELAY 3 SEC & UNMUTE HERE:
@@ -289,6 +292,7 @@ void setup() {
    
    myDFPlayer.volume(15);  //Just only one time
    myDFPlayer.enableLoopAll();  //Play the first mp3 and loop all
+   paused=false;
    Timer1.initialize(20000);
    
   
@@ -301,7 +305,7 @@ void setup() {
 
 void loop() {
       
-    if(millis() - currenttime >100){  // hülye név..
+    if(millis() - currenttime >50){  // hülye név..
         ADChandler();
         currenttime=millis();
     }

@@ -90,7 +90,7 @@ int timeoutCounterLong = 0;
 int setpointReachedSince=0;
 int buttonTimer = 0;
 
-int timeoutMillis = 4000;
+int timeoutMillis = 5000;
 int timeStopMillis = 10000;
 int timeoutTimerPeriod(1000);
 int setpointWait = 1500;

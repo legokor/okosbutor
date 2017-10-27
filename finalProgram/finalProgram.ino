@@ -70,10 +70,11 @@ void ADChandler()
       if(millis()>timeoutCounter+timeStopMillis)
       { //stop timeout volt --> elorol kezd
             myDFPlayer.enableLoopAll();
+            myDFPlayer.start();
       }
       else
       {
-      myDFPlayer.start(); //must be in else branch!
+            myDFPlayer.start(); //nem elorol kezd
       }
       digitalWrite(mutePin,0);  //unmute
       timeoutCounter = millis();                    // timeout frissites
@@ -82,11 +83,7 @@ void ADChandler()
   }
 
   if(sensorstate){
-      //logic high state
-      if(digitalRead(mutePin)) // biztosan ne legyen mutolva
-      {
-        digitalWrite(mutePin,0);      
-      }
+      digitalWrite(mutePin,0);      
       if(max_adc>350)                             //near
       {
           Timer1.setPeriod(8000);
@@ -113,37 +110,25 @@ void ADChandler()
       circularColor();
       timeoutCounter=millis();  
   }
-  else if (prevsensorstate>sensorstate)                 // falling edge
+  /*else if (prevsensorstate>sensorstate)                 // falling edge
   {
       timeoutCounter=millis(); //redundant...
-  }
+  }*/
   ////////////////////////////////////// TIMEOUTING ///////////////////////////////////
  //order of evaluation is important -> first is the longest time - else the longer never be evaluated
  // pause and stop working @10.27_21:33
  
- else if (millis()>timeoutCounter+timeStopMillis){     
-      /*if(!paused){
-          myDFPlayer.pause();
-          paused=true;*/
-      finVol=0; //equal with mute
-      //}//!paused
-      //mute just if vol==0
-      Timer1.setPeriod(5001);
-      setTargetColor(9); //black
-      Serial.println("Big");
-  } 
-  else if (millis()>timeoutCounter+timeoutMillis){               // timeout happened
+  if ((millis()>(timeoutCounter+timeoutMillis))&&!sensorstate){               // timeout happened
       //NO pause, no mute
+      finVol=0;
       setTargetColor(9);
-      Timer1.setPeriod(50000); //very slow to black transition
+      Timer1.setPeriod(30000); //very slow to black transition
       if(soundcycle)
       {
-        Serial.println("smol");
+        Serial.println("tout");
       }
-      
-
   }
-  else if(millis()>timeoutCounter+timeoutMillis-500){     //logic low state 0.5s before timeout to volumedown
+  else if(millis()>(timeoutCounter+timeoutMillis-500)){     //logic low state 0.5s before timeout to volumedown
       if(!soundcycle&&(1!=finVol)){
             finVol=1;
       }//bonus
@@ -165,7 +150,6 @@ void ADChandler()
   if(0==curVol){
           myDFPlayer.pause();
           digitalWrite(mutePin,1);
-          //paused=true;
   }
 
 
@@ -307,7 +291,7 @@ void setup() {
    delay(3000);
    digitalWrite(mutePin,0);
    Serial.println("disable mute");
-   Serial.println(F("DFPlayer Mini online."));
+   Serial.println(F("online."));
 
    myDFPlayer.enableLoopAll();  //Play the first mp3 and loop all
    paused=false;
@@ -332,7 +316,7 @@ void loop() {
               Serial.print("\t\t finv, curv: ");
               Serial.print(finVol);
               Serial.print("\t");
-              Serial.println(curVol);         
+              Serial.println(curVol);      
         }
     }
 

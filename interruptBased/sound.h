@@ -1,5 +1,19 @@
-void inline sound(void){
+//    input variables nextSound
+//                    sensorstate
+//                    max_adc
+//   output variables music               
+//                    prevsensorstate
+//                    timeoutCounter
+//                    started
+//                    finVol
+//                    curVol
+//                    
+//
     
+void inline sound(void){
+    if(nextSound){
+    myDFPlayer.play((music==3)?(0):(++music));
+    }
     if(prevsensorstate<sensorstate){                       // rising edge
       digitalWrite(mutePin,0);  //unmute
       if(millis()>timeoutCounter+timeStopMillis)

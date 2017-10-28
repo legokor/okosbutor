@@ -1,4 +1,5 @@
 #include "main.h"
+#include "led.h"
 
 DFRobotDFPlayerMini myDFPlayer;
 SoftwareSerial mySoftwareSerial(10, 11); // RX, TX
@@ -51,7 +52,8 @@ void ADCread()
   prevButton=button;
 
 
-  /////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////  ADC COUNTING   /////////////////////////////////////////
+  
   //AVERAGING 4 values, using map fcn
   lastread=(3==lastread)?(0):(lastread+1);
   
@@ -74,6 +76,8 @@ void ADCread()
   max_adc=max(s1_adc,max(s2_adc,s3_long_adc));
   //prevsensorstate=sensorstate;
   sensorstate= (sense_radius < max_adc)?(true):(false); //true if people there
+  
+  increaseRate=map(max_adc,0,1023,0,20);
 
  ///////////////////////FOR DEBUG AND INFORMATION//////////////////////////// 
   
@@ -87,7 +91,7 @@ if(usound){
               Serial.println(s3_long_adc); */
  }
 }//END OF ADCread
-///////////////////////////////////////  SOUND   /////////////////////////////////////////////
+///////////////////////////////////////  SOUND CALC   /////////////////////////////////////////////
 
 //    input variables:nextSound
 //                    sensorstate
@@ -157,15 +161,55 @@ void inline sound(void){
     prevsensorstate=sensorstate;
 }
 
+////////////////////////////////// LED FADING //////////////////////////////////
+#define curR OCR2B
+#define curG OCR0B
+#define curB OCR2A
 
+void led(void){
+  //may increase an int to perform other tasks
+  dR=(0<(finR-curR))?(1):(-1);
+  dR=(0==(finR-curR))?(0):(dR); //elerte a celt
+  
+  dG=(0<(finG-curG))?(1):(-1);
+  dG=(0==(finG-curG))?(0):(dG);
+  
+  dB=(0<(finB-curB))?(1):(-1);
+  dB=(0==(finB-curB))?(0):(dB);
+  
+  if(!dR && !dG && !dB){
+    x=(x<6)?(x+1):(0);
+    finR = rgb[colorPalette][x][0];
+    finG = rgb[colorPalette][x][1];
+    finB = rgb[colorPalette][x][2];
+  }else{ 
+    curR=((dR>0)&&(curR>curR+dR*increaseRate))?(curR+dR):(curR+dR*increaseRate);
+    curG=((dG>0)&&(curG>curG+dG*increaseRate))?(curG+dG):(curG+dG*increaseRate);
+    curB=((dB>0)&&(curB>curB+dB*increaseRate))?(curB+dB):(curB+dB*increaseRate);
+  }
+}
+//////////////////////////////////   SETUP   //////////////////////////////////////////////
 void setup()
 {
-  /*pinMode(redPin, OUTPUT);
-  pinMode(grnPin, OUTPUT);   
-  pinMode(bluPin, OUTPUT);*/
-  pinMode(mutePin, OUTPUT);
   digitalWrite(mutePin,1);
   
+  pinMode(redPin, OUTPUT);
+  pinMode(grnPin, OUTPUT);   
+  pinMode(bluPin, OUTPUT);
+  pinMode(mutePin, OUTPUT);
+
+  TCCR0A = _BV(COM0A1) | _BV(COM0B1) | _BV(WGM00);
+//WGM0[2:0]=001b PWM, Phase Correct TOP=0xFF update of OCR0x at TOP and TOV flag Set on BOTTOM(BOTTOM=0x00)
+//COM0A[1:0]=10b Clear OC0A on Compare Match when up-counting. Set OC0A on Compare Match when down-counting.
+//com0B[1:0]=10b Clear OC0B on Compare Match when up-counting. Set OC0B on Compare Match when down-counting. 
+  TCCR0B = _BV(CS02);
+//CS0[2:0]=001b clk i/o / 4^cs0=
+  TCCR2A = _BV(COM2B1) | _BV(WGM20);
+  TCCR2B = _BV(CS22);
+ // OCR2B = 125; //R
+  //OCR0A = 50;  //B   //compare values
+  //OCR0B = 100; //G
+
   Serial.begin(9600);
   Serial.println("ena mute");
    mySoftwareSerial.begin(9600); // maybe higher baud leads to less noise?!
@@ -192,6 +236,8 @@ void loop()
     //handle leds
 	if(uled)
 	{
+    uled=false;
+    led();
 		//TODO: write led refresh
 	}
 	
@@ -209,6 +255,7 @@ void loop()
      //Serial.println("sound");
     usound=false;
 		sound();
+    Serial.print(millis());
 	}
 	
 	//handle button pushes? with adc.

@@ -1,18 +1,24 @@
 //source is the 5fb709 commit.
 
+  // put your setup code here, to run once:
+ 
+
+
 #define redPin  3  //r
 #define grnPin  5  //g
 #define bluPin  6  //b
 
-
+byte x=0;
+byte increaseRate=1;
 
 byte finR=0;
 byte finG=0;
 byte finB=0;
 
-byte curR=0;
-byte curB=0;
-byte curG=0;
+signed char dR = 0;//step
+signed char dB = 0;
+signed char dG = 0;
+
 
 
 byte rgb[3][7][3] = { {{ 0, 0, 0 }, { 255, 255, 255 },{ 255, 0, 0 },{ 0, 255, 0 }, { 0, 0, 255 }, { 255, 255, 0 }, { 80, 80, 80 }}};
@@ -22,5 +28,5 @@ byte rgb[3][7][3] = { {{ 0, 0, 0 }, { 255, 255, 255 },{ 255, 0, 0 },{ 0, 255, 0 
                       {{255,255,0}, {255,255,0},{250,255,0},{250,127,0},{250,0,0},{250,0,0},{255,0,0}} };
 
 */
-int colorPalette = 1;
+//int colorPalette = 1;
 int colorNum=0;

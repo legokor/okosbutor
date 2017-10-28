@@ -13,7 +13,7 @@ void timingISR(void)
 		uadc=true;
 	}
 	
-	if(!(iISR%8))
+	if(!(iISR%32))
 	{
 		usound=true;
 	}
@@ -53,7 +53,6 @@ void ADCread()
 
   /////////////////////////////////////////////////////////////////////////////////////
   //AVERAGING 4 values, using map fcn
-  int lastread = 0;
   lastread=(3==lastread)?(0):(lastread+1);
   
   t_s1_adc[lastread] = analogRead(distPin1);
@@ -66,9 +65,9 @@ void ADCread()
   int avg_i;
   for(avg_i=0;avg_i<4;avg_i++)
   {
-    s1_adc+=map(t_s2_adc,0,1023,0,63);
-    s2_adc+=map(t_s2_adc,0,1023,0,63);
-    s3_long_adc+=map(t_s2_adc,0,1023,0,127); //different mapping, since high voltage means bigger distance
+    s1_adc+=map(t_s1_adc[lastread],0,1023,0,255);
+    s2_adc+=map(t_s2_adc[lastread],0,1023,0,255);
+    s3_long_adc+=map(t_s3_long_adc[lastread],0,1023,0,127); //different mapping, since high voltage means bigger distance
   }
 	
   //MAXIMUM calculation, sensorstate
@@ -78,14 +77,15 @@ void ADCread()
 
  ///////////////////////FOR DEBUG AND INFORMATION//////////////////////////// 
   
-  if(0==lastread)
-           {
+if(usound){
+  
+/*
               Serial.print(s1_adc);
               Serial.print("\t");
               Serial.print(s2_adc);
               Serial.print("\t");
-              Serial.println(s3_long_adc); 
-           }
+              Serial.println(s3_long_adc); */
+ }
 }//END OF ADCread
 ///////////////////////////////////////  SOUND   /////////////////////////////////////////////
 
@@ -123,7 +123,7 @@ void inline sound(void){
     }
     
     if(sensorstate){
-      finVol=map(max_adc,0,511,0,15);
+      finVol=map(max_adc,0,511,0,15)+10;
       timeoutCounter=millis();
     }
     else if (prevsensorstate>sensorstate)                 // falling edge
@@ -139,13 +139,13 @@ void inline sound(void){
   
     if(curVol<finVol){
       myDFPlayer.volume(curVol);
-      curVol++;
-      Serial.println("vol++");
+      curVol=((curVol+4)>finVol)?(finVol):(curVol+4);
+      //Serial.println("vol++");
     }
     else if(curVol>finVol){
       myDFPlayer.volume(curVol);
-      curVol--;
-      Serial.println("vol--");
+      curVol=((curVol-4)<finVol)?(finVol):(curVol-4);
+      //Serial.println("vol--");
     }
   
     if(0==curVol){
@@ -178,7 +178,8 @@ void setup()
    delay(3000);
    digitalWrite(mutePin,0);
    Serial.println("disable mute");
-   Serial.println(F("DFPlayer Mini online."));
+   Serial.println(F("online."));
+   myDFPlayer.volume(1);
 
    
   Timer1.initialize(50000);
@@ -197,12 +198,16 @@ void loop()
 	//handle adc
 	if(uadc)
 	{
+   //Serial.println("adc");
+   uadc=false;
 		ADCread();
 	}
 	
 	//handle sound
 	if(usound)
 	{
+     //Serial.println("sound");
+    usound=false;
 		sound();
 	}
 	

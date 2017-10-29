@@ -26,9 +26,10 @@ volatile word max_adc;
 
 
 ///////INPUT VARIABLES//////
-#define distLong 5
-#define distPin1 6
-#define distPin2 7
+// panel rev2 !!
+#define distLong 3
+#define distPin1 4
+#define distPin2 5
 #define buttonPin 12
 
 /////////CONSTANTS///////////

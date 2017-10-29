@@ -96,24 +96,31 @@ void ADCread()
 }//END OF ADCread
 ///////////////////////////////////////   SOUND CALC    ///////////////////////////////////////////
 //
-//    INPUT variables:nextSound
+//    INPUT variables:  (working based on the values of)
+//                    nextSound
 //                    sensorstate
 //                    max_adc
 //
-//   OUTPUT variables:music
+//   OUTPUT variables:  (set by this function)
+//                    music
 //                    prevsensorstate
 //                    timeoutCounter
 //                    started
 //                    colorBlack
 //
-//   INSIDE variables:curVol
-//                    finVol
+//   INTERNAL variables:
+//                    finVol (target to reach)
 //
 //   GLOBAL constants:timeStopMillis
 //                    mutePin
 //                    timeoutMillis
 //                    
-//                    
+//   physical output: 
+//                    curVol (on SoftwareSerial ports: digital 10-11)
+//
+//
+
+
 void inline sound(void) {
   if (nextSound) {                                       //change to next music
     myDFPlayer.next();
@@ -170,13 +177,15 @@ void inline sound(void) {
 /////////////////////////////////////    LED FADING    ///////////////////////////////////////
 //
 //    INPUT variables:  increaseRate
-//                      colorBlack
+//                        - adc alapjan gyorsabban novel, a regi conceptbeli timert valtja ki
+//                      colorBlack 
+//                        - shows dark final state
 //                      colorPalette
 //   GLOBAL constants:  rgb[3][7][3]
 //
 //   INSIDE variables:  x
 //                      finR,finG,finB
-//                      curR,curG,curB
+//                      curR,curG,curB -> regiszterek
 //                        dR,  dG,  dB
 //
 
@@ -273,6 +282,12 @@ void loop()
   {
     usound = false;
     sound();
+      
+                  Serial.print(s1_adc);
+                  Serial.print("\t");
+                  Serial.println(s2_adc);
+                  //Serial.print("\t");
+                  //Serial.println(s3_long_adc); */
   }
 
   //handle button pushes? with adc.

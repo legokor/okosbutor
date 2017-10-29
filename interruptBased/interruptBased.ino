@@ -80,7 +80,7 @@ void ADCread()
   //prevsensorstate=sensorstate;
   sensorstate = (sense_radius < max_adc) ? (true) : (false); //true if people there
 
-  //increaseRate = map(max_adc, 0, 1023, 0, 20);
+  increaseRate = map(max_adc, 0, 1024, 0, 8);
 
 ///////////////////////////////   FOR DEBUG AND INFORMATION   ////////////////////////////////////
 

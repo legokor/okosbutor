@@ -49,7 +49,7 @@ void ADCread()
     nextSound = true;                      // @rise_edge if pos_level shorter than 2sec
   }
   else if (prevButton > button) {                                     // @fall_edge if pos_level longer than 2sec
-    colorPalette = 0; //((1==colorPalette) ? (0) : (colorPalette+1));  // predefined color sets
+    colorPalette = ((1==colorPalette) ? (0) : (colorPalette+1));  // predefined color sets
   }
   prevButton = button;
 
@@ -162,28 +162,6 @@ void inline sound(void) {
 }
 
 ////////////////////////////////// LED FADING //////////////////////////////////
-/*
-int black = 9;
-
-int curR = rgb[0][black][0];//now
-int curB = rgb[0][black][1];
-int curG = rgb[0][black][2];
-
-byte finR = rgb[0][black][0];//next
-byte finB = rgb[0][black][1];
-byte finG = rgb[0][black][2];
-
-//double dR = 0;//step
-//double dB = 0;
-//double dG = 0;
-*/
-
-#define curR OCR2B
-#define curG OCR0B
-#define curB OCR0A
-byte finR=0;
-byte finG=0;
-byte finB=0;
 
   void led(void){
   //may increase an int to perform other tasks
@@ -263,19 +241,12 @@ void loop()
   if (uled)
   {
     uled = false;
-   // rgbIncrement();
    led();
-   Serial.print(curR);Serial.print("\t");
-    Serial.print(curG);Serial.print("\t");
-    Serial.println(curB); 
-    
-    //TODO: write led refresh
   }
 
   //handle adc
   if (uadc)
   {
-    //Serial.println("adc");
     uadc = false;
     ADCread();
   }
@@ -283,16 +254,8 @@ void loop()
   //handle sound
   if (usound)
   {
-    //Serial.println("sound");
     usound = false;
     sound();
-    //circularColor();
-       
-
-    Serial.print(finR);Serial.print("\t");
-    Serial.print(finG);Serial.print("\t");
-    Serial.println(finB);
-
   }
 
   //handle button pushes? with adc.

@@ -2,6 +2,7 @@
 
   // put your setup code here, to run once:
  
+bool targetReached=0;
 
 
 #define redPin  3  //r
@@ -11,9 +12,6 @@
 byte x=0;
 byte increaseRate=1;
 
-byte finR=0;
-byte finG=0;
-byte finB=0;
 
 signed char dR = 0;//step
 signed char dB = 0;

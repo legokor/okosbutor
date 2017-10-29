@@ -5,6 +5,8 @@
 bool targetReached=0;
 
 
+bool colorBlack = false;
+
 #define redPin  3  //r
 #define grnPin  5  //g
 #define bluPin  6  //b

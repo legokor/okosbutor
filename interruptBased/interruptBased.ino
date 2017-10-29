@@ -107,18 +107,15 @@ void ADCread()
 //                    curVol
 //
 //
-
-
-
-
 void inline sound(void) {
   if (nextSound) {                                       //change to next music
     myDFPlayer.next();
   }
   if (prevsensorstate < sensorstate) {                   // rising edge
     digitalWrite(mutePin, 0); //unmute
+    colorBlack = false;
     if (millis() > timeoutCounter + timeStopMillis)      //if there was a big low sensorstate
-    { //stop timeout volt --> elorol kezd
+    {                                                    //stop timeout volt --> elorol kezd
       myDFPlayer.enableLoopAll();
     }
     else
@@ -138,6 +135,7 @@ void inline sound(void) {
   }
   else if (millis() > timeoutCounter + timeoutMillis) {          // timeout happened
     finVol = 0;
+    colorBlack = true;
   }
 
 
@@ -178,78 +176,7 @@ byte finG = rgb[0][black][2];
 //double dR = 0;//step
 //double dB = 0;
 //double dG = 0;
-
-void applyRGB()
-{
-  analogWrite(redPin, curR);
-  analogWrite(grnPin, curG);
-  analogWrite(bluPin, curB);
-
-  //OCR2B=100;
-}
-
-byte nextVal(word curX, double dX)
-{
-  curX = curX + dX * increaseRate;
-  //Serial.println(curX);
-
-  curX = (curX > 255) ? (255) : (curX);
-  curX = (curX < 0) ? (0) : (curX);
-  return curX;
-}
-
-void rgbIncrement()
-{ //not too long interrupt routine?!
-  //may increase an int to perform other tasks
-  dR = (0 < (finR - curR)) ? (1) : (-1);
-  dR = (0 == (finR - curR)) ? (0) : (dR); //elerte a celt
-
-  dG = (0 < (finG - curG)) ? (1) : (-1);
-  dG = (0 == (finG - curG)) ? (0) : (dG);
-
-  dB = (0 < (finB - curB)) ? (1) : (-1);
-  dB = (0 == (finB - curB)) ? (0) : (dB);
-
-  if (!dR && !dG && !dB)
-  {
-    targetReached = true;
-  }
-
-  curR = nextVal(curR, dR);
-  curG = nextVal(curG, dG);
-  curB = nextVal(curB, dB);
-
-  applyRGB();
-}
-
-void setTargetColor(int x)
-{ //WORKING
-  if (9 == x) {
-    finR = 0;
-    finG = 0;
-    finB = 0;
-  }
-  else
-  {
-    colorNum = x;
-    targetReached = (curR == finR && curG == finG && curB == finB) ? (1) : (0);
-    finR = rgb[colorPalette][x][0];
-    finG = rgb[colorPalette][x][1];
-    finB = rgb[colorPalette][x][2];
-  }
-}
-
-/////////////////////Led color change///////////////////////////////
-void circularColor()
-{
-  if ( targetReached ) // && (millis()<(setpointReachedSince+setpointWait)))
-  {
-    int nextColor = (6 == colorNum) ? (0) : (colorNum + 1);
-    //Serial.print("Circular color, next:\t");
-    //Serial.println(nextColor);
-    setTargetColor(nextColor);
-  }
-}*/
+*/
 
 #define curR OCR2B
 #define curG OCR0B
@@ -268,12 +195,18 @@ byte finB=0;
 
   dB=(0<(finB-curB))?(1):(-1);
   dB=(0==(finB-curB))?(0):(dB);
-
+  
   if(!dR && !dG && !dB){
-    x=(x<6)?(x+1):(0);
-    finR = rgb[colorPalette][x][0];
-    finG = rgb[colorPalette][x][1];
-    finB = rgb[colorPalette][x][2];
+    if(colorBlack){
+      finR = 0;
+      finG = 0;
+      finB = 0;
+    }else{
+      x=(x<6)?(x+1):(0);
+      finR = rgb[colorPalette][x][0];
+      finG = rgb[colorPalette][x][1];
+      finB = rgb[colorPalette][x][2];
+    }
   }else{
     curR=((dR>0)&&(curR>curR+dR*increaseRate))?(curR+dR):(curR+dR*increaseRate);
     curG=((dG>0)&&(curG>curG+dG*increaseRate))?(curG+dG):(curG+dG*increaseRate);

@@ -21,13 +21,12 @@ void timingISR(void)
     usound = true;
   }
 }
-
-void ADCread()
+////////////////////////////////////    ADC HANDLER   ////////////////////////////////////////
 //
-//		2017.10.27. 23:58: ready to be tested.
+//    2017.10.27. 23:58: ready to be tested.
 //
-//		fcn-s copied from program before.
-//		changelog: using map function.
+//    fcn-s copied from program before.
+//    changelog: using map function.
 //
 //  INPUT variables:
 //      - three Analog channel
@@ -37,8 +36,10 @@ void ADCread()
 //      - bool sensorState
 //      - bool nextSound
 //      - max_adc
+void ADCread()
+
 {
-  //////////////////////////////BUTTON HANDLING/////////////////////////////////////////
+  //////////////////////////////    BUTTON HANDLING   /////////////////////////////////////////
   button = digitalRead(buttonPin);
   if (prevButton < button)
   {
@@ -54,7 +55,7 @@ void ADCread()
   prevButton = button;
 
 
-  ////////////////////////////  ADC COUNTING   /////////////////////////////////////////
+/////////////////////////////////////   ADC COUNTING   //////////////////////////////////////////////
 
   //AVERAGING 4 values, using map fcn
   lastread = (3 == lastread) ? (0) : (lastread + 1);
@@ -81,7 +82,7 @@ void ADCread()
 
   //increaseRate = map(max_adc, 0, 1023, 0, 20);
 
-  ///////////////////////FOR DEBUG AND INFORMATION////////////////////////////
+///////////////////////////////   FOR DEBUG AND INFORMATION   ////////////////////////////////////
 
   if (usound) {
 
@@ -93,20 +94,26 @@ void ADCread()
                   Serial.println(s3_long_adc); */
   }
 }//END OF ADCread
-///////////////////////////////////////  SOUND CALC   /////////////////////////////////////////////
-
-//    input variables:nextSound
+///////////////////////////////////////   SOUND CALC    ///////////////////////////////////////////
+//
+//    INPUT variables:nextSound
 //                    sensorstate
 //                    max_adc
 //
-//   output variables:music
+//   OUTPUT variables:music
 //                    prevsensorstate
 //                    timeoutCounter
 //                    started
+//                    colorBlack
+//
+//   INSIDE variables:curVol
 //                    finVol
-//                    curVol
 //
-//
+//   GLOBAL constants:timeStopMillis
+//                    mutePin
+//                    timeoutMillis
+//                    
+//                    
 void inline sound(void) {
   if (nextSound) {                                       //change to next music
     myDFPlayer.next();
@@ -137,22 +144,21 @@ void inline sound(void) {
     finVol = 0;
     colorBlack = true;
   }
-
-
-  /////////////////////////////   SOUND FADING   ////////////////////////////////
-
-  if (curVol < finVol) {
-    myDFPlayer.volume(curVol);
-    curVol = ((curVol + 4) > finVol) ? (finVol) : (curVol + 4);
+  
+  //SOUND FADING PART
+ 
+  if (curVol < finVol) {        //ha felfele kell lépni  
+    curVol = ((curVol + 4) > finVol) ? (finVol) : (curVol + 4); //4-et lépünk  kivéve, 
+    myDFPlayer.volume(curVol);                                  //ha túlllépünk akkor egyből a célba lép
     //Serial.println("vol++");
   }
-  else if (curVol > finVol) {
-    myDFPlayer.volume(curVol);
+  else if (curVol > finVol) {   //ha lefele kell lépni
     curVol = ((curVol - 4) < finVol) ? (finVol) : (curVol - 4);
+    myDFPlayer.volume(curVol);
     //Serial.println("vol--");
   }
 
-  if (0 == curVol) {
+  if (0 == curVol) {            //ha 0 a hangerő, akkor zene leáll és mute-ol is 
     myDFPlayer.pause();
     digitalWrite(mutePin, 1);
     //paused=true;
@@ -161,37 +167,48 @@ void inline sound(void) {
   prevsensorstate = sensorstate;
 }
 
-////////////////////////////////// LED FADING //////////////////////////////////
+/////////////////////////////////////    LED FADING    ///////////////////////////////////////
+//
+//    INPUT variables:  increaseRate
+//                      colorBlack
+//                      colorPalette
+//   GLOBAL constants:  rgb[3][7][3]
+//
+//   INSIDE variables:  x
+//                      finR,finG,finB
+//                      curR,curG,curB
+//                        dR,  dG,  dB
+//
 
-  void led(void){
-  //may increase an int to perform other tasks
-  dR=(0<(finR-curR))?(1):(-1);
-  dR=(0==(finR-curR))?(0):(dR); //elerte a celt
+  void led(void){               //may increase an int to perform other tasks
+  dR=(0<(finR-curR))?(1):(-1);  // föl vagy le fele kelll változni
+  dR=(0==(finR-curR))?(0):(dR); // elerte a celt
 
   dG=(0<(finG-curG))?(1):(-1);
   dG=(0==(finG-curG))?(0):(dG);
 
   dB=(0<(finB-curB))?(1):(-1);
   dB=(0==(finB-curB))?(0):(dB);
-  
-  if(!dR && !dG && !dB){
-    if(colorBlack){
+
+
+  if(dR || dG || dB){         //ha valaminek változnia kell
+    curR=((dR>0)^(curR>curR+dR*increaseRate))?(curR+dR*increaseRate):(curR+dR);  //kérdés(ha számolás és túlcsordulás iránya különböző)akkor(lépj)ellenben(lassan közelít)
+    curG=((dG>0)^(curG>curG+dG*increaseRate))?(curG+dG*increaseRate):(curG+dG);  //ha increaseRate=1 akkor a lassu lépés nem csordulhat túl, mert a dB érték fentebb 0-ba áll
+    curB=((dB>0)^(curB>curB+dB*increaseRate))?(curB+dB*increaseRate):(curB+dB);  
+ 
+  }else{                      //ha nem kell változni akkor jöhet az uj cél
+    if(colorBlack){                 //ha nincs senki közelben sötétbe vált
       finR = 0;
       finG = 0;
       finB = 0;
-    }else{
-      x=(x<6)?(x+1):(0);
-      finR = rgb[colorPalette][x][0];
+    }else{                          //ha vannak a közelben
+      x=(x<6)?(x+1):(0);                  //x érték cirkulálása 0->6
+      finR = rgb[colorPalette][x][0];     //a megfelelő palettából az x-edik szín r,g,b azaz 0,1,2 byte-ok
       finG = rgb[colorPalette][x][1];
       finB = rgb[colorPalette][x][2];
     }
-  }else{
-    curR=((dR>0)&&(curR>curR+dR*increaseRate))?(curR+dR):(curR+dR*increaseRate);
-    curG=((dG>0)&&(curG>curG+dG*increaseRate))?(curG+dG):(curG+dG*increaseRate);
-    curB=((dB>0)&&(curB>curB+dB*increaseRate))?(curB+dB):(curB+dB*increaseRate);
-  }
-  
-  }
+  } 
+}
 //////////////////////////////////   SETUP   //////////////////////////////////////////////
 void setup()
 {

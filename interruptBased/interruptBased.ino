@@ -7,7 +7,7 @@ SoftwareSerial mySoftwareSerial(10, 11); // RX, TX
 void timingISR(void)
 {
   iISR++;
-  if (!(iISR % 1))
+  if (!(iISR % increaseRate))
   {
     uled = true;
   }
@@ -80,7 +80,7 @@ void ADCread()
   //prevsensorstate=sensorstate;
   sensorstate = (sense_radius < max_adc) ? (true) : (false); //true if people there
 
-  increaseRate = map(max_adc, 0, 1024, 0, 8);
+  increaseRate = map(max_adc, 0, 1024, 8, 0);
 
 ///////////////////////////////   FOR DEBUG AND INFORMATION   ////////////////////////////////////
 
@@ -128,7 +128,7 @@ void inline sound(void) {
   if (prevsensorstate < sensorstate) {                   // rising edge
     digitalWrite(mutePin, 0); //unmute
     colorBlack = false;
-    if (millis() > timeoutCounter + timeStopMillis)      //if there was a big low sensorstate
+    if (millis() > (timeoutCounter + timeStopMillis))    //if there was a big low sensorstate
     {                                                    //stop timeout volt --> elorol kezd
       myDFPlayer.enableLoopAll();
     }
@@ -147,7 +147,7 @@ void inline sound(void) {
   {
     timeoutCounter = millis(); //redundant...
   }
-  else if (millis() > timeoutCounter + timeoutMillis) {          // timeout happened
+  else if (millis() > (timeoutCounter + timeoutMillis)) {          // timeout happened
     finVol = 0;
     colorBlack = true;
   }
@@ -191,19 +191,22 @@ void inline sound(void) {
 
   void led(void){               //may increase an int to perform other tasks
   dR=(0<(finR-curR))?(1):(-1);  // föl vagy le fele kelll változni
-  dR=(0==(finR-curR))?(0):(dR); // elerte a celt
+  if(0 == (finR-curR)){dR=0;}
+  //dR=(0==(finR-curR))?(0):(dR); // elerte a celt
 
   dG=(0<(finG-curG))?(1):(-1);
-  dG=(0==(finG-curG))?(0):(dG);
+  if(0 == (finG-curG)){dG=0;}
+  //dG=(0==(finG-curG))?(0):(dG);
 
   dB=(0<(finB-curB))?(1):(-1);
-  dB=(0==(finB-curB))?(0):(dB);
+  if(0 == (finB-curB)){dB=0;}
+  //dB=(0==(finB-curB))?(0):(dB);
 
 
   if(dR || dG || dB){         //ha valaminek változnia kell
-    curR=((dR>0)^(curR>curR+dR*increaseRate))?(curR+dR*increaseRate):(curR+dR);  //kérdés(ha számolás és túlcsordulás iránya különböző)akkor(lépj)ellenben(lassan közelít)
-    curG=((dG>0)^(curG>curG+dG*increaseRate))?(curG+dG*increaseRate):(curG+dG);  //ha increaseRate=1 akkor a lassu lépés nem csordulhat túl, mert a dB érték fentebb 0-ba áll
-    curB=((dB>0)^(curB>curB+dB*increaseRate))?(curB+dB*increaseRate):(curB+dB);  
+    curR=(curR+dR);  //kérdés(ha számolás és túlcsordulás iránya különböző)akkor(lépj)ellenben(lassan közelít)
+    curG=(curG+dG);  //ha increaseRate=1 akkor a lassu lépés nem csordulhat túl, mert a dB érték fentebb 0-ba áll
+    curB=(curB+dB);  
  
   }else{                      //ha nem kell változni akkor jöhet az uj cél
     if(colorBlack){                 //ha nincs senki közelben sötétbe vált

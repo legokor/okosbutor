@@ -59,29 +59,34 @@ void ADCread()
 /////////////////////////////////////   ADC COUNTING   //////////////////////////////////////////////
 
   //AVERAGING 4 values, using map fcn
-  lastread = (3 == lastread) ? (0) : (lastread + 1);
+  lastread = (7 == lastread) ? (0) : (lastread + 1);
 
   t_s1_adc[lastread] = analogRead(distPin1);
   t_s2_adc[lastread] = analogRead(distPin2);
-  t_s3_long_adc[lastread] = analogRead(distLong); //special sensor
+  t_s3_adc[lastread] = analogRead(distLong); //special sensor
   s1_adc = 0;
   s2_adc = 0;
-  s3_long_adc = 0;
+  s3_adc = 0;
 
+  sum=0;
   int avg_i;
-  for (avg_i = 0; avg_i < 4; avg_i++)
+  for (avg_i = 0; avg_i < 8; avg_i++)
   {
-    s1_adc += map(t_s1_adc[lastread], 0, 500, 0, 255);
-    s2_adc += map(t_s2_adc[lastread], 0, 500, 0, 255);
-    s3_long_adc += map(t_s3_long_adc[lastread], 0, 1023, 0, 255); //different mapping, since high voltage means bigger distance
+    s1_adc += t_s1_adc[avg_i];
+    s2_adc += t_s2_adc[avg_i];
+    s3_adc += t_s3_adc[avg_i];
   }
 
+  s1_adc/=8;
+  s2_adc/=8;
+  s3_adc/=8;
+  
   //MAXIMUM calculation, sensorstate
-  max_adc = max(s1_adc, max(s2_adc, s3_long_adc));
+  max_adc = max(s1_adc, max(s2_adc, s3_adc));
   //prevsensorstate=sensorstate;
   sensorstate = (sense_radius < max_adc) ? (true) : (false); //true if people there
 
-  increaseRate = map(max_adc, 0, 1024, 8, 0);
+ // increaseRate = map(max_adc, 0, 1024, 8, 0);
 
 ///////////////////////////////   FOR DEBUG AND INFORMATION   ////////////////////////////////////
 
@@ -259,7 +264,7 @@ void setup()
   Serial.println(F("online."));
   myDFPlayer.volume(1);
 
-  Timer1.initialize(500000);
+  Timer1.initialize(1000000);
   delay(100);
   Timer1.attachInterrupt(timingISR);
   
@@ -273,7 +278,7 @@ void loop()
   {
     uled = false;
    led();
-   k=k+1;
+   k+=1;
   }
 
   //handle adc
@@ -281,14 +286,33 @@ void loop()
   {
     uadc = false;
     ADCread();
-     Serial.print(s1_adc);
+     /*Serial.print(s1_adc);
      Serial.print("\t");
      Serial.print(s2_adc);
      Serial.print("\t");
      Serial.print(s3_long_adc);
      Serial.print("\t");
-     Serial.println(k);
-
+     Serial.println(k);*/
+                  Serial.print(t_s1_adc[0]);
+                  Serial.print("\t");
+                  Serial.print(t_s1_adc[1]);
+                  Serial.print("\t");
+                  Serial.print(t_s1_adc[2]);
+                  Serial.print("\t");
+                  Serial.print(t_s1_adc[3]); 
+                  Serial.print("\t");
+                  Serial.print(t_s1_adc[4]);
+                  Serial.print("\t");
+                  Serial.print(t_s1_adc[5]);
+                  Serial.print("\t");
+                  Serial.print(t_s1_adc[6]); 
+                  Serial.print("\t");
+                  Serial.print(t_s1_adc[7]); 
+                  Serial.print("\t avg: ");
+                  Serial.print(s1_adc); 
+                  
+                  Serial.print("\t");
+                  Serial.println(k);
   }
 
   //handle sound

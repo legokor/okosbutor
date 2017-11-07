@@ -1,13 +1,14 @@
 #include "main.h"
 #include "led.h"
 
+int k=0;
 DFRobotDFPlayerMini myDFPlayer;
 SoftwareSerial mySoftwareSerial(10, 11); // RX, TX
 
 void timingISR(void)
 {
   iISR++;
-  if (!(iISR % increaseRate))
+  if (!(iISR % 1))
   {
     uled = true;
   }
@@ -16,7 +17,7 @@ void timingISR(void)
     uadc = true;
   }
 
-  if (!(iISR % 32))
+  if (!(iISR % 10))
   {
     usound = true;
   }
@@ -70,9 +71,9 @@ void ADCread()
   int avg_i;
   for (avg_i = 0; avg_i < 4; avg_i++)
   {
-    s1_adc += map(t_s1_adc[lastread], 0, 1023, 0, 255);
-    s2_adc += map(t_s2_adc[lastread], 0, 1023, 0, 255);
-    s3_long_adc += map(t_s3_long_adc[lastread], 0, 1023, 0, 127); //different mapping, since high voltage means bigger distance
+    s1_adc += map(t_s1_adc[lastread], 0, 500, 0, 255);
+    s2_adc += map(t_s2_adc[lastread], 0, 500, 0, 255);
+    s3_long_adc += map(t_s3_long_adc[lastread], 0, 1023, 0, 255); //different mapping, since high voltage means bigger distance
   }
 
   //MAXIMUM calculation, sensorstate
@@ -258,19 +259,21 @@ void setup()
   Serial.println(F("online."));
   myDFPlayer.volume(1);
 
-
-  Timer1.initialize(50000);
+  Timer1.initialize(500000);
   delay(100);
   Timer1.attachInterrupt(timingISR);
+  
 }
 
 void loop()
 {
+  
   //handle leds
   if (uled)
   {
     uled = false;
    led();
+   k=k+1;
   }
 
   //handle adc
@@ -278,6 +281,14 @@ void loop()
   {
     uadc = false;
     ADCread();
+     Serial.print(s1_adc);
+     Serial.print("\t");
+     Serial.print(s2_adc);
+     Serial.print("\t");
+     Serial.print(s3_long_adc);
+     Serial.print("\t");
+     Serial.println(k);
+
   }
 
   //handle sound
@@ -285,12 +296,14 @@ void loop()
   {
     usound = false;
     sound();
-      
-                  Serial.print(s1_adc);
+     /* 
+                  Serial.print(t_s1_adc[1]);
                   Serial.print("\t");
-                  Serial.println(s2_adc);
-                  //Serial.print("\t");
-                  //Serial.println(s3_long_adc); */
+                  Serial.print(t_s1_adc[2]);
+                  Serial.print("\t");
+                  Serial.println(t_s1_adc[3]); // */
+
+                  
   }
 
   //handle button pushes? with adc.

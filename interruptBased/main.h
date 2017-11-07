@@ -42,12 +42,12 @@ int avg_i = 0;
 
 /////INTERNAL VARIABLES/////
 
-volatile word s1_adc = 0;
-volatile word s2_adc = 0;
-volatile word s3_long_adc = 0;
-volatile word t_s1_adc[8] = { 0,0,0,0,0,0,0,0 };
-volatile word t_s2_adc[8] = { 0,0,0,0,0,0,0,0 };
-volatile word t_s3_long_adc[8] = { 0,0,0,0 };
+volatile int s1_adc = 0;
+volatile int s2_adc = 0;
+volatile int s3_long_adc = 0;
+volatile int t_s1_adc[4] = { 0,0,0,0 };
+volatile int t_s2_adc[4] = { 0,0,0,0 };
+volatile int t_s3_long_adc[8] = { 0,0,0,0 };
 
 
 ///////OUTPUT VARIABLES/////

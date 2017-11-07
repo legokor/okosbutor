@@ -12,12 +12,12 @@ void timingISR(void)
   {
     uled = true;
   }
-  if (!(iISR % 2))
+  if (!(iISR % 20))
   {
     uadc = true;
   }
 
-  if (!(iISR % 10))
+  if (!(iISR % 100))
   {
     usound = true;
   }
@@ -137,10 +137,14 @@ void inline sound(void) {
     if (millis() > (timeoutCounter + timeStopMillis))    //if there was a big low sensorstate
     {                                                    //stop timeout volt --> elorol kezd
       myDFPlayer.enableLoopAll();
+     Serial.println("timeoutbol elorol lejatszok");
+
     }
     else
     {
       myDFPlayer.start(); //must be in else branch!
+           Serial.print("siman folztatom a lejatszast");
+
       //started=true;
     }
   }
@@ -148,12 +152,14 @@ void inline sound(void) {
   if (sensorstate) {
     finVol = map(max_adc, 0, 511, 0, 15) + 10;
     timeoutCounter = millis();
+    counterK=k;
   }
   else if (prevsensorstate > sensorstate)               // falling edge
   {
     timeoutCounter = millis(); //redundant...
   }
-  else if (millis() > (timeoutCounter + timeoutMillis)) {          // timeout happened
+  else if (k>counterK+1000 /*millis() > (timeoutCounter + timeoutMillis)*/) {          // timeout happened
+    //10k is     
     finVol = 0;
     colorBlack = true;
   }
@@ -264,7 +270,7 @@ void setup()
   Serial.println(F("online."));
   myDFPlayer.volume(1);
 
-  Timer1.initialize(1000000);
+  Timer1.initialize(20000);
   delay(100);
   Timer1.attachInterrupt(timingISR);
   
@@ -286,33 +292,7 @@ void loop()
   {
     uadc = false;
     ADCread();
-     /*Serial.print(s1_adc);
-     Serial.print("\t");
-     Serial.print(s2_adc);
-     Serial.print("\t");
-     Serial.print(s3_long_adc);
-     Serial.print("\t");
-     Serial.println(k);*/
-                  Serial.print(t_s1_adc[0]);
-                  Serial.print("\t");
-                  Serial.print(t_s1_adc[1]);
-                  Serial.print("\t");
-                  Serial.print(t_s1_adc[2]);
-                  Serial.print("\t");
-                  Serial.print(t_s1_adc[3]); 
-                  Serial.print("\t");
-                  Serial.print(t_s1_adc[4]);
-                  Serial.print("\t");
-                  Serial.print(t_s1_adc[5]);
-                  Serial.print("\t");
-                  Serial.print(t_s1_adc[6]); 
-                  Serial.print("\t");
-                  Serial.print(t_s1_adc[7]); 
-                  Serial.print("\t avg: ");
-                  Serial.print(s1_adc); 
-                  
-                  Serial.print("\t");
-                  Serial.println(k);
+
   }
 
   //handle sound
@@ -320,13 +300,15 @@ void loop()
   {
     usound = false;
     sound();
-     /* 
-                  Serial.print(t_s1_adc[1]);
+     
+                  Serial.print(s1_adc); 
+                  Serial.print("\t ");
+                  Serial.print(s2_adc); 
+                  Serial.print("\t ");
+                  Serial.print(s3_adc); 
+                  
                   Serial.print("\t");
-                  Serial.print(t_s1_adc[2]);
-                  Serial.print("\t");
-                  Serial.println(t_s1_adc[3]); // */
-
+                  Serial.println(k);
                   
   }
 

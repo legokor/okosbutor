@@ -33,7 +33,7 @@ volatile word max_adc;
 #define buttonPin 12
 
 /////////CONSTANTS///////////
-const byte sense_radius = 40;
+const byte sense_radius = 80;
 
 
 //////////ITERATORS/////////
@@ -70,6 +70,7 @@ int buttonTimer = 0;
 
 unsigned long currenttime;    //  while(1) loopban
 int timeoutCounter = 0;
+int counterK = 0;
 int timeoutCounterLong = 0;
 int setpointReachedSince=0;
 

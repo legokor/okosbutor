@@ -9,8 +9,10 @@
 bool uled=false;
 bool uadc=false;
 bool usound=false;
+bool ubutton=false;
 
-byte iISR=0;
+
+word iISR=0;
 
 
 ///ADC OUTPUTS
@@ -32,6 +34,7 @@ volatile word max_adc;
 #define distPin1 4
 #define distPin2 5
 #define buttonPin 12
+#define buttonAnalogPin 7
 
 /////////CONSTANTS///////////
 const byte sense_radius = 80;

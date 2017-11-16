@@ -17,7 +17,7 @@
  C:\sloeber\arduinoPlugin\libraries\DFRobotDFPlayerMini\1.0.1/DFRobotDFPlayerMini.h \
  C:\sloeber\arduinoPlugin\libraries\TimerOne\1.1.0/TimerOne.h \
  C:\sloeber\arduinoPlugin\libraries\TimerOne\1.1.0/config/known_16bit_timers.h \
- ..\led.h ..\interruptBased.ino
+ ..\led.h ..\button.h ..\interruptBased.ino
 
 C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\cores\arduino/Arduino.h:
 
@@ -56,5 +56,7 @@ C:\sloeber\arduinoPlugin\libraries\TimerOne\1.1.0/TimerOne.h:
 C:\sloeber\arduinoPlugin\libraries\TimerOne\1.1.0/config/known_16bit_timers.h:
 
 ..\led.h:
+
+..\button.h:
 
 ..\interruptBased.ino:

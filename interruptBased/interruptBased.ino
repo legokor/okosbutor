@@ -1,7 +1,8 @@
 #include "main.h"
 #include "led.h"
+#include "button.h"
 
-int k=0;
+long int k=0; //lasts as long as 29h
 DFRobotDFPlayerMini myDFPlayer;
 SoftwareSerial mySoftwareSerial(10, 11); // RX, TX
 
@@ -12,6 +13,11 @@ void timingISR(void)
   {
     uled = true;
   }
+  if (!(iISR % 5))
+  {
+    ubutton = true;
+  }
+
   if (!(iISR % 20))
   {
     uadc = true;
@@ -21,10 +27,120 @@ void timingISR(void)
   {
     usound = true;
   }
+  if (!(iISR % 2048))
+  {
+	  //ritka dolgok
+  }
 }
-////////////////////////////////////    ADC HANDLER   ////////////////////////////////////////
+
+
+/////////////////////////////////    BUTTON HANDLING   /////////////////////////////////////////
+/*	(0)
+ * Ha nem nyomnak gombot, folyton porgeti a countert.
+ *
+ * Lekezelt esemenyek:
+ *
+ * 	(1) Megnyomom a gombot
+ * 	(1b)elengedem
+ * 	(1c)nem nyulok hozza 2s-ig.-->Timeouted event
+ *
+ * 	(2) Megnyomom a gombot, es 1s-en belul ujra. 						Below 1s repeated push
+ * 	(3) Nyomva tartom a gombot 5s-ig.
+ */
+
+/* Az esemenyek kezeleset mi vegzi?
+ *
+ * 	(1)
+ * 	- elso megnyomas: pushInProgress TRUE lesz
+ * 		1s-en belul nem szabad uj ciklusnak kezdodnie
+ *
+ * 	(2)
+ * 	- ameddig nyomva tartom, TRUE lesz a continousPush
+ * 		5s folyamatosan, TODO: ciklus vege
+ *
+ * 	(3)
+ * 	- 1. felfuto elt jelez a repeatedPush
+ * 	- 2. felfuto elt jelez a repeatedPush
+ * 		ha 1 s-en belul FELFUTO el, TODO: ciklus vege
+ *
+ */
+
+
+void buttonRead()
+{
+//(0)
+	buttonVal = analogRead(buttonAnalogPin); 	//updating
+	button=(buttonVal>1000)?(1):(0);
+	if(!button && !pushInProgress)
+	{
+		buttonCounter=k;
+	}
+//(1)
+								//elso megnyomas a ciklusban
+	if(button && !pushInProgress)
+	{
+		pushStartedAt=k;
+		pushInProgress=true;		//START OF CYCLE
+		continousPush=true;
+		Serial.println("pushed!");
+	}
+//(1b)								//elengedi miutan meg volt nyomva
+	if(!button && continousPush && pushInProgress)
+	{
+		continousPush=false;
+		Serial.println("released after push");
+	}
+//(1c)
+	if(!button && !continousPush && pushInProgress)
+	{
+		if(k > (buttonCounter+BUTTON_TIME_2s))
+		{
+			Serial.println("timeout after release");
+			pushInProgress=false;	//END OF CYCLE
+		}
+	}
+/*
+
+								// meg volt nyomva de elengedtek
+//(2)							// ha eltelt 2s, leptessuk a kovetkezo szamra
+	if(!button && pushInProgress)
+	{
+		continousPush=false;
+		if(k > (buttonCounter+BUTTON_TIME_2s))
+		{	//20ms*5=2s
+			//myDFPlayer.next();
+			Serial.println("2s timeouted push");
+			pushInProgress=false;
+		}
+	}
+
+  //if pushed again, see if it was fast push
+	if(button && pushInProgress)
+	{
+		pushedAgainAt=k;
+		pushDelay=pushedAgainAt-pushStartedAt;
+		if(continousPush && (pushDelay>BUTTON_TIME_5s))
+		{
+			//5s=20ms*250
+			//k=0;
+		 	Serial.println("5s continuous push");
+		}
+		//
+		else if (!continousPush && (pushDelay<BUTTON_TIME_1s))
+		{
+			//1s
+			//myDFPlayer.next();
+			Serial.println("less than 1s delayed push");
+		}
+		pushInProgress=false;
+	}
+
+	*/
+}
+
+//////////////////////////////////////    ADC HANDLER   ////////////////////////////////////////
 //
-//    2017.10.27. 23:58: ready to be tested.
+//    2017.11.15: tested, corrected, button pushing rewritten and outsourced
 //
 //    fcn-s copied from program before.
 //    changelog: using map function.
@@ -38,25 +154,8 @@ void timingISR(void)
 //      - bool nextSound
 //      - max_adc
 void ADCread()
-
 {
-  //////////////////////////////    BUTTON HANDLING   /////////////////////////////////////////
-  button = digitalRead(buttonPin);
-  if (prevButton < button)
-  {
-    buttonTimer = millis();                   // rise edge start buttonTimer
-  }
-  if (prevButton > button && ((millis() - buttonTimer) < 2500))
-  {
-    nextSound = true;                      // @rise_edge if pos_level shorter than 2sec
-  }
-  else if (prevButton > button) {                                     // @fall_edge if pos_level longer than 2sec
-    colorPalette = ((1==colorPalette) ? (0) : (colorPalette+1));  // predefined color sets
-  }
-  prevButton = button;
-
-
-/////////////////////////////////////   ADC COUNTING   //////////////////////////////////////////////
+  ////////////////////////////////   ADC COUNTING   ///////////////////////////////////////////
 
   //AVERAGING 4 values, using map fcn
   lastread = (7 == lastread) ? (0) : (lastread + 1);
@@ -88,7 +187,7 @@ void ADCread()
 
  // increaseRate = map(max_adc, 0, 1024, 8, 0);
 
-///////////////////////////////   FOR DEBUG AND INFORMATION   ////////////////////////////////////
+///////////////////////////   FOR DEBUG AND INFORMATION   /////////////////////////////////
 
   if (usound) {
 
@@ -100,7 +199,8 @@ void ADCread()
                   Serial.println(s3_long_adc); */
   }
 }//END OF ADCread
-///////////////////////////////////////   SOUND CALC    ///////////////////////////////////////////
+
+////////////////////////////////////   SOUND CALC    ///////////////////////////////////////
 //
 //    INPUT variables:  (working based on the values of)
 //                    nextSound
@@ -125,7 +225,6 @@ void ADCread()
 //                    curVol (on SoftwareSerial ports: digital 10-11)
 //
 //
-
 
 void inline sound(void) {
   if (nextSound) {                                       //change to next music
@@ -174,7 +273,7 @@ void inline sound(void) {
     //Serial.println("vol--");
   }
 
-  /*if (0 == curVol) {            //ha 0 a hangerő, akkor zene leáll és mute-ol is
+  /*if (0 == curVol) {            //ha 0 a hangero, akkor zene leall es mute-ol is
     myDFPlayer.pause();
     digitalWrite(mutePin, 1);
     //paused=true;
@@ -280,40 +379,38 @@ void setup()
 
 void loop()
 {
-  
   //handle leds
   if (uled)
   {
-    uled = false;
+   uled = false;
    led();
    k+=1;
   }
-
+  //button pushes
+  if (ubutton)
+  {
+   ubutton = false;
+   buttonRead();
+  }
   //handle adc
   if (uadc)
   {
     uadc = false;
     ADCread();
-
   }
-
   //handle sound
   if (usound)
   {
     usound = false;
     sound();
-     
+    //if(k%30), if(k%125)
                   Serial.print(s1_adc); 
                   Serial.print("\t ");
                   Serial.print(s2_adc); 
                   Serial.print("\t ");
-                  Serial.print(s3_adc); 
-                  
+                  Serial.print(s3_adc);
                   Serial.print("\t");
                   Serial.println(k);
                   
   }
-
-  //handle button pushes? with adc.
-
 }

@@ -131,35 +131,32 @@ void inline sound(void) {
   if (nextSound) {                                       //change to next music
     myDFPlayer.next();
   }
-  if (prevsensorstate < sensorstate) {                   // rising edge
+  // rising edge
+  else if (prevsensorstate < sensorstate) {
     digitalWrite(mutePin, 0); //unmute
     colorBlack = false;
-    if (millis() > (timeoutCounter + timeStopMillis))    //if there was a big low sensorstate
-    {                                                    //stop timeout volt --> elorol kezd
+    if (k>(counterK+2000))
+    		/*millis() > (timeoutCounter + timeStopMillis)*/    //if there was a big low sensorstate
+    {      //20 ms ->k+=1 =>      10mp=500k                                       //stop timeout volt --> elorol kezd
       myDFPlayer.enableLoopAll();
-     Serial.println("timeoutbol elorol lejatszok");
+      	  Serial.println("timeoutbol elorol lejatszok");
 
     }
     else
     {
       myDFPlayer.start(); //must be in else branch!
-           Serial.print("siman folztatom a lejatszast");
-
-      //started=true;
+      	  Serial.print("siman folztatom a lejatszast");
     }
   }
-
-  if (sensorstate) {
-    finVol = map(max_adc, 0, 511, 0, 15) + 10;
-    timeoutCounter = millis();
+  // continuous high
+  else if (sensorstate) {
+    finVol = map(max_adc, 0, 511, 0, 10) + 5;
+    //timeoutCounter = millis();
     counterK=k;
   }
-  else if (prevsensorstate > sensorstate)               // falling edge
-  {
-    timeoutCounter = millis(); //redundant...
-  }
-  else if (k>counterK+1000 /*millis() > (timeoutCounter + timeoutMillis)*/) {          // timeout happened
-    //10k is     
+  // sensorstate=false AND timed out
+  else if (k>(counterK+300)){
+    //1000K=20s     --> after 6 sec decreasing vol
     finVol = 0;
     colorBlack = true;
   }
@@ -177,11 +174,14 @@ void inline sound(void) {
     //Serial.println("vol--");
   }
 
-  if (0 == curVol) {            //ha 0 a hangerő, akkor zene leáll és mute-ol is 
+  /*if (0 == curVol) {            //ha 0 a hangerő, akkor zene leáll és mute-ol is
     myDFPlayer.pause();
     digitalWrite(mutePin, 1);
     //paused=true;
   }
+  //not good practice! will not continue the play*/
+
+
   //to be handled here:
   prevsensorstate = sensorstate;
 }
@@ -202,17 +202,17 @@ void inline sound(void) {
 //
 
   void led(void){               //may increase an int to perform other tasks
-  dR=(0<(finR-curR))?(1):(-1);  // föl vagy le fele kelll változni
+  dR=(0<(finR-curR))?(1):(-1);  // fol vagy le fele kelll valtozni
   if(0 == (finR-curR)){dR=0;}
-  //dR=(0==(finR-curR))?(0):(dR); // elerte a celt
+  	  	  //dR=(0==(finR-curR))?(0):(dR); // elerte a celt
 
   dG=(0<(finG-curG))?(1):(-1);
   if(0 == (finG-curG)){dG=0;}
-  //dG=(0==(finG-curG))?(0):(dG);
+  	  	  //dG=(0==(finG-curG))?(0):(dG);
 
   dB=(0<(finB-curB))?(1):(-1);
   if(0 == (finB-curB)){dB=0;}
-  //dB=(0==(finB-curB))?(0):(dB);
+  	  	  //dB=(0==(finB-curB))?(0):(dB);
 
 
   if(dR || dG || dB){         //ha valaminek változnia kell
@@ -220,14 +220,14 @@ void inline sound(void) {
     curG=(curG+dG);  //ha increaseRate=1 akkor a lassu lépés nem csordulhat túl, mert a dB érték fentebb 0-ba áll
     curB=(curB+dB);  
  
-  }else{                      //ha nem kell változni akkor jöhet az uj cél
-    if(colorBlack){                 //ha nincs senki közelben sötétbe vált
+  }else{                      		//ha nem kell valtozni akkor johet az uj cel
+    if(colorBlack){                 //ha nincs senki kozelben sotetbe valt
       finR = 0;
       finG = 0;
       finB = 0;
-    }else{                          //ha vannak a közelben
-      x=(x<6)?(x+1):(0);                  //x érték cirkulálása 0->6
-      finR = rgb[colorPalette][x][0];     //a megfelelő palettából az x-edik szín r,g,b azaz 0,1,2 byte-ok
+    }else{                          	//ha vannak a kozelben
+      x=(x<6)?(x+1):(0);				//x ertek cirkulalas 0->6
+      finR = rgb[colorPalette][x][0];	//a megfelelo palettából az x-edik szín r,g,b azaz 0,1,2 byte-ok
       finG = rgb[colorPalette][x][1];
       finB = rgb[colorPalette][x][2];
     }
@@ -236,12 +236,14 @@ void inline sound(void) {
 //////////////////////////////////   SETUP   //////////////////////////////////////////////
 void setup()
 {
-  digitalWrite(mutePin, 1);
 
   pinMode(redPin, OUTPUT);
   pinMode(grnPin, OUTPUT);
   pinMode(bluPin, OUTPUT);
   pinMode(mutePin, OUTPUT);
+
+  digitalWrite(mutePin, 1);
+
 
     TCCR0A = _BV(COM0A1) | _BV(COM0B1) | _BV(WGM00);
     //WGM0[2:0]=001b PWM, Phase Correct TOP=0xFF update of OCR0x at TOP and TOV flag Set on BOTTOM(BOTTOM=0x00)

@@ -3,7 +3,8 @@
 #include "DFRobotDFPlayerMini.h"
 #include "TimerOne.h"
 
-
+#ifndef MAIN_H
+#define MAIN_H
 
 bool uled=false;
 bool uadc=false;
@@ -79,3 +80,4 @@ int timeStopMillis = 10000;
 
 int finVol=0;
 int curVol=0;
+#endif

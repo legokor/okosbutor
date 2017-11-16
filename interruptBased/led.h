@@ -1,5 +1,7 @@
 //source is the 5fb709 commit.
- 
+#ifndef LED_H
+#define LED_H
+
 bool targetReached=0;
 
 bool colorBlack = false;
@@ -30,3 +32,5 @@ byte rgb[3][7][3] = {{{ 0, 0, 0 },       { 255, 255, 255 }, { 255, 0, 0 },     {
                     };
 
 int colorNum=0;
+
+#endif

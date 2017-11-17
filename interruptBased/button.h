@@ -26,4 +26,5 @@ bool continousPush=true;
 #define BUTTON_TIME_2s 		100
 #define BUTTON_TIME_5s 		250
 
+
 #endif

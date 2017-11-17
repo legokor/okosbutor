@@ -6,6 +6,9 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#define HALK
+//if not defined, volumes higher
+
 bool uled=false;
 bool uadc=false;
 bool usound=false;
@@ -71,6 +74,14 @@ int buttonTimer = 0;
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define mutePin 13
+
+#ifdef HALK
+	#define SOUND_MAX_VOL 5
+	#define SOUND_OFFSET_VOL 2
+#else
+	#define SOUND_MAX_VOL 20
+	#define SOUND_OFFSET_VOL 10
+#endif
 
 unsigned long currenttime;    //  while(1) loopban
 int timeoutCounter = 0;

@@ -13,7 +13,7 @@ void timingISR(void)
   {
     uled = true;
   }
-  if (!(iISR % 5))
+  if (!(iISR % 100))
   {
     ubutton = true;
   }
@@ -33,9 +33,9 @@ void timingISR(void)
   }
 }
 
-
 /////////////////////////////////    BUTTON HANDLING   /////////////////////////////////////////
-/*	(0)
+/* Taszkok leirasa
+ * 	(0)
  * Ha nem nyomnak gombot, folyton porgeti a countert.
  *
  * Lekezelt esemenyek:
@@ -44,11 +44,11 @@ void timingISR(void)
  * 	(1b)elengedem
  * 	(1c)nem nyulok hozza 2s-ig.-->Timeouted event
  *
- * 	(2) Megnyomom a gombot, es 1s-en belul ujra. 						Below 1s repeated push
- * 	(3) Nyomva tartom a gombot 5s-ig.
+ * 	(2) Nyomva tartom a gombot 5s-ig.
+ * 	(3) Megnyomom a gombot, es 1s-en belul ujra. 						Below 1s repeated push
  */
 
-/* Az esemenyek kezeleset mi vegzi?
+/* Az esemenyek kezelese
  *
  * 	(1)
  * 	- elso megnyomas: pushInProgress TRUE lesz
@@ -58,13 +58,10 @@ void timingISR(void)
  * 	- ameddig nyomva tartom, TRUE lesz a continousPush
  * 		5s folyamatosan, TODO: ciklus vege
  *
- * 	(3)
- * 	- 1. felfuto elt jelez a repeatedPush
- * 	- 2. felfuto elt jelez a repeatedPush
- * 		ha 1 s-en belul FELFUTO el, TODO: ciklus vege
+ * 	(3)  - not implemented
+ * 		ha 1 s-en belul 2 gombnyomas erkezik
  *
  */
-
 
 void buttonRead()
 {
@@ -96,50 +93,32 @@ void buttonRead()
 		if(k > (buttonCounter+BUTTON_TIME_2s))
 		{
 			Serial.println("timeout after release");
+			myDFPlayer.next();
 			pushInProgress=false;	//END OF CYCLE
 		}
 	}
-/*
 
-								// meg volt nyomva de elengedtek
-//(2)							// ha eltelt 2s, leptessuk a kovetkezo szamra
-	if(!button && pushInProgress)
-	{
-		continousPush=false;
-		if(k > (buttonCounter+BUTTON_TIME_2s))
-		{	//20ms*5=2s
-			//myDFPlayer.next();
-			Serial.println("2s timeouted push");
-			pushInProgress=false;
-		}
-	}
-
-  //if pushed again, see if it was fast push
-	if(button && pushInProgress)
+//(2)
+	if(button && continousPush && pushInProgress)
 	{
 		pushedAgainAt=k;
 		pushDelay=pushedAgainAt-pushStartedAt;
-		if(continousPush && (pushDelay>BUTTON_TIME_5s))
+		if(pushDelay>BUTTON_TIME_5s)
 		{
-			//5s=20ms*250
 			//k=0;
-		 	Serial.println("5s continuous push");
-		}
-		//
-		else if (!continousPush && (pushDelay<BUTTON_TIME_1s))
-		{
-			//1s
-			//myDFPlayer.next();
-			Serial.println("less than 1s delayed push");
-		}
-		pushInProgress=false;
-	}
+			Serial.println("5s continuous push");
+			pushInProgress=false;	//END OF CYCLE
+			buttonCounter=k; 		//for "reset" button handling
+			digitalWrite(mutePin,1);
+			myDFPlayer.reset();
 
-	*/
+			//setup(); //trash
+		}
+	}
 }
 
 //////////////////////////////////////    ADC HANDLER   ////////////////////////////////////////
-//
+/*
 //    2017.11.15: tested, corrected, button pushing rewritten and outsourced
 //
 //    fcn-s copied from program before.
@@ -153,6 +132,8 @@ void buttonRead()
 //      - bool sensorState
 //      - bool nextSound
 //      - max_adc
+ * */
+
 void ADCread()
 {
   ////////////////////////////////   ADC COUNTING   ///////////////////////////////////////////
@@ -185,10 +166,7 @@ void ADCread()
   //prevsensorstate=sensorstate;
   sensorstate = (sense_radius < max_adc) ? (true) : (false); //true if people there
 
- // increaseRate = map(max_adc, 0, 1024, 8, 0);
-
 ///////////////////////////   FOR DEBUG AND INFORMATION   /////////////////////////////////
-
   if (usound) {
 
     /*
@@ -199,9 +177,8 @@ void ADCread()
                   Serial.println(s3_long_adc); */
   }
 }//END OF ADCread
-
 ////////////////////////////////////   SOUND CALC    ///////////////////////////////////////
-//
+/*
 //    INPUT variables:  (working based on the values of)
 //                    nextSound
 //                    sensorstate
@@ -223,8 +200,9 @@ void ADCread()
 //                    
 //   physical output: 
 //                    curVol (on SoftwareSerial ports: digital 10-11)
-//
-//
+*/
+
+
 
 void inline sound(void) {
   if (nextSound) {                                       //change to next music
@@ -239,6 +217,7 @@ void inline sound(void) {
     {      //20 ms ->k+=1 =>      10mp=500k                                       //stop timeout volt --> elorol kezd
       myDFPlayer.enableLoopAll();
       	  Serial.println("timeoutbol elorol lejatszok");
+      	  //TODO: test what happening if left alone (lejatssza-e az osszes zenet)
 
     }
     else
@@ -249,8 +228,7 @@ void inline sound(void) {
   }
   // continuous high
   else if (sensorstate) {
-    finVol = map(max_adc, 0, 511, 0, 10) + 5;
-    //timeoutCounter = millis();
+    finVol = map(max_adc, 0, 511, 0, SOUND_MAX_VOL) + SOUND_OFFSET_VOL;
     counterK=k;
   }
   // sensorstate=false AND timed out

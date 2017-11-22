@@ -6,7 +6,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#define HALK
+//#define HALK
 //if not defined, volumes higher
 
 bool uled=false;
@@ -79,8 +79,8 @@ int buttonTimer = 0;
 	#define SOUND_MAX_VOL 5
 	#define SOUND_OFFSET_VOL 2
 #else
-	#define SOUND_MAX_VOL 20
-	#define SOUND_OFFSET_VOL 10
+	#define SOUND_MAX_VOL 15
+	#define SOUND_OFFSET_VOL 5
 #endif
 
 unsigned long currenttime;    //  while(1) loopban
@@ -91,6 +91,12 @@ int setpointReachedSince=0;
 
 int timeoutMillis = 4000;
 int timeStopMillis = 10000;
+
+// 	k+=	1000 increment	= 20s
+// 	k+=	   1 incr		= 20ms
+#define TIMEOUT_10s 		500
+
+
 
 int finVol=0;
 int curVol=0;

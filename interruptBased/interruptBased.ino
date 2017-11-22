@@ -94,6 +94,8 @@ void buttonRead()
 		{
 			Serial.println("timeout after release");
 			myDFPlayer.next();
+			digitalWrite(mutePin,0);
+
 			pushInProgress=false;	//END OF CYCLE
 		}
 	}
@@ -111,6 +113,9 @@ void buttonRead()
 			buttonCounter=k; 		//for "reset" button handling
 			digitalWrite(mutePin,1);
 			myDFPlayer.reset();
+			delay(100);
+			myDFPlayer.volume(1);
+
 
 			//setup(); //trash
 		}
@@ -210,20 +215,17 @@ void inline sound(void) {
   }
   // rising edge
   else if (prevsensorstate < sensorstate) {
-    digitalWrite(mutePin, 0); //unmute
     colorBlack = false;
-    if (k>(counterK+2000))
-    		/*millis() > (timeoutCounter + timeStopMillis)*/    //if there was a big low sensorstate
-    {      //20 ms ->k+=1 =>      10mp=500k                                       //stop timeout volt --> elorol kezd
-      myDFPlayer.enableLoopAll();
-      	  Serial.println("timeoutbol elorol lejatszok");
-      	  //TODO: test what happening if left alone (lejatssza-e az osszes zenet)
-
+    if ((0==counterK)||(k>(counterK+TIMEOUT_10s)))
+    {//stop timeout volt --> elorol kezd
+        digitalWrite(mutePin, 0); //unmute
+    	myDFPlayer.enableLoopAll();
+    		Serial.println("timeoutbol elorol lejatszok");
     }
     else
     {
-      myDFPlayer.start(); //must be in else branch!
-      	  Serial.print("siman folztatom a lejatszast");
+        digitalWrite(mutePin, 0); //unmute
+    		Serial.print("siman folztatom a lejatszast");
     }
   }
   // continuous high
@@ -243,21 +245,21 @@ void inline sound(void) {
   if (curVol < finVol) {        //ha felfele kell lépni  
     curVol = ((curVol + 4) > finVol) ? (finVol) : (curVol + 4); //4-et lépünk  kivéve, 
     myDFPlayer.volume(curVol);                                  //ha túlllépünk akkor egyből a célba lép
+    digitalWrite(mutePin, 0);
+
     //Serial.println("vol++");
   }
   else if (curVol > finVol) {   //ha lefele kell lépni
     curVol = ((curVol - 4) < finVol) ? (finVol) : (curVol - 4);
     myDFPlayer.volume(curVol);
+    digitalWrite(mutePin, 0);
+
     //Serial.println("vol--");
   }
 
-  /*if (0 == curVol) {            //ha 0 a hangero, akkor zene leall es mute-ol is
-    myDFPlayer.pause();
+  if (0 == curVol) {            //ha 0 a hangero, akkor mute-ol
     digitalWrite(mutePin, 1);
-    //paused=true;
   }
-  //not good practice! will not continue the play*/
-
 
   //to be handled here:
   prevsensorstate = sensorstate;

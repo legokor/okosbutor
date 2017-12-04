@@ -40,7 +40,7 @@ volatile word max_adc;
 #define buttonAnalogPin 7
 
 /////////CONSTANTS///////////
-const byte sense_radius = 80;
+#define sense_radius 70
 
 
 //////////ITERATORS/////////
@@ -79,7 +79,7 @@ int buttonTimer = 0;
 	#define SOUND_MAX_VOL 5
 	#define SOUND_OFFSET_VOL 2
 #else
-	#define SOUND_MAX_VOL 15
+	#define SOUND_MAX_VOL 13
 	#define SOUND_OFFSET_VOL 5
 #endif
 
@@ -94,7 +94,9 @@ int timeStopMillis = 10000;
 
 // 	k+=	1000 increment	= 20s
 // 	k+=	   1 incr		= 20ms
+#define TIMEOUT_20s 		1000
 #define TIMEOUT_10s 		500
+#define TIMEOUT_5s 			250
 
 
 

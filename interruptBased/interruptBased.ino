@@ -18,7 +18,7 @@ void timingISR(void)
     ubutton = true;
   }
 
-  if (!(iISR % 20))
+  if (!(iISR % 2))
   {
     uadc = true;
   }
@@ -210,11 +210,9 @@ void ADCread()
 
 
 void inline sound(void) {
-  if (nextSound) {                                       //change to next music
-    myDFPlayer.next();
-  }
+
   // rising edge
-  else if (prevsensorstate < sensorstate) {
+  if (prevsensorstate < sensorstate) {
     colorBlack = false;
     if ((0==counterK)||(k>(counterK+TIMEOUT_10s)))
     {//stop timeout volt --> elorol kezd
@@ -225,17 +223,18 @@ void inline sound(void) {
     else
     {
         digitalWrite(mutePin, 0); //unmute
-    		Serial.print("siman folztatom a lejatszast");
+    		Serial.println("siman folytatom a lejatszast");
     }
   }
+
   // continuous high
-  else if (sensorstate) {
+  if (sensorstate) {
     finVol = map(max_adc, 0, 511, 0, SOUND_MAX_VOL) + SOUND_OFFSET_VOL;
     counterK=k;
   }
+
   // sensorstate=false AND timed out
-  else if (k>(counterK+300)){
-    //1000K=20s     --> after 6 sec decreasing vol
+  if (!sensorstate && (k>(counterK+TIMEOUT_5s))){
     finVol = 0;
     colorBlack = true;
   }
@@ -384,13 +383,14 @@ void loop()
     usound = false;
     sound();
     //if(k%30), if(k%125)
-                  Serial.print(s1_adc); 
+                  Serial.print(s1_adc);
                   Serial.print("\t ");
                   Serial.print(s2_adc); 
                   Serial.print("\t ");
                   Serial.print(s3_adc);
                   Serial.print("\t");
                   Serial.println(k);
-                  
+                  //Serial.print("\t");
+                  //Serial.println(sensorstate);
   }
 }

@@ -13,9 +13,8 @@
  C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\variants\eightanaloginputs/../standard/pins_arduino.h \
  ..\main.h C:\sloeber\arduinoPlugin\libraries\TimerOne\1.1.0/TimerOne.h \
  C:\sloeber\arduinoPlugin\libraries\TimerOne\1.1.0/config/known_16bit_timers.h \
- ..\ultra.h \
  C:\sloeber\arduinoPlugin\libraries\Ultrasonic\2.1.0\src/Ultrasonic.h \
- ..\ultrasonic_initial.ino
+ ..\ultra.h ..\ultrasonic_initial.ino
 
 C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\cores\arduino/Arduino.h:
 
@@ -47,8 +46,8 @@ C:\sloeber\arduinoPlugin\libraries\TimerOne\1.1.0/TimerOne.h:
 
 C:\sloeber\arduinoPlugin\libraries\TimerOne\1.1.0/config/known_16bit_timers.h:
 
-..\ultra.h:
-
 C:\sloeber\arduinoPlugin\libraries\Ultrasonic\2.1.0\src/Ultrasonic.h:
+
+..\ultra.h:
 
 ..\ultrasonic_initial.ino:

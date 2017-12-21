@@ -18,7 +18,7 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-#define period 50000 //in microseconds
+#define period 50000 // In microseconds---- TIMING accurately follows this: changing this wont affect the TIMEOUT_1s's accuracy
 #define inEachCycle 1
 #define inEverySecondCycle 2
 #define inEveryTenthCycle 10
@@ -70,6 +70,8 @@ volatile word max_adc;
 
 
 ///////INPUT VARIABLES//////
+
+
 #define trig1	9
 #define trig2	9
 #define trig3	9
@@ -80,6 +82,8 @@ volatile word max_adc;
 #define echo4	8
 #define signPin	3
 
+#define echo1	4
+#define trig1	2
 
 /////////CONSTANTS///////////
 #define iZone1Radius 50 // [cm] -  dont get confused with Sharp values!
@@ -169,9 +173,13 @@ int iSumToCalibrate=0;
 
 // 	k+=	1000 increment	= 20s
 // 	k+=	   1 incr		= 20ms
-#define TIMEOUT_20s 		1000
-#define TIMEOUT_10s 		500
-#define TIMEOUT_5s 			250
+
+//period=50.000 => 1s 20inc
+//1s 1.000.000us -> 1.000.000/period=1s
+#define TIMEOUT_1s 			1000000/period
+#define TIMEOUT_5s 			5*TIMEOUT_1s
+#define TIMEOUT_10s 		10*TIMEOUT_1s
+#define TIMEOUT_20s 		20*TIMEOUT_1s
 
 
 

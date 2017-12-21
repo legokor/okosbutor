@@ -24,6 +24,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ultrasonic_initial/libraries/TimerOne}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ultrasonic_initial/libraries/Ultrasonic}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ultrasonic_initial/libraries/Ultrasonic/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ultrasonic_initial/libraries/DFRobotDFPlayerMini}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ultrasonic_initial/libraries/SoftwareSerial}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ultrasonic_initial/libraries/SoftwareSerial/src}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.cpp.sketch.input.1226086049" name="CPP source files" superClass="io.sloeber.compiler.cpp.sketch.input"/>
 							</tool>
@@ -34,6 +37,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ultrasonic_initial/libraries/TimerOne}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ultrasonic_initial/libraries/Ultrasonic}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ultrasonic_initial/libraries/Ultrasonic/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ultrasonic_initial/libraries/DFRobotDFPlayerMini}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ultrasonic_initial/libraries/SoftwareSerial}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ultrasonic_initial/libraries/SoftwareSerial/src}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.c.sketch.input.274530925" name="C Source Files" superClass="io.sloeber.compiler.c.sketch.input"/>
 							</tool>
@@ -44,6 +50,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ultrasonic_initial/libraries/TimerOne}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ultrasonic_initial/libraries/Ultrasonic}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ultrasonic_initial/libraries/Ultrasonic/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ultrasonic_initial/libraries/DFRobotDFPlayerMini}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ultrasonic_initial/libraries/SoftwareSerial}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ultrasonic_initial/libraries/SoftwareSerial/src}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.S.sketch.input.419557988" name="Assembly source files" superClass="io.sloeber.compiler.S.sketch.input"/>
 							</tool>

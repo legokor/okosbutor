@@ -9,7 +9,7 @@
 #define BUTTON_H
 
 
-#define buttonAnalogPin 7
+#define buttonAnalogPin 6
 
 extern long int k;
 

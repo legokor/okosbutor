@@ -29,10 +29,10 @@ int iSensor2ValueArray[SamplesToCalibrate];
 int iSensor3ValueArray[SamplesToCalibrate];
 int iSensor4ValueArray[SamplesToCalibrate];
 
-int iSensor1OffsetValue=400;
-int iSensor2OffsetValue=400;
-int iSensor3OffsetValue=400;
-int iSensor4OffsetValue=400;
+int iSensor1OffsetValue=85;
+int iSensor2OffsetValue=85;
+int iSensor3OffsetValue=60;
+int iSensor4OffsetValue=95;
 
 int iSumToCalibrate=0;
 

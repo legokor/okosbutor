@@ -19,9 +19,13 @@ void timingISR(void)
   iISR++;
   k++;				//very long count
   usensor = true;
-  //uzone=true;
-  //uled = true;
+  uzone=true;
+  uled = true;
 
+  if (!(iISR % 2)) //100ms
+    {
+  	ubutton = true;
+    }
 
   if (!(iISR % 20))		//500ms
   {
@@ -74,7 +78,7 @@ void timingISR(void)
 void buttonRead()
 {
 	buttonVal = analogRead(buttonAnalogPin); 	//updating
-	bButtonPushed=(buttonVal>1000)?(true):(false);
+	bButtonPushed=(buttonVal>900)?(false):(true);
 
 	switch (nyomogomb)
 	{
@@ -120,17 +124,27 @@ void buttonRead()
 
 		if(!bButtonPushed)
 		{
-			nyomogomb=Pushed;
+			nyomogomb=NotPushed;
 		}
 		break;
 	case PushedAgain:
 		//egyik funkcio
+		if(!bButtonPushed)
+		{
+			nyomogomb=NotPushed;
+		}
+		break;
+
 
 	case LongPush:
 		// calibrate
 		ledSetBlinking(TIMEOUT_5s, BUTTON_TIME_1s, 0.5);
 		Serial.println("Blinking initiated");
-
+		if(!bButtonPushed)
+		{
+			nyomogomb=NotPushed;
+		}
+		break;
 
 		//why
 	}//end of switch
@@ -285,12 +299,13 @@ bool inline zonetrig(int zone_border_cm)
 {
 	if(cm1<iSensor1OffsetValue && cm1<zone_border_cm)
 	{
-		//Serial.println("sensor 1 triggers");
+		//Serial.print("sensor 1 triggers z1 with cm of ");Serial.println(cm1);
 		return true;
 	}
-	/*
+
 	if(cm2<iSensor2OffsetValue && cm2<zone_border_cm)
 	{
+		//Serial.print("sensor 2 triggers z1:");Serial.println(cm2);
 		return true;
 	}
 
@@ -298,7 +313,7 @@ bool inline zonetrig(int zone_border_cm)
 	{
 		return true;
 	}
-
+/*
 	if(cm4<iSensor4OffsetValue && cm4<zone_border_cm)
 	{
 		return true;
@@ -336,7 +351,7 @@ void allzonetrigger()
 
 	case timeouting :
 		//ido eltelt:
-		if(k>iZone1TimeoutStart+TIMEOUT_1s)
+		if(k>iZone1TimeoutStart+TIMEOUT_5s)
 		{
 			digitalWrite(0,13);//led
 			zone1=idle;
@@ -347,14 +362,14 @@ void allzonetrigger()
 		}
 		break;
 	}//end of switch
-	/*
+
 	switch (zone2)
 		{
 		case idle :
 			if(zonetrig(iZone2Radius))
 			{
 				zone2=triggered;
-				//Serial.println("now triggered from idle"); - meghivodik ez is
+				Serial.println("z2 trig");//
 			}
 			break;
 
@@ -363,7 +378,7 @@ void allzonetrigger()
 			if(!zonetrig(iZone2Radius))
 			{
 				zone2=timeouting;
-				iZone1TimeoutStart=k;
+				iZone2TimeoutStart=k;
 				//Serial.println("now timeout started"); - eljut ide
 
 			}
@@ -371,7 +386,7 @@ void allzonetrigger()
 
 		case timeouting :
 			//ido eltelt:
-			if(k>iZone2TimeoutStart+TIMEOUT_1s)
+			if(k>iZone2TimeoutStart+TIMEOUT_10s)
 			{
 				digitalWrite(0,13);//led
 				zone2=idle;
@@ -382,8 +397,8 @@ void allzonetrigger()
 			}
 			break;
 		}//end of switch
-*/
-	colorBlack=!((zone1==idle)&&(zone2==idle)); //NOT(all idle)
+
+	colorBlack=(zone1==idle); //NOT(all idle)
 
 	//if zone1 triggered ---> intensity big
 	//if zone2 triggered ---> int med
@@ -398,11 +413,17 @@ void allzonetrigger()
  */
 inline void initialCalibrate()
 {
-	delay(10000);	//menekulj!!
+	delay(10000);	//menekulj!! not working
 
 	iSensor1OffsetValue=sensor1.distanceRead();
+  	delay(1000);
+
 	iSensor2OffsetValue=sensor2.distanceRead();
+  	delay(1000);
+
 	iSensor3OffsetValue=sensor3.distanceRead();
+  	delay(1000);
+
 	iSensor4OffsetValue=sensor4.distanceRead();
 }
 
@@ -473,13 +494,18 @@ void setup()
 		TCCR2B = _BV(CS20);
 		// OCR2B = 125; //R
 		//OCR0A = 50;  //B   //compare values
-//OCR0B = 100; //G
+		//OCR0B = 100; //G
   /*
    * calibration of sensor viewranges
    *
    */
+	Timer1.initialize(period);
+	delay(100);
+	Timer1.attachInterrupt(timingISR);
+
+
 	ledSetBlinking(TIMEOUT_5s, BUTTON_TIME_1s, 0.5);
-	initialCalibrate();
+	//initialCalibrate();
 	Serial.println("Calibrated with:");
 	Serial.print(iSensor1OffsetValue);Serial.print("\t");
 	Serial.print(iSensor2OffsetValue);Serial.print("\t");
@@ -487,26 +513,30 @@ void setup()
 	Serial.println(iSensor4OffsetValue);
 	ledSetBlinking(TIMEOUT_5s, BUTTON_TIME_2s, 0.1);
 
-	Timer1.initialize(period);
-	delay(100);
-	Timer1.attachInterrupt(timingISR);
+
 
 }
 
 void loop()
 {
-  if (usensor)
-  {
-   usensor = false;
-   sensor();
-  }
+	if (usensor)
+	  {
+	   usensor = false;
+	   sensor();
+	  }
+	if (ubutton)
+	  {
+	   ubutton = false;
+	   buttonRead();
+	  }
 
   if (usend)
   {
     usend = false;
-	Serial.print("zone1: ");
-	Serial.print(zone1==idle);Serial.print("\t");
-	Serial.print("measured: ");
+	Serial.print("zone1: ");Serial.print(zone1);
+	Serial.print("\t zone2: ");Serial.print(zone2);
+	Serial.print("\t colorNo: ");Serial.print(x);
+	Serial.print("\t \t measured: ");
 	Serial.print(cm1);Serial.print("\t");
 	Serial.print(cm2);Serial.print("\t");
 	Serial.print(cm3);Serial.print("\t");

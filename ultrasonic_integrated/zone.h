@@ -15,9 +15,9 @@
 //period=50.000 => 1s 20inc
 //1s 1.000.000us -> 1.000.000/period=1s
 #define TIMEOUT_1s 			1000000/period
-#define TIMEOUT_5s 			5*TIMEOUT_1s
-#define TIMEOUT_10s 		10*TIMEOUT_1s
-#define TIMEOUT_20s 		20*TIMEOUT_1s
+#define TIMEOUT_5s 			5000000/period
+#define TIMEOUT_10s 		10000000/period
+#define TIMEOUT_20s 		20000000/period
 
 
 

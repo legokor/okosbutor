@@ -9,15 +9,14 @@
 
 /* Pins: */
 
-#define trig1	9
-#define trig2	9
-#define trig3	9
-#define trig4	9
-#define echo1	2
-#define echo2	4
-#define echo3	7
-#define echo4	8
-#define signPin	3
+#define trig1	17	//A3
+#define trig2	17
+#define trig3	17
+#define trig4	17
+#define echo1	10	//D10
+#define echo2	14	//A0
+#define echo3	15	//A1
+#define echo4	16	//A2
 
 //////////////////////////////////////////////////////////
 /*					For calibrating:			 		*/

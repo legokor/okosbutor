@@ -11,7 +11,8 @@ Ultrasonic sensor1(2, 4, 50000UL); Ultrasonic sensor2(trig2, echo2, 50000UL); Ul
 int cm1=0,cm2=0,cm3=0,cm4=0;
 //mp3
 DFRobotDFPlayerMini myDFPlayer;
-SoftwareSerial mySoftwareSerial(10, 11);
+							//  rx tx
+SoftwareSerial mySoftwareSerial(7, 4);
 
 
 void timingISR(void)
@@ -22,19 +23,26 @@ void timingISR(void)
   uzone=true;
   uled = true;
 
-  if (!(iISR % 10))		//500ms
-  {
-    usend = true;
-  }
+  if (!(iISR % TIMEOUT_1s))
+    {
+  	  usend=true;
+  		Serial.println("vazze");
 
-  if (!(iISR % 100))
+    }
+  if (!(iISR % 40))		//500ms
+    {
+  	  usend=true;
+  		Serial.println("vazze2mp");
+
+    }
+
+  if (!(iISR % BUTTON_TIME_100ms))
   {
 	ubutton = true;
-    //usound = true;
   }
-  if (!(iISR % 2048))
+  if (!(iISR % TIMEOUT_20s))
   {
-	  //ritka dolgok, pl calibration
+		Serial.println("20s elapsed");
   }
 }
 
@@ -50,7 +58,6 @@ void buttonRead()
 	switch (nyomogomb)
 	{
 	case NotPushed:
-		buttonCounter=k;
 		if(bButtonPushed)
 		{
 			pushStartedAt=k;
@@ -81,7 +88,7 @@ void buttonRead()
 			nyomogomb=PushedAgain;
 			Serial.println("pushed again");
 		}
-		else if(k>(pushStartedAt+BUTTON_TIME_1s))
+		else if(k>(pushReleasedAt+BUTTON_TIME_1s))
 		{
 			nyomogomb=ShortPush;
 			Serial.println("now pushed 1s long");
@@ -99,9 +106,9 @@ void buttonRead()
 		//egyik funkcio
 
 	case LongPush:
-		//wait 10s and calibrate
-
-
+		// calibrate
+		ledSetBlinking(TIMEOUT_5s, BUTTON_TIME_1s, 0.5);
+		Serial.println("Blinking initiated");
 
 
 		//why
@@ -116,9 +123,7 @@ void buttonRead()
  */
 /////////////////////////////////////    LED FADING    ///////////////////////////////////////
 //
-//    INPUT variables:  increaseRate
-//                        - adc alapjan gyorsabban novel, a regi conceptbeli timert valtja ki
-//                      colorBlack
+//    INPUT variables:  colorBlack - set by sensor reader: most a zona fogja megadni
 //                        - shows dark final state
 //                      colorPalette
 //   GLOBAL constants:  rgb[3][7][3]
@@ -129,40 +134,84 @@ void buttonRead()
 //                        dR,  dG,  dB
 //
 
+
   void led(void){               //may increase an int to perform other tasks
-  dR=(0<(finR-curR))?(1):(-1);  // fol vagy le fele kelll valtozni
-  if(0 == (finR-curR)){dR=0;}
-  	  	  //dR=(0==(finR-curR))?(0):(dR); // elerte a celt
+	  if(ledstrip!=Blinking)
+	  {
+		  dR=(0<(finR-curR))?(1):(-1);  // fol vagy le fele kell valtozni
+		  if(0 == (finR-curR)){dR=0;}
+			  //dR=(0==(finR-curR))?(0):(dR); // elerte a celt
 
-  dG=(0<(finG-curG))?(1):(-1);
-  if(0 == (finG-curG)){dG=0;}
-  	  	  //dG=(0==(finG-curG))?(0):(dG);
+		  dG=(0<(finG-curG))?(1):(-1);
+		  if(0 == (finG-curG)){dG=0;}
+				  //dG=(0==(finG-curG))?(0):(dG);
 
-  dB=(0<(finB-curB))?(1):(-1);
-  if(0 == (finB-curB)){dB=0;}
-  	  	  //dB=(0==(finB-curB))?(0):(dB);
+		  dB=(0<(finB-curB))?(1):(-1);
+		  if(0 == (finB-curB)){dB=0;}
+				  //dB=(0==(finB-curB))?(0):(dB);
 
 
-  if(dR || dG || dB){         //ha valaminek változnia kell
-    curR=(curR+dR);  //kérdés(ha számolás és túlcsordulás iránya különbözõ)akkor(lépj)ellenben(lassan közelít)
-    curG=(curG+dG);  //ha increaseRate=1 akkor a lassu lépés nem csordulhat túl, mert a dB érték fentebb 0-ba áll
-    curB=(curB+dB);
-
-  }else{                      		//ha nem kell valtozni akkor johet az uj cel
-    if(colorBlack){                 //ha nincs senki kozelben sotetbe valt
-      finR = 0;
-      finG = 0;
-      finB = 0;
-    }else{                          	//ha vannak a kozelben
-      x=(x<6)?(x+1):(0);				//x ertek cirkulalas 0->6
-      finR = rgb[colorPalette][x][0];	//a megfelelo palettából az x-edik szín r,g,b azaz 0,1,2 byte-ok
-      finG = rgb[colorPalette][x][1];
-      finB = rgb[colorPalette][x][2];
-      //valami skalafaktor lehet zona fuggvenyeben>>>> a zona valt ColorPalette-t
-    }
-  }
+		  if(dR || dG || dB){         //ha valaminek változnia kell
+			curR=(curR+dR);  //kérdés(ha számolás és túlcsordulás iránya különbözõ)akkor(lépj)ellenben(lassan közelít)
+			curG=(curG+dG);  //ha increaseRate=1 akkor a lassu lépés nem csordulhat túl, mert a dB érték fentebb 0-ba áll
+			curB=(curB+dB);
+		  }
+		  else{ //ha nem kell valtozni akkor johet az uj cel
+			  if(colorBlack){                 //ha nincs senki kozelben sotetbe valt
+				  finR = 0;
+				  finG = 0;
+				  finB = 0;
+			  }
+			  else{                          	//ha vannak a kozelben
+				  x=(x<6)?(x+1):(0);				//x ertek cirkulalas 0->6
+				  finR = rgb[colorPalette][x][0];	//a megfelelo palettából az x-edik szín r,g,b azaz 0,1,2 byte-ok
+				  finG = rgb[colorPalette][x][1];
+				  finB = rgb[colorPalette][x][2];
+				  //valami skalafaktor lehet zona fuggvenyeben>>>> a zona valt ColorPalette-t
+			  }
+		  }
+	  }
+	  else
+	  {
+		  ledBlinking();
+	  }
 }
 
+  void ledSetBlinking(int duration_k_increments, int period_k_increments, int fill=0.5)
+  {
+	  ledstrip=Blinking;
+	  iBlinkStart=k;
+	  iBlinkPeriodStart=k;
+	  iBlinkDuration=duration_k_increments;
+	  iBlinkPeriod=period_k_increments;
+	  iBlinkFill=fill;
+
+  }
+  void ledBlinking()
+  {
+	  if(Blinking==ledstrip)											// villogni fog
+	  {
+		  if(k<(iBlinkStart+iBlinkDuration))							// meddig?
+		  {
+			  if(k<(iBlinkPeriodStart+iBlinkPeriod))					// milyen periodusidovel?
+			  {
+				  if(k<(iBlinkPeriodStart+iBlinkPeriod*iBlinkFill))		// milyen kitoltesi tenyezo?
+				  {//red - TODO: to be corrected to any color
+					  curR=0;
+					  curB=255;
+					  curG=255;
+				  }//vilagitas vege
+				  else
+				  {
+					  curR=0;
+					  curB=255;
+					  curG=255;
+				  }
+			  }// 1 periodus vege
+		  }// teljes villogasi ido vege
+	  ledstrip=Normal; //mar nincs villogasi modban
+	  }
+  }
 
 
 /*
@@ -277,6 +326,11 @@ void allzonetrigger()
 		break;
 	}//end of switch
 
+	colorBlack=!((zone1==idle)&&(zone2==idle)); //NOT(all idle)
+
+	//if zone1 triggered ---> intensity big
+	//if zone2 triggered ---> int med
+
 }
 
 
@@ -341,19 +395,46 @@ void setup()
   Serial.begin(9600);
   Serial.println("serial enabled");
 
+  	pinMode(redPin, OUTPUT);
+  	pinMode(grnPin, OUTPUT);
+	pinMode(bluPin, OUTPUT);
+	//pinMode(chargeGreen, OUTPUT);
+	//pinMode(chargeRed, OUTPUT);
+	pinMode(mutePin, OUTPUT);
+
+    digitalWrite(mutePin, 1);
+    //digitalWrite(chargeGreen, 1);
+    //digitalWrite(chargeRed, 1);
+
+    //regisztermagic
+		TCCR0A = _BV(COM0A1) | _BV(COM0B1) | _BV(WGM00);
+		//WGM0[2:0]=001b PWM, Phase Correct TOP=0xFF update of OCR0x at TOP and TOV flag Set on BOTTOM(BOTTOM=0x00)
+		//COM0A[1:0]=10b Clear OC0A on Compare Match when up-counting. Set OC0A on Compare Match when down-counting.
+		//com0B[1:0]=10b Clear OC0B on Compare Match when up-counting. Set OC0B on Compare Match when down-counting.
+		TCCR0B = _BV(CS00);
+		//CS0[2:0]=001b clk i/o / 4^cs0=
+		TCCR2A = _BV(COM2B1) | _BV(WGM00);
+		TCCR2B = _BV(CS20);
+		// OCR2B = 125; //R
+		//OCR0A = 50;  //B   //compare values
+//OCR0B = 100; //G
   /*
    * calibration of sensor viewranges
    *
    */
-  initialCalibrate();
+	ledSetBlinking(TIMEOUT_5s, BUTTON_TIME_1s, 0.5);
+	initialCalibrate();
+	Serial.println("Calibrated with:");
+	Serial.print(iSensor1OffsetValue);Serial.print("\t");
+	Serial.print(iSensor2OffsetValue);Serial.print("\t");
+	Serial.print(iSensor3OffsetValue);Serial.print("\t");
+	Serial.println(iSensor4OffsetValue);
+	ledSetBlinking(TIMEOUT_5s, BUTTON_TIME_2s, 0.1);
 
+	Timer1.initialize(period);
+	delay(100);
+	Timer1.attachInterrupt(timingISR);
 
-  Timer1.initialize(period);
-  delay(100);
-  Timer1.attachInterrupt(timingISR);
-
-  pinMode(signPin,OUTPUT);
-//  digitalWrite(signPin,1);
 }
 
 void loop()
@@ -368,7 +449,6 @@ void loop()
   {
     usend = false;
 	Serial.print("zone1: ");
-	Serial.print(zone1);Serial.print("\t");
 	Serial.print(k);Serial.print("\t");
 	Serial.print("measured: ");
 		Serial.print(cm1);Serial.print("\t");

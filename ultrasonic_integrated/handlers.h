@@ -30,6 +30,8 @@ void allzonetrigger();
 bool inline zonetrig(int sensor_cm, int zone_border_cm);
 void sensor();
 void led();
+void ledSetBlinking(int duration_k_increments, int period_k_increments, int fill=0.5);
+void ledBlinking();
 void buttonRead();
 
 //void send();

@@ -10,6 +10,9 @@ bool colorBlack = false;
 #define grnPin  5  //g
 #define bluPin  6  //b
 
+#define chargeGreen 19		//A5
+#define chargeRed 	18		//A4
+
 #define curR OCR2B
 #define curG OCR0B
 #define curB OCR0A
@@ -31,6 +34,15 @@ byte rgb[3][7][3] = {{{ 0, 0, 0 },       { 255, 255, 255 }, { 255, 0, 0 },     {
                      {{255, 255, 0},     {255, 255, 0},     {250, 255, 0},     {250, 127, 0},     {250, 0, 0},       {250, 0, 0},       {255, 0, 0}       }
                     };
 
+typedef enum  {Off=0, Normal,Blinking} ledStateMachine;
+ledStateMachine ledstrip=0;
 int colorNum=0;
+
+bool bBlinkingModeActive=false;
+int iBlinkPeriod=0;
+int iBlinkPeriodStart=0;
+int iBlinkDuration=0;
+int iBlinkStart=0;
+int iBlinkFill=50;
 
 #endif

@@ -9,7 +9,7 @@
 #define mutePin 13
 
 DFRobotDFPlayerMini myDFPlayer;
-SoftwareSerial mySoftwareSerial(10, 11); // RX, TX
+SoftwareSerial mySoftwareSerial(7, 4); // RX, TX 7 4  10  11
 
 void setup() {
    pinMode(mutePin, OUTPUT);

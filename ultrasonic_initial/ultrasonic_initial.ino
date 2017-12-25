@@ -12,9 +12,8 @@ Ultrasonic sensor1(trig1, echo1, 50000UL); Ultrasonic sensor2(trig2, echo2, 5000
 int cm1=0,cm2=0,cm3=0,cm4=0;
 //mp3
 DFRobotDFPlayerMini myDFPlayer;
-							//  rx 11  tx 9
-SoftwareSerial mySoftwareSerial(11, 10);
-
+SoftwareSerial mySoftwareSerial(7, 4); // RX, TX 7 4
+//alternative: 10  11
 void timingISR(void)
 {
   iISR++;
@@ -48,39 +47,6 @@ void timingISR(void)
 
 
 }
-
-/*
-void timingISR(void)
-{
-  iISR++;
-  k++;				//very long count
-  usensor = true;
-  uzone=true;
-  //uled = true;
-
-  if (!(iISR % 10))
-    {
-  	usend=true;
-  	Serial.println("vazze");
-
-    }
-  if (!(iISR % 40))		//500ms
-    {
-  	  usend=true;
-  		Serial.println("vazze2mp");
-
-    }
-
-  if (!(iISR % BUTTON_TIME_100ms))
-  {
-	ubutton = true;
-  }
-  if (!(iISR % TIMEOUT_20s))
-  {
-		Serial.println("20s elapsed");
-  }
-}
-*/
 
 
 /*

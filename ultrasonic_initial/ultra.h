@@ -9,10 +9,10 @@
 
 /* Pins: */
 
-#define trig1	17	//A3
-#define trig2	17
-#define trig3	17
-#define trig4	17
+#define trig1	19	//A5
+#define trig2	19
+#define trig3	19
+#define trig4	19
 #define echo1	10	//D10
 #define echo2	14	//A0
 #define echo3	15	//A1

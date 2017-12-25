@@ -1,3 +1,4 @@
+#include "battery.h"
 #include "button.h"
 #include "handlers.h"
 #include "led.h"
@@ -11,30 +12,41 @@ Ultrasonic sensor1(trig1, echo1, 50000UL); Ultrasonic sensor2(trig2, echo2, 5000
 int cm1=0,cm2=0,cm3=0,cm4=0;
 //mp3
 DFRobotDFPlayerMini myDFPlayer;
-							//  rx tx
-SoftwareSerial mySoftwareSerial(7, 4);
+							//  rx 11  tx 9
+SoftwareSerial mySoftwareSerial(11, 10);
 
 void timingISR(void)
 {
   iISR++;
   k++;				//very long count
-  usensor = true;
-  uzone=true;
-  uled = true;
+
+  if(akku!=VoltageCriticalLow)
+  {
+	  uled = true;
+	  //uzone=true;
+	  //usound=true;
+  }
 
   if (!(iISR % 2)) //100ms
     {
   	ubutton = true;
     }
 
-  if (!(iISR % 20))		//500ms
+  if (!(iISR % TIMEOUT_1s))
   {
     usend = true;
+  }
+  if (!(iISR % TIMEOUT_5s))
+  {
+    ubattery = true;
   }
   if (!(iISR % 2048))
   {
 	  //ritka dolgok, pl calibration
   }
+
+
+
 }
 
 /*
@@ -74,6 +86,9 @@ void timingISR(void)
 /*
  * 1st section:
  * 		BUTTON HANDLING
+ * 		BATTERY MONITORING
+ *
+ * 		a.k.a. user interfaces (a kezelopanelen talalhato dolgok)
  */
 void buttonRead()
 {
@@ -129,6 +144,8 @@ void buttonRead()
 		break;
 	case PushedAgain:
 		//egyik funkcio
+		myDFPlayer.randomAll(); //maybe suitable
+
 		if(!bButtonPushed)
 		{
 			nyomogomb=NotPushed;
@@ -151,6 +168,54 @@ void buttonRead()
 
 }
 
+void batteryMonitor()
+{
+
+	batteryAnalog = analogRead(batteryAnalogPin); 	//updating
+	batteryVoltage=map(batteryAnalog, 0, 1024, 0, 2190);
+	//Mapping: 1500 means 15V. (not using double^^)
+	if(batteryVoltage<110)
+	{
+		akku=VoltageBelow11V;
+	}
+	else if(batteryVoltage<120)
+	{
+		akku=VoltageBelow12V;
+	}
+	else if(batteryVoltage>=120)
+	{
+		akku=VoltageNormal;
+	}
+	else
+	{
+		akku=VoltageCriticalLow;
+	}
+
+	switch(akku)
+	{
+	case VoltageCriticalLow:
+	  if (!(iISR % TIMEOUT_500ms))
+		{
+		  twoleds=RedBlinking;
+		  Serial.println("Voltage Critical!");
+		}
+	  break;
+	case VoltageNormal:
+	  //if (!(iISR % TIMEOUT_5s))
+		{
+		  twoleds=GreenBlink;
+		  Serial.print("Voltage Normal\t");  Serial.println(batteryVoltage);
+		  break;
+		}
+	default:
+		//dummy:
+		Serial.println("Voltage tested");
+	}
+
+
+
+
+}
 /*
  * 2nd section:
  * 		LED HANDLING
@@ -169,22 +234,29 @@ void buttonRead()
 //                        dR,  dG,  dB
 //
 
+inline void calcColorDifference()
+{
+	dR=(0<(finR-curR))?(1):(-1);  // fol vagy le fele kell valtozni
+	if(0 == (finR-curR)){dR=0;}
+	  //dR=(0==(finR-curR))?(0):(dR); // elerte a celt
+
+	dG=(0<(finG-curG))?(1):(-1);
+	if(0 == (finG-curG)){dG=0;}
+		  //dG=(0==(finG-curG))?(0):(dG);
+
+	dB=(0<(finB-curB))?(1):(-1);
+	if(0 == (finB-curB)){dB=0;}
+		  //dB=(0==(finB-curB))?(0):(dB);
+
+
+}
 
   void led(void){               //may increase an int to perform other tasks
-	  if(ledstrip!=Blinking)
+	  switch(ledstrip)
 	  {
-		  dR=(0<(finR-curR))?(1):(-1);  // fol vagy le fele kell valtozni
-		  if(0 == (finR-curR)){dR=0;}
-			  //dR=(0==(finR-curR))?(0):(dR); // elerte a celt
+	  case Automatic:
 
-		  dG=(0<(finG-curG))?(1):(-1);
-		  if(0 == (finG-curG)){dG=0;}
-				  //dG=(0==(finG-curG))?(0):(dG);
-
-		  dB=(0<(finB-curB))?(1):(-1);
-		  if(0 == (finB-curB)){dB=0;}
-				  //dB=(0==(finB-curB))?(0):(dB);
-
+		  calcColorDifference();
 
 		  if(dR || dG || dB){         //ha valaminek változnia kell
 			curR=(curR+dR);  //kérdés(ha számolás és túlcsordulás iránya különbözõ)akkor(lépj)ellenben(lassan közelít)
@@ -192,12 +264,14 @@ void buttonRead()
 			curB=(curB+dB);
 		  }
 		  else{ //ha nem kell valtozni akkor johet az uj cel
-			  if(colorBlack){                 //ha nincs senki kozelben sotetbe valt
+			  if(colorBlack)
+			  {                 //ha nincs senki kozelben sotetbe valt
 				  finR = 0;
 				  finG = 0;
 				  finB = 0;
 			  }
-			  else{                          	//ha vannak a kozelben
+			  else
+			  {                          	//ha vannak a kozelben
 				  x=(x<6)?(x+1):(0);				//x ertek cirkulalas 0->6
 				  finR = rgb[colorPalette][x][0];	//a megfelelo palettából az x-edik szín r,g,b azaz 0,1,2 byte-ok
 				  finG = rgb[colorPalette][x][1];
@@ -205,11 +279,24 @@ void buttonRead()
 				  //valami skalafaktor lehet zona fuggvenyeben>>>> a zona valt ColorPalette-t
 			  }
 		  }
-	  }
-	  else
+	  break;
+	  //case automatic
+
+	 // case Manual:
+		  //TODO: mukodesi mod megadasa
+//		  finR = rgb[colorPalette][x][0];	//a megfelelo palettából az x-edik szín r,g,b azaz 0,1,2 byte-ok
+//		  finG = rgb[colorPalette][x][1];
+//		  finB = rgb[colorPalette][x][2];
+
+	  default:
 	  {
 		  ledBlinking();
+		  break;
 	  }
+	  case Off:
+	  		  Serial.println("off");
+	  		  break;
+	  }//end switch
 }
 
   void ledSetBlinking(int duration_k_increments, int period_k_increments, int fill=0.5)
@@ -226,11 +313,11 @@ void buttonRead()
   {
 	  if(Blinking==ledstrip)											// villogni fog
 	  {
-		  if(k<(iBlinkStart+iBlinkDuration))							// meddig?
+		  if(k>(iBlinkStart+iBlinkDuration))							// meddig?
 		  {
-			  if(k<(iBlinkPeriodStart+iBlinkPeriod))					// milyen periodusidovel?
+			  if(k>(iBlinkPeriodStart+iBlinkPeriod))					// milyen periodusidovel?
 			  {
-				  if(k<(iBlinkPeriodStart+iBlinkPeriod*iBlinkFill))		// milyen kitoltesi tenyezo?
+				  if(k>(iBlinkPeriodStart+iBlinkPeriod*iBlinkFill))		// milyen kitoltesi tenyezo?
 				  {//red - TODO: to be corrected to any color
 					  curR=0;
 					  curB=255;
@@ -238,11 +325,15 @@ void buttonRead()
 				  }//vilagitas vege
 				  else
 				  {
-					  curR=0;
+					  curR=255;
 					  curB=255;
 					  curG=255;
 				  }
 			  }// 1 periodus vege
+			  else
+			  {
+				  iBlinkPeriodStart=k;
+			  }
 		  }// teljes villogasi ido vege
 	  ledstrip=Normal; //mar nincs villogasi modban
 	  }
@@ -340,6 +431,7 @@ void allzonetrigger()
 
 	case triggered:
 		digitalWrite(1,13);//led
+		//sound volume increase
 		if(!zonetrig(iZone1Radius))
 		{
 			zone1=timeouting;
@@ -355,12 +447,14 @@ void allzonetrigger()
 		{
 			digitalWrite(0,13);//led
 			zone1=idle;
+			//sound volume
 		}
 		else if(zonetrig(iZone1Radius))
 		{
 			zone1=triggered;
-		}
+			//for sound: triggeredAgain=k;		}
 		break;
+		}
 	}//end of switch
 
 	switch (zone2)
@@ -369,12 +463,17 @@ void allzonetrigger()
 			if(zonetrig(iZone2Radius))
 			{
 				zone2=triggered;
+				//just starts music from idle, not when triggered again
+				myDFPlayer.randomAll(); //maybe suitable
+
+				//color intensity handle
 				Serial.println("z2 trig");//
 			}
 			break;
 
 		case triggered:
 			digitalWrite(1,13);//led
+			//TODO: music volume handle
 			if(!zonetrig(iZone2Radius))
 			{
 				zone2=timeouting;
@@ -398,7 +497,10 @@ void allzonetrigger()
 			break;
 		}//end of switch
 
-	colorBlack=(zone1==idle); //NOT(all idle)
+	//zone3 must be implemented
+	colorBlack=(zone2==idle); 	//zone2 triggered: light goes on
+	digitalWrite(mutePin,(zone1==idle));		//zone1 triggered: sound goes on
+			//mutepin=1: muted. 0: unmuted
 
 	//if zone1 triggered ---> intensity big
 	//if zone2 triggered ---> int med
@@ -469,7 +571,7 @@ void setup()
    * 	- pin mode setup
    * 	- register magics
    */
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("serial enabled");
 
   	pinMode(redPin, OUTPUT);
@@ -503,6 +605,15 @@ void setup()
 	delay(100);
 	Timer1.attachInterrupt(timingISR);
 
+	//Serial.begin(9600);
+	Serial.println("ena mute");
+	mySoftwareSerial.begin(9600); // maybe higher baud leads to less noise?!
+	Serial.println(F("Initializing, DFPlayer"));
+	while (!myDFPlayer.begin(mySoftwareSerial))
+	{ //Use softwareSerial to communicate with mp3.
+		Serial.println(F("Unable to connect"));
+		delay(1000);
+	}
 
 	ledSetBlinking(TIMEOUT_5s, BUTTON_TIME_1s, 0.5);
 	//initialCalibrate();
@@ -524,11 +635,21 @@ void loop()
 	   usensor = false;
 	   sensor();
 	  }
+	if (ubattery)
+	  {
+	   ubattery = false;
+	   batteryMonitor();
+	  }
 	if (ubutton)
 	  {
 	   ubutton = false;
 	   buttonRead();
 	  }
+	if (uled)
+		  {
+		   uled = false;
+		   led();
+		  }
 
   if (usend)
   {

@@ -11,7 +11,7 @@
  C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\cores\arduino/Arduino.h \
  C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\variants\eightanaloginputs/pins_arduino.h \
  C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\variants\eightanaloginputs/../standard/pins_arduino.h \
- ..\button.h ..\handlers.h ..\led.h ..\main.h \
+ ..\battery.h ..\button.h ..\handlers.h ..\led.h ..\main.h \
  C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\libraries\SoftwareSerial\src/SoftwareSerial.h \
  C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\cores\arduino/Stream.h \
  C:\sloeber\arduinoPlugin\libraries\DFRobotDFPlayerMini\1.0.1/DFRobotDFPlayerMini.h \
@@ -43,6 +43,8 @@ C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\cores\arduino/Ardu
 C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\variants\eightanaloginputs/pins_arduino.h:
 
 C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\variants\eightanaloginputs/../standard/pins_arduino.h:
+
+..\battery.h:
 
 ..\button.h:
 

@@ -24,46 +24,20 @@
 #include "Arduino.h"
 #include "global_time.h"
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-///ADC OUTPUTS
-bool sensorstate = 0;
 bool nextSound=false;
-volatile word max_adc;
 
-
-//test
-//#define echo1	4
-//#define trig1	2
-
+//bool sensorstate = 0;
+//volatile word max_adc;
+//
 
 //// Output variables /////
-bool prevsensorstate = 0;
-bool button=0;
-bool prevButton=0;
+//bool prevsensorstate = 0;
+//bool button=0;
+//bool prevButton=0;
 
 
 //for color/music changes
-int buttonTimer = 0;
+//int buttonTimer = 0;
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -72,7 +46,7 @@ int buttonTimer = 0;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define mutePin 13
+#define mutePin 8
 
 #ifdef HALK
 	#define SOUND_MAX_VOL_ZONE1 7

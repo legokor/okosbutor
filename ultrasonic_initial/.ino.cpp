@@ -2,9 +2,10 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2017-12-26 11:55:41
+//This file has been generated on 2017-12-26 18:46:41
 
 #include "Arduino.h"
+#include "battery.h"
 #include "button.h"
 #include "handlers.h"
 #include "led.h"
@@ -13,6 +14,7 @@
 #include "zone.h"
 void timingISR(void) ;
 void buttonRead() ;
+void batteryMonitor() ;
 void led(void);
 void ledBlinking()   ;
 void sensor()   ;

@@ -15,24 +15,30 @@ long int k=0; //lasts as long as 29h
 #define inEverySecondCycle 2
 #define inEveryTenthCycle 10
 
-bool uzone=false;
-bool usensor=false;
-bool usend=false;
-bool uled=false;
-bool usound=false;
+bool ubattery = false;
 bool ubutton=false;
+bool uled=false;
+bool usend=false;
+bool usensor=false;
+bool usound=false;
+bool uzone=false;
+
 
 
 /*
  * Handlers for the above
  */
-void allzonetrigger();
-bool inline zonetrig(int sensor_cm, int zone_border_cm);
+void batteryMonitor();
+void buttonRead();
+
 void sensor();
 void led();
 void ledSetBlinking(int duration_k_increments, int period_k_increments, int fill=0.5);
 void ledBlinking();
-void buttonRead();
+
+
+void allzonetrigger();
+bool inline zonetrig(int sensor_cm, int zone_border_cm);
 
 //void send();
 

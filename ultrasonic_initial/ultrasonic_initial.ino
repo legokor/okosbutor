@@ -1,3 +1,4 @@
+#include "battery.h"
 #include "button.h"
 #include "handlers.h"
 #include "led.h"
@@ -150,6 +151,59 @@ void buttonRead()
 	}//end of switch
 
 }
+
+
+
+void batteryMonitor()
+{
+
+	batteryAnalog = analogRead(batteryAnalogPin); 	//updating
+	batteryVoltage=map(batteryAnalog, 0, 1024, 0, 2190);
+	//Mapping: 1500 means 15V. (not using double^^)
+	if(batteryVoltage<110)
+	{
+		akku=VoltageBelow11V;
+	}
+	else if(batteryVoltage<120)
+	{
+		akku=VoltageBelow12V;
+	}
+	else if(batteryVoltage>=120)
+	{
+		akku=VoltageNormal;
+	}
+	else
+	{
+		akku=VoltageCriticalLow;
+	}
+
+	switch(akku)
+	{
+	case VoltageCriticalLow:
+	  if (!(iISR % TIMEOUT_500ms))
+		{
+		  twoleds=RedBlinking;
+		  Serial.println("Voltage Critical!");
+		}
+	  break;
+	case VoltageNormal:
+	  //if (!(iISR % TIMEOUT_5s))
+		{
+		  twoleds=GreenBlink;
+		  Serial.print("Voltage Normal\t");  Serial.println(batteryVoltage);
+		  break;
+		}
+	default:
+		//dummy:
+		Serial.println("Voltage tested");
+
+	}
+}
+
+
+
+
+
 
 /*
  * 2nd section:
@@ -592,6 +646,11 @@ void loop()
 	   usensor = false;
 	   sensor();
 	  }
+	if (ubattery)
+		  {
+		   ubattery = false;
+		   batteryMonitor();
+		  }
 	if (ubutton)
 	  {
 	   ubutton = false;

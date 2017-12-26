@@ -22,6 +22,8 @@ bool usend=false;
 bool usensor=false;
 bool usound=false;
 bool uzone=false;
+bool ucalibrate=false;
+
 
 
 

@@ -29,9 +29,9 @@ byte x=0;
 byte increaseRate=1;
 int colorPalette=0;
 
-byte rgb[3][7][3] = {{{ 0, 0, 0 },       { 255, 255, 255 }, { 255, 0, 0 },     { 0, 255, 0 },     { 0, 0, 255 },    { 255, 255, 0 },    { 80, 80, 80 }    },
-                     {{0x8d, 0x6e, 0x63},{0xff, 0x57, 0x22},{0xff, 0x6f, 0x00},{0xcd, 0xdc, 0x39},{0x4c, 0xaf, 0x50},{0x00, 0x96, 0x88},{0x7e, 0x57, 0xc2}},
-                     {{255, 255, 0},     {255, 255, 0},     {250, 255, 0},     {250, 127, 0},     {250, 0, 0},       {250, 0, 0},       {255, 0, 0}       }
+byte rgb[3][7][3] = {{{ 0, 0, 255 },       	{ 255, 255, 255 }, 	{ 255, 0, 0 },     { 0, 255, 0 },		{ 0, 0, 255 },		{ 255, 255, 0 },	{ 80, 80, 80 }    },
+                     {{0x8d, 0x6e, 0x63},	{0xff, 0x57, 0x22},	{0xff, 0x6f, 0x00},{0xcd, 0xdc, 0x39},	{0x4c, 0xaf, 0x50},	{0x00, 0x96, 0x88},	{0x7e, 0x57, 0xc2}},
+                     {{0, 125, 0},     		{0, 125, 65},     	{125, 125, 0},     {125, 65, 0},     	{0, 65, 0},       	{0, 65, 125},    	{0, 0, 125}       }
                     };
 
 typedef enum  {Off=0, Normal, Automatic, Manual,Blinking} ledStateMachine;
@@ -39,11 +39,19 @@ ledStateMachine ledstrip=Off;
 int colorNum=0;
 
 bool bBlinkingModeActive=false;
+bool bColorSettled=false;
+
+#define iLedStepTime (TIMEOUT_100ms*2)
+#define iFinalColorStepTime (TIMEOUT_5s)
+
+
+int iColorSettledAt=0;
+int iColorSteppedAt=0;
 int iBlinkPeriod=0;
 int iBlinkPeriodStart=0;
 int iBlinkDuration=0;
 int iBlinkStart=0;
-int iBlinkFill=50;
+double iBlinkFill=0.5;
 
 typedef enum  {IndicatorsOff=0, GreenIsOn,GreenBlink,RedBlinking,BothAreOn} indicatorLedStateMachine;
 indicatorLedStateMachine twoleds=IndicatorsOff;

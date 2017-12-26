@@ -9,7 +9,7 @@
 
 //sensor
 Ultrasonic sensor1(trig1, echo1, 50000UL); Ultrasonic sensor2(trig2, echo2, 50000UL); Ultrasonic sensor3(trig3, echo3, 50000UL); Ultrasonic sensor4(trig4, echo4, 50000UL);
-int cm1=0,cm2=0,cm3=0,cm4=0;
+int cm1=400,cm2=400,cm3=400,cm4=400;
 //mp3
 DFRobotDFPlayerMini myDFPlayer;
 							//  rx tx
@@ -19,63 +19,92 @@ void timingISR(void)
 {
   iISR++;
   k++;				//very long count
-  usensor = true;
+  ubutton = true;
   uzone=true;
-  uled = true;
 
-  if (!(iISR % 2)) //100ms
-    {
-  	ubutton = true;
-    }
-
-  if (!(iISR % 20))		//500ms
+  if(akku!=VoltageCriticalLow)
   {
-    usend = true;
+	  uled = true;
+	  if (!(iISR % TIMEOUT_100ms))
+	  {
+		  usound = true;
+	  }
   }
-  if (!(iISR % 2048))
+
+  if (!(iISR % TIMEOUT_100ms))
   {
+	  ubutton = true;
+	  usensor = true;
+  }
+
+  if (!(iISR % TIMEOUT_100ms*2))
+  {
+	  usend = true;
+  }
+  if (!(iISR % TIMEOUT_10s))
+  {
+	  ubattery=true;
 	  //ritka dolgok, pl calibration
   }
-}
 
-/*
-void timingISR(void)
-{
-  iISR++;
-  k++;				//very long count
-  usensor = true;
-  uzone=true;
-  //uled = true;
-
-  if (!(iISR % 10))
-    {
-  	usend=true;
-  	Serial.println("vazze");
-
-    }
-  if (!(iISR % 40))		//500ms
-    {
-  	  usend=true;
-  		Serial.println("vazze2mp");
-
-    }
-
-  if (!(iISR % BUTTON_TIME_100ms))
+  if(k<TIMEOUT_10s && (nyomogomb==ShortPush))
   {
-	ubutton = true;
-  }
-  if (!(iISR % TIMEOUT_20s))
-  {
-		Serial.println("20s elapsed");
+	  ucalibrate=true;
+	  Serial.println("entering calibration");
   }
 }
-*/
 
 
 /*
  * 1st section:
  * 		BUTTON HANDLING
  */
+void batteryMonitor()
+{
+
+	batteryAnalog = analogRead(batteryAnalogPin); 	//updating
+	batteryVoltage=map(batteryAnalog, 0, 1024, 0, 2190);
+	//Mapping: 1500 means 15V. (not using double^^)
+	if(batteryVoltage<1100)
+	{
+		akku=VoltageBelow11V;
+	}
+	else if(batteryVoltage<1200)
+	{
+		akku=VoltageBelow12V;
+	}
+	else if(batteryVoltage>=1200)
+	{
+		akku=VoltageNormal;
+	}
+	else
+	{
+		akku=VoltageCriticalLow;
+	}
+
+	switch(akku)
+	{
+	case VoltageCriticalLow:
+	  if (!(iISR % TIMEOUT_500ms))
+		{
+		  twoleds=RedBlinking;
+		  Serial.println("Voltage Critical!");
+		}
+	  break;
+	case VoltageNormal:
+	  //if (!(iISR % TIMEOUT_5s))
+		{
+		  twoleds=GreenBlink;
+		  //Serial.print("Voltage Normal\t");  Serial.println(batteryVoltage);
+		  break;
+		}
+	default:
+		//dummy:
+		Serial.println("Voltage tested");
+
+	}
+}
+
 void buttonRead()
 {
 	buttonVal = analogRead(buttonAnalogPin); 	//updating
@@ -88,7 +117,7 @@ void buttonRead()
 		{
 			pushStartedAt=k;
 			nyomogomb=Pushed;
-			Serial.println("now pushed");
+				//Serial.println("now pushed");
 		}
 		break;
 	case Pushed:
@@ -97,7 +126,7 @@ void buttonRead()
 		{
 			pushReleasedAt=k;
 			nyomogomb=Released;
-			Serial.println("now released");
+				//Serial.println("now released");
 
 		}
 		else if(k>(pushStartedAt+BUTTON_TIME_5s))
@@ -112,12 +141,12 @@ void buttonRead()
 		{
 			pushedAgainAt=k;
 			nyomogomb=PushedAgain;
-			Serial.println("pushed again");
+			Serial.println("pushed twice");
 		}
 		else if(k>(pushReleasedAt+BUTTON_TIME_1s))
 		{
 			nyomogomb=ShortPush;
-			Serial.println("now pushed 1s long");
+			Serial.println("short push");
 		}
 		break;
 	case ShortPush:
@@ -153,63 +182,11 @@ void buttonRead()
 }
 
 
-
-void batteryMonitor()
-{
-
-	batteryAnalog = analogRead(batteryAnalogPin); 	//updating
-	batteryVoltage=map(batteryAnalog, 0, 1024, 0, 2190);
-	//Mapping: 1500 means 15V. (not using double^^)
-	if(batteryVoltage<110)
-	{
-		akku=VoltageBelow11V;
-	}
-	else if(batteryVoltage<120)
-	{
-		akku=VoltageBelow12V;
-	}
-	else if(batteryVoltage>=120)
-	{
-		akku=VoltageNormal;
-	}
-	else
-	{
-		akku=VoltageCriticalLow;
-	}
-
-	switch(akku)
-	{
-	case VoltageCriticalLow:
-	  if (!(iISR % TIMEOUT_500ms))
-		{
-		  twoleds=RedBlinking;
-		  Serial.println("Voltage Critical!");
-		}
-	  break;
-	case VoltageNormal:
-	  //if (!(iISR % TIMEOUT_5s))
-		{
-		  twoleds=GreenBlink;
-		  Serial.print("Voltage Normal\t");  Serial.println(batteryVoltage);
-		  break;
-		}
-	default:
-		//dummy:
-		Serial.println("Voltage tested");
-
-	}
-}
-
-
-
-
-
-
 /*
  * 2nd section:
  * 		LED HANDLING
  *
- */
+
 /////////////////////////////////////    LED FADING    ///////////////////////////////////////
 //
 //    INPUT variables:  colorBlack - set by sensor reader: most a zona fogja megadni
@@ -223,50 +200,95 @@ void batteryMonitor()
 //                        dR,  dG,  dB
 //
 
+*/
+inline void calcColorDifference()
+{
+	dR=(0<(finR-curR))?(1):(-1);  // fol vagy le fele kell valtozni
+	if(0 == (finR-curR)){dR=0;}
+	  //dR=(0==(finR-curR))?(0):(dR); // elerte a celt
 
-  void led(void){               //may increase an int to perform other tasks
-	  if(ledstrip!=Blinking)
-	  {
-		  dR=(0<(finR-curR))?(1):(-1);  // fol vagy le fele kell valtozni
-		  if(0 == (finR-curR)){dR=0;}
-			  //dR=(0==(finR-curR))?(0):(dR); // elerte a celt
+	dG=(0<(finG-curG))?(1):(-1);
+	if(0 == (finG-curG)){dG=0;}
+		  //dG=(0==(finG-curG))?(0):(dG);
 
-		  dG=(0<(finG-curG))?(1):(-1);
-		  if(0 == (finG-curG)){dG=0;}
-				  //dG=(0==(finG-curG))?(0):(dG);
+	dB=(0<(finB-curB))?(1):(-1);
+	if(0 == (finB-curB)){dB=0;}
+		  //dB=(0==(finB-curB))?(0):(dB);
 
-		  dB=(0<(finB-curB))?(1):(-1);
-		  if(0 == (finB-curB)){dB=0;}
-				  //dB=(0==(finB-curB))?(0):(dB);
-
-
-		  if(dR || dG || dB){         //ha valaminek változnia kell
-			curR=(curR+dR);  //kérdés(ha számolás és túlcsordulás iránya különbözõ)akkor(lépj)ellenben(lassan közelít)
-			curG=(curG+dG);  //ha increaseRate=1 akkor a lassu lépés nem csordulhat túl, mert a dB érték fentebb 0-ba áll
-			curB=(curB+dB);
-		  }
-		  else{ //ha nem kell valtozni akkor johet az uj cel
-			  if(colorBlack){                 //ha nincs senki kozelben sotetbe valt
-				  finR = 0;
-				  finG = 0;
-				  finB = 0;
-			  }
-			  else{                          	//ha vannak a kozelben
-				  x=(x<6)?(x+1):(0);				//x ertek cirkulalas 0->6
-				  finR = rgb[colorPalette][x][0];	//a megfelelo palettából az x-edik szín r,g,b azaz 0,1,2 byte-ok
-				  finG = rgb[colorPalette][x][1];
-				  finB = rgb[colorPalette][x][2];
-				  //valami skalafaktor lehet zona fuggvenyeben>>>> a zona valt ColorPalette-t
-			  }
-		  }
-	  }
-	  else
-	  {
-		  ledBlinking();
-	  }
+	 if(dR || dG || dB){
+		 //bColorSettled=false;
+	 }
+	 else
+	 {
+		 bColorSettled=true;
+		 iColorSettledAt=k;
+	 }
 }
 
-  void ledSetBlinking(int duration_k_increments, int period_k_increments, int fill=0.5)
+void led(void){               //may increase an int to perform other tasks
+  	  switch(ledstrip)
+  	  {
+  	  case Automatic:
+  		calcColorDifference();
+  		if(!bColorSettled)
+  		{
+  			if((k>(iColorSteppedAt+iLedStepTime)))
+  			{
+				curR=(curR+dR);
+				curG=(curG+dG);
+				curB=(curB+dB);
+				iColorSteppedAt=k;
+				Serial.println("increased");
+
+  			}
+  		}
+  		else
+  		{	//color settled
+  			if(colorBlack)
+  			  {                 //ha nincs senki kozelben sotetbe valt
+  				  finR = 0;
+  				  finG = 0;
+  				  finB = 0;
+  				  Serial.println("blek");
+
+  			  }
+  			  else //if(k>(iColorSettledAt+iFinalColorStepTime))
+  			  {
+  				  Serial.println("color chg");
+  				x=(x<6)?(x+1):(0);				//x ertek cirkulalas 0->6
+  				finR = rgb[colorPalette][x][0];	//a megfelelo palettából az x-edik szín r,g,b azaz 0,1,2 byte-ok
+  				finG = rgb[colorPalette][x][1];
+				finB = rgb[colorPalette][x][2];
+					//a zona valt ColorPalette-t
+	  			bColorSettled=false;
+  			  }
+  		  }
+  	  break;
+  	  //case automatic
+
+  	 // case Manual:
+  		  //TODO: mukodesi mod megadasa
+  //		  finR = rgb[colorPalette][x][0];	//a megfelelo palettából az x-edik szín r,g,b azaz 0,1,2 byte-ok
+  //		  finG = rgb[colorPalette][x][1];
+  //		  finB = rgb[colorPalette][x][2];
+
+  	  case Blinking:
+  		  ledBlinking();
+  		  break;
+  	  default:
+  	  {
+	  		  //Serial.println("default switch led");
+  		  break;
+  	  }
+  	  case Off:
+  		  //colorBlack=true;
+  	  		  //Serial.println("off");
+
+  		  break;
+  	  }//end switch
+  }
+
+void ledSetBlinking(int duration_k_increments, int period_k_increments, double fill)
   {
 	  ledstrip=Blinking;
 	  iBlinkStart=k;
@@ -276,7 +298,7 @@ void batteryMonitor()
 	  iBlinkFill=fill;
 
   }
-  void ledBlinking()
+void ledBlinking()
   {
 	  if(Blinking==ledstrip)											// villogni fog
 	  {
@@ -297,6 +319,7 @@ void batteryMonitor()
 					  curG=255;
 				  }
 			  }// 1 periodus vege
+			  iBlinkPeriodStart=k;
 		  }// teljes villogasi ido vege
 	  ledstrip=Normal; //mar nincs villogasi modban
 	  }
@@ -308,91 +331,100 @@ void batteryMonitor()
  * 		ULTRASONIC
  */
 
-  void sensor()
+void sensor()
   {
   //kb. 50-100ms-kent kellene meghivni
   //atlagolni nem kell, vagy csak keveset, mert nincs zavarjel
-
+	long int kdel=k;
+	byte dummy=0;
   	cm1=sensor1.distanceRead();
   	if(cm1==0)
   	{
   		cm1=401;
   	}
-  	delay(1000);
+  	/*while(k<kdel+TIMEOUT_100ms){
+  		dummy++;
+  	}*/
+
+  	delay(10);
+
   	cm2=sensor2.distanceRead();
   	if(cm2==0)
   		{
   			cm2=401;
   		}
-  	delay(1000);
+  	//Serial.println("do nothing");
+  	delay(20);
 
   	cm3=sensor3.distanceRead();
   	if(cm3==0)
   		{
   			cm3=401;
   		}
-  	delay(1000);
-
+/*
  	cm4=sensor4.distanceRead();
   	if(cm4==0)
   		{
   			cm4=401;
   		}
+  		*/
   }
+void sound()
+{
 
-  void sound()
-  {
-	  //felkapcsolas a zone triggernel
-	  //itt csak hangero
-	  switch (zone1)
-	  {
-	  case triggered:
-		  // iMinCm biztosan kisebb mint iZoneRad, hisz triggered.
-		  finVol = map(iMinCm, iZone1Radius, 1, 0, SOUND_MAX_VOL_ZONE1) + SOUND_OFFSET_VOL_ZONE1;
-		  break;
+  //felkapcsolas a zone triggernel
+  //itt csak hangero
+	switch (zone1)
+	{
+	case triggered:
+		// iMinCm biztosan kisebb mint iZoneRad, hisz triggered.
+		finVol = map(iMinCm, iZone1Radius, 1, 0, SOUND_MAX_VOL_ZONE1) + SOUND_OFFSET_VOL_ZONE1;
+		break;
 
-	  case timeouting:
-		  break;
+	case timeouting:
+		break;
 
-	  case idle:
-		  // if zone2 triggered
-		  switch (zone2)
-		 	  {
-		 	  case triggered:
-				  finVol = map(iMinCm, iZone2Radius, 1, 0, SOUND_MAX_VOL_ZONE2) + SOUND_OFFSET_VOL_ZONE2;
-		 		  break;
-
-		 	  case timeouting:
-		 		  break;
-
-		 	  case idle:
-		 	  break;
-		 	  }
-	  break;
-	  }
+	case idle:
+		// if zone2 triggered
+		switch (zone2)
+		{
+		case triggered:
+			finVol = map(iMinCm, iZone2Radius, 1, 0, SOUND_MAX_VOL_ZONE2) + SOUND_OFFSET_VOL_ZONE2;
+			break;
+		case timeouting:
+			break;
+		case idle:
+			//Serial.println("zone2 inactive");
+			break;
+		}
+	break;
+	}
 
 
-	  //SOUND FADING PART
+  //SOUND FADING PART
 
-	   if (curVol < finVol) {		// hangosabb lesz
-	     curVol = ((curVol + 4) > finVol) ? (finVol) : (curVol + 4);	//4-es lepeskoz, szaturalassal
-	     myDFPlayer.volume(curVol);
-	     digitalWrite(mutePin, 0);
+	if 		(curVol < finVol)		// hangosabb lesz
+	{
+		curVol = ((curVol + 4) > finVol) ? (finVol) : (curVol + 4);	//4-es lepeskoz, szaturalassal
+		myDFPlayer.volume(curVol);
+		digitalWrite(mutePin, 0);
 
-	     //Serial.println("vol++");
-	   }
-	   else if (curVol > finVol) {	// halkabb lesz
-	     curVol = ((curVol - 4) < finVol) ? (finVol) : (curVol - 4);	//4-es lepeskoz, szaturalassal
-	     myDFPlayer.volume(curVol);
-	     digitalWrite(mutePin, 0);
+			//Serial.println("vol++");
+	}
+	else if	(curVol > finVol)		// halkabb lesz
+	{
+		curVol = ((curVol - 4) < finVol) ? (finVol) : (curVol - 4);	//4-es lepeskoz, szaturalassal
+		myDFPlayer.volume(curVol);
+		digitalWrite(mutePin, 0);
 
-	     //Serial.println("vol--");
-	   }
+			//Serial.println("vol--");
+	}
 
-	   if (0 == curVol) {			//ha 0 a hangero, akkor mute-ol
-	     digitalWrite(mutePin, 1);
-	   }
-  }
+	if (0 == curVol)
+	{			//ha 0 a hangero, akkor mute-ol
+		digitalWrite(mutePin, 1);
+	}
+}
 
 /*
  * 4th section:
@@ -409,29 +441,34 @@ void batteryMonitor()
   * 	bool-t ad vissza hogy a hatosugar triggerelve van-e.
   * 	iMinCm-t allitja: minimalis triggerelt tavolsag
   */
-bool inline zonetrig(int zone_border_cm)
+bool zonetrig(int zone_border_cm)
 {
-	bZoneTriggered=false;
+	//bZoneTriggered=false;
 	iMinCm=400;
 	//visszaad egy tavolsagot is a legkozelebbivel
 	if(cm1<iSensor1OffsetValue && cm1<zone_border_cm)
 	{
 		iMinCm=(cm1<iMinCm)?(cm1):(iMinCm);
 		//Serial.print("sensor 1 triggers z1 with cm of ");Serial.println(cm1);
-		bZoneTriggered = true;
+		//bZoneTriggered = true;
+		return true;
 	}
 
 	if(cm2<iSensor2OffsetValue && cm2<zone_border_cm)
 	{
 		iMinCm=(cm2<iMinCm)?(cm2):(iMinCm);
 		//Serial.print("sensor 2 triggers z1:");Serial.println(cm2);
-		bZoneTriggered = true;
+		//bZoneTriggered = true;
+		return true;
+
 	}
 
 	if(cm3<iSensor3OffsetValue && cm3<zone_border_cm)
 	{
 		iMinCm=(cm3<iMinCm)?(cm3):(iMinCm);
-		bZoneTriggered = true;
+		//bZoneTriggered = true;
+		return true;
+
 	}
 /*
 	if(cm4<iSensor4OffsetValue && cm4<zone_border_cm)
@@ -443,7 +480,6 @@ bool inline zonetrig(int zone_border_cm)
 	 */
 
 	return false;
-
 }
 
 void allzonetrigger()
@@ -453,13 +489,16 @@ void allzonetrigger()
 	case idle :
 		if(zonetrig(iZone1Radius))
 		{
+			ledstrip=Automatic;
+			colorPalette=0;
+			digitalWrite(13,1);//led
+
 			zone1=triggered;
 			//Serial.println("now triggered from idle"); - meghivodik ez is
 		}
 		break;
 
 	case triggered:
-		digitalWrite(1,grnPin);//led
 		if(!zonetrig(iZone1Radius))
 		{
 			zone1=timeouting;
@@ -473,7 +512,9 @@ void allzonetrigger()
 		//ido eltelt:
 		if(k>iZone1TimeoutStart+TIMEOUT_5s)
 		{
-			digitalWrite(0,grnPin);//led
+			digitalWrite(grnPin,0);//led
+			digitalWrite(13,0);//led
+
 			zone1=idle;
 		}
 		else if(zonetrig(iZone1Radius))
@@ -494,7 +535,9 @@ void allzonetrigger()
 			break;
 
 		case triggered:
-			digitalWrite(1,13);//led
+			ledstrip=Automatic;
+			//digitalWrite(13,1);//led
+			colorPalette=2;
 			if(!zonetrig(iZone2Radius))
 			{
 				zone2=timeouting;
@@ -508,7 +551,7 @@ void allzonetrigger()
 			//ido eltelt:
 			if(k>iZone2TimeoutStart+TIMEOUT_10s)
 			{
-				digitalWrite(0,13);//led
+				//digitalWrite(13,1);//led
 				zone2=idle;
 			}
 			else if(zonetrig(iZone2Radius))
@@ -533,20 +576,35 @@ void allzonetrigger()
  */
 inline void initialCalibrate()
 {
-	delay(10000);	//menekulj!! not working
+	int k_wait=k;
+	Serial.println("start 5s wait:");
+
+	do
+	{
+	    digitalWrite(13, 1);
+	}
+	while(k_wait<TIMEOUT_5s);
+    digitalWrite(13, 0);
+
+	Serial.println("end 5s wait:");
+
+	//delay(10000);	//menekulj!! not working
 
 	iSensor1OffsetValue=sensor1.distanceRead();
-  	delay(1000);
+	/*
+	while(k_wait<(TIMEOUT_5s+TIMEOUT_100ms)) {	}
 
 	iSensor2OffsetValue=sensor2.distanceRead();
-  	delay(1000);
+	while(k_wait<(TIMEOUT_5s+2*TIMEOUT_100ms)) { }
 
 	iSensor3OffsetValue=sensor3.distanceRead();
   	delay(1000);
 
 	iSensor4OffsetValue=sensor4.distanceRead();
-}
+	*/
+	Serial.println("end calibration");
 
+}
 inline void calibrate()
 {
 	// in very 5 min, recalculating.
@@ -580,6 +638,17 @@ inline void calibrate()
 	iSensor4OffsetValue=iSumToCalibrate/SamplesToCalibrate;
 }
 
+void calibrateAtBeginning()
+{
+	ledSetBlinking(TIMEOUT_1s*2, BUTTON_TIME_1s, 0.5); //won't work in setup
+	initialCalibrate();
+	Serial.println("Calibrated with:");
+	Serial.print(iSensor1OffsetValue);Serial.print("\t");
+	Serial.print(iSensor2OffsetValue);Serial.print("\t");
+	Serial.print(iSensor3OffsetValue);Serial.print("\t");
+	Serial.println(iSensor4OffsetValue);
+	ledSetBlinking(TIMEOUT_5s, BUTTON_TIME_2s, 0.1);
+}
 
 //////////////////////////////////   SETUP   //////////////////////////////////////////////
 void setup()
@@ -623,56 +692,83 @@ void setup()
 	delay(100);
 	Timer1.attachInterrupt(timingISR);
 
+	Serial.println("Start Blink");
 
-	ledSetBlinking(TIMEOUT_5s, BUTTON_TIME_1s, 0.5);
-	//initialCalibrate();
-	Serial.println("Calibrated with:");
-	Serial.print(iSensor1OffsetValue);Serial.print("\t");
-	Serial.print(iSensor2OffsetValue);Serial.print("\t");
-	Serial.print(iSensor3OffsetValue);Serial.print("\t");
-	Serial.println(iSensor4OffsetValue);
-	ledSetBlinking(TIMEOUT_5s, BUTTON_TIME_2s, 0.1);
+	Serial.println("ena mute");
+	mySoftwareSerial.begin(9600); // maybe higher baud leads to less noise?!
+	Serial.println(F("Initializing DFPlayer."));
+	while (!myDFPlayer.begin(mySoftwareSerial))
+	{
+		Serial.println(F("Unable to connect"));
+		delay(1000);
+	}
+	Serial.println(F("done."));
 
     digitalWrite(chargeGreen, 1);
     digitalWrite(chargeRed, 0);
-
 
 }
 
 void loop()
 {
-	if (usensor)
-	  {
-	   usensor = false;
-	   sensor();
-	  }
+	if(ucalibrate)
+	{
+		ucalibrate=false;
+		calibrateAtBeginning();
+	}
 	if (ubattery)
-		  {
-		   ubattery = false;
-		   batteryMonitor();
-		  }
+	{
+		ubattery = false;
+		batteryMonitor();
+	}
 	if (ubutton)
-	  {
-	   ubutton = false;
-	   buttonRead();
-	  }
+	{
+		ubutton = false;
+		buttonRead();
+	}
+	if (uled)
+	{
+		uled = false;
+		led();
+	}
+	if (usensor)
+	{
+		usensor = false;
+		sensor();
+	}
+	if (usound)
+	{
+		usound = false;
+		sound();
+	}
+	if(uzone)
+	{
+		uzone=false;
+		allzonetrigger();
+	}
+
 
   if (usend)
   {
     usend = false;
-	Serial.print("zone1: ");Serial.print(zone1);
-	Serial.print("\t zone2: ");Serial.print(zone2);
+	/*Serial.print("z1: ");Serial.print(zone1);
+	Serial.print("\t z2: ");Serial.print(zone2);*/
 	Serial.print("\t colorNo: ");Serial.print(x);
-	Serial.print("\t \t measured: ");
+	Serial.print("\t set: ");Serial.println(bColorSettled);
+	/*Serial.print("\t z1tr?: ");Serial.print(zonetrig(iZone1Radius));
+	Serial.print("\t z2tr?: ");Serial.print(zonetrig(iZone2Radius));*/
+
+
+/*
+	Serial.print("\t r: ");Serial.print(finR);
+	Serial.print("\t g: ");Serial.print(finG);
+	Serial.print("\t b: ");Serial.println(finB);
+*/
+
+	Serial.print("\t");
 	Serial.print(cm1);Serial.print("\t");
 	Serial.print(cm2);Serial.print("\t");
-	Serial.print(cm3);Serial.print("\t");
-	Serial.println(cm4);
-  }
+	Serial.println(cm3);
 
-  if(uzone)
-  {
-	  uzone=false;
-	  allzonetrigger();
   }
 }

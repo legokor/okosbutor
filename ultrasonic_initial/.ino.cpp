@@ -2,7 +2,11 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
+<<<<<<< HEAD
 //This file has been generated on 2017-12-25 21:14:36
+=======
+//This file has been generated on 2017-12-25 21:55:36
+>>>>>>> dev_pins
 
 #include "Arduino.h"
 #include "battery.h"

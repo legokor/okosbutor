@@ -543,13 +543,13 @@ void setup()
   	pinMode(redPin, OUTPUT);
   	pinMode(grnPin, OUTPUT);
 	pinMode(bluPin, OUTPUT);
-	//pinMode(chargeGreen, OUTPUT);
-	//pinMode(chargeRed, OUTPUT);
+	pinMode(chargeGreen, OUTPUT);
+	pinMode(chargeRed, OUTPUT);
 	pinMode(mutePin, OUTPUT);
 
     digitalWrite(mutePin, 1);
-    //digitalWrite(chargeGreen, 1);
-    //digitalWrite(chargeRed, 1);
+    digitalWrite(chargeGreen, 1);
+    digitalWrite(chargeRed, 1);
 
     //regisztermagic
 		TCCR0A = _BV(COM0A1) | _BV(COM0B1) | _BV(WGM00);
@@ -590,6 +590,8 @@ void setup()
 	Serial.println(iSensor4OffsetValue);
 	ledSetBlinking(TIMEOUT_5s, BUTTON_TIME_2s, 0.1);
 
+    digitalWrite(chargeGreen, 1);
+    digitalWrite(chargeRed, 0);
 
 
 }

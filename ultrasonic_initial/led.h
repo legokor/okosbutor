@@ -10,7 +10,7 @@ bool colorBlack = false;
 #define grnPin  5  //g
 #define bluPin  6  //b
 
-#define chargeGreen 19		//A5
+#define chargeGreen 17		//A3
 #define chargeRed 	18		//A4
 
 #define curR OCR2B

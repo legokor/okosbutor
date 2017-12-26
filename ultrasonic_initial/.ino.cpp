@@ -2,11 +2,7 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-<<<<<<< HEAD
-//This file has been generated on 2017-12-26 11:45:23
-=======
-//This file has been generated on 2017-12-26 11:51:59
->>>>>>> a330c
+//This file has been generated on 2017-12-26 11:55:41
 
 #include "Arduino.h"
 #include "button.h"

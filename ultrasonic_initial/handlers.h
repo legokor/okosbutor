@@ -21,7 +21,7 @@ bool usend=false;
 bool uled=false;
 bool usound=false;
 bool ubutton=false;
-bool ubattery = false;
+
 
 /*
  * Handlers for the above
@@ -33,8 +33,6 @@ void led();
 void ledSetBlinking(int duration_k_increments, int period_k_increments, int fill=0.5);
 void ledBlinking();
 void buttonRead();
-void batteryMonitor();
-
 
 //void send();
 

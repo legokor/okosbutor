@@ -38,4 +38,7 @@ zoneStateMachine zone2=idle;
 zoneStateMachine zone3=idle;
 
 
+bool bZoneTriggered=false;
+int iMinCm=400;
+
 #endif /* ZONE_H_ */

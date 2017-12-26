@@ -34,8 +34,8 @@ byte rgb[3][7][3] = {{{ 0, 0, 0 },       { 255, 255, 255 }, { 255, 0, 0 },     {
                      {{255, 255, 0},     {255, 255, 0},     {250, 255, 0},     {250, 127, 0},     {250, 0, 0},       {250, 0, 0},       {255, 0, 0}       }
                     };
 
-typedef enum  {Off=0, Normal, Automatic, Manual,Blinking} ledStateMachine;
-ledStateMachine ledstrip=Off;
+typedef enum  {Off=0, Normal,Blinking} ledStateMachine;
+ledStateMachine ledstrip=0;
 int colorNum=0;
 
 bool bBlinkingModeActive=false;
@@ -44,8 +44,5 @@ int iBlinkPeriodStart=0;
 int iBlinkDuration=0;
 int iBlinkStart=0;
 int iBlinkFill=50;
-
-typedef enum  {IndicatorsOff=0, GreenIsOn,GreenBlink,RedBlinking,BothAreOn} indicatorLedStateMachine;
-indicatorLedStateMachine twoleds=IndicatorsOff;
 
 #endif

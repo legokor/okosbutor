@@ -26,6 +26,25 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ///ADC OUTPUTS
 bool sensorstate = 0;
 bool nextSound=false;
@@ -53,14 +72,18 @@ int buttonTimer = 0;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define mutePin 8
+#define mutePin 13
 
 #ifdef HALK
-	#define SOUND_MAX_VOL 5
-	#define SOUND_OFFSET_VOL 2
+	#define SOUND_MAX_VOL_ZONE1 7
+	#define SOUND_OFFSET_VOL_ZONE1 3
+	#define SOUND_MAX_VOL_ZONE2 4
+	#define SOUND_OFFSET_VOL_ZONE2 1
 #else
-	#define SOUND_MAX_VOL 13
-	#define SOUND_OFFSET_VOL 5
+	#define SOUND_MAX_VOL_ZONE1 14
+	#define SOUND_OFFSET_VOL_ZONE1 6
+	#define SOUND_MAX_VOL_ZONE2 10
+	#define SOUND_OFFSET_VOL_ZONE2 3
 #endif
 
 

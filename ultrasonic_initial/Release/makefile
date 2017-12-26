@@ -53,7 +53,7 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 AR += \
-C:\ard\ultrasonic_initial\Release\arduino.ar \
+C:\ard\okosbutor\ultrasonic_initial\Release\arduino.ar \
 
 ELF += \
 ultrasonic_initial.elf \
@@ -69,19 +69,19 @@ all: ultrasonic_initial
 ultrasonic_initial: $(HEX)
 	@echo 'Building target: $@'
 	@echo 'Printing size:'
-	"C:\sloeber\/arduinoPlugin/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.4-arduino2/bin/avr-size" -A "C:/ard/ultrasonic_initial/Release/ultrasonic_initial.elf"
+	"C:\sloeber\/arduinoPlugin/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.4-arduino2/bin/avr-size" -A "C:/ard/okosbutor/ultrasonic_initial/Release/ultrasonic_initial.elf"
 	@echo 'Finished building target: $@'
 	@echo ' '
 
-C:\ard\ultrasonic_initial\Release\arduino.ar: $(AR_OBJ)
+C:\ard\okosbutor\ultrasonic_initial\Release\arduino.ar: $(AR_OBJ)
 	@echo 'Starting archiver'
-	"C:\sloeber\/arduinoPlugin/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.4-arduino2/bin/avr-gcc-ar" rcs    C:/ard/ultrasonic_initial/Release/arduino.ar $(AR_OBJ)
+	"C:\sloeber\/arduinoPlugin/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.4-arduino2/bin/avr-gcc-ar" rcs    C:/ard/okosbutor/ultrasonic_initial/Release/arduino.ar $(AR_OBJ)
 	@echo 'Finished building: $@'
 	@echo ' '
 
 ultrasonic_initial.elf: $(LINK_OBJ) $(AR)
 	@echo 'Starting combiner'
-	"C:\sloeber\/arduinoPlugin/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.4-arduino2/bin/avr-gcc" -Wall -Wextra -Os -g -flto -fuse-linker-plugin -Wl,--gc-sections -mmcu=atmega328p -o "C:\ard\ultrasonic_initial/Release/ultrasonic_initial.elf"   $(LINK_OBJ) $(AR)   C:/ard/ultrasonic_initial/Release/arduino.ar  "-LC:\ard\ultrasonic_initial/Release" -lm
+	"C:\sloeber\/arduinoPlugin/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.4-arduino2/bin/avr-gcc" -Wall -Wextra -Os -g -flto -fuse-linker-plugin -Wl,--gc-sections -mmcu=atmega328p -o "C:\ard\okosbutor\ultrasonic_initial/Release/ultrasonic_initial.elf"   $(LINK_OBJ) $(AR)   C:/ard/okosbutor/ultrasonic_initial/Release/arduino.ar  "-LC:\ard\okosbutor\ultrasonic_initial/Release" -lm
 	@echo 'Finished building: $@'
 	@echo ' '
 

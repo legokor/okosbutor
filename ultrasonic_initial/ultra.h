@@ -23,6 +23,7 @@
 //////////////////////////////////////////////////////////
 #define SamplesToCalibrate 20
 
+byte iSampleIterator=0;
 
 int iSensor1ValueArray[SamplesToCalibrate];
 int iSensor2ValueArray[SamplesToCalibrate];
@@ -35,6 +36,11 @@ int iSensor3OffsetValue=60;
 int iSensor4OffsetValue=95;
 
 int iSumToCalibrate=0;
+
+int iSensor1Previous=399;
+int iSensor2Previous=399;
+int iSensor3Previous=399;
+int iSensor4Previous=399;
 
 
 

@@ -6,16 +6,16 @@ bool targetReached=0;
 
 bool colorBlack = false;
 
-#define redPin  3  //r
-#define grnPin  5  //g
-#define bluPin  6  //b
+#define redPin  5  //r
+#define grnPin  6  //g
+#define bluPin  3	 //b
 
 #define chargeGreen 17		//A3
 #define chargeRed 	18		//A4
 
-#define curR OCR2B
-#define curG OCR0B
-#define curB OCR0A
+#define curB OCR2B
+#define curR OCR0B
+#define curG OCR0A
 
 byte finR=0;
 byte finG=0;
@@ -41,7 +41,7 @@ int colorNum=0;
 bool bBlinkingModeActive=false;
 bool bColorSettled=false;
 
-#define iLedStepTime (TIMEOUT_100ms*2)
+#define iLedStepTime (TIMEOUT_100ms)
 #define iFinalColorStepTime (TIMEOUT_5s)
 
 

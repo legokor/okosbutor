@@ -37,13 +37,14 @@ void timingISR(void)
 	  usensor = true;
   }
 
-  if (!(iISR % TIMEOUT_100ms*2))
+  if (!(iISR % TIMEOUT_500ms))
   {
 	  usend = true;
   }
   if (!(iISR % TIMEOUT_10s))
   {
 	  ubattery=true;
+	  sensorValueAveraging();
 	  //ritka dolgok, pl calibration
   }
 
@@ -52,6 +53,11 @@ void timingISR(void)
 	  ucalibrate=true;
 	  Serial.println("entering calibration");
   }
+
+  if (!(iISR % 4800)) //4 perc
+    {
+  	  calibrate();
+    }
 }
 
 
@@ -215,8 +221,9 @@ inline void calcColorDifference()
 	if(0 == (finB-curB)){dB=0;}
 		  //dB=(0==(finB-curB))?(0):(dB);
 
+
 	 if(dR || dG || dB){
-		 //bColorSettled=false;
+		 bColorSettled=false;
 	 }
 	 else
 	 {
@@ -234,12 +241,12 @@ void led(void){               //may increase an int to perform other tasks
   		{
   			if((k>(iColorSteppedAt+iLedStepTime)))
   			{
-				curR=(curR+dR);
-				curG=(curG+dG);
-				curB=(curB+dB);
-				iColorSteppedAt=k;
-				Serial.println("increased");
+				curR=((curR+dR)>255)?(255):(((curR+dR)<0)?(0):(curR+dR));
+				curG=((curG+dG)>255)?(255):(((curG+dG)<0)?(0):(curG+dG));
+				curB=((curB+dB)>255)?(255):(((curB+dB)<0)?(0):(curB+dB));
 
+
+				iColorSteppedAt=k;
   			}
   		}
   		else
@@ -249,7 +256,6 @@ void led(void){               //may increase an int to perform other tasks
   				  finR = 0;
   				  finG = 0;
   				  finB = 0;
-  				  Serial.println("blek");
 
   			  }
   			  else //if(k>(iColorSettledAt+iFinalColorStepTime))
@@ -512,7 +518,6 @@ void allzonetrigger()
 		//ido eltelt:
 		if(k>iZone1TimeoutStart+TIMEOUT_5s)
 		{
-			digitalWrite(grnPin,0);//led
 			digitalWrite(13,0);//led
 
 			zone1=idle;
@@ -607,8 +612,8 @@ inline void initialCalibrate()
 }
 inline void calibrate()
 {
-	// in very 5 min, recalculating.
-	// for each sensor in sensors  - python <3
+	// in every ~5 min, recalculating.
+	// for each sensor in sensors  //- python <3
 	iSumToCalibrate=0;
 	for(int i=0; i<SamplesToCalibrate; i++)
 	{
@@ -636,6 +641,14 @@ inline void calibrate()
 		iSumToCalibrate+=iSensor4ValueArray[i];
 	}
 	iSensor4OffsetValue=iSumToCalibrate/SamplesToCalibrate;
+
+	Serial.println("Calibrated with:");
+		Serial.print(iSensor1OffsetValue);Serial.print("\t");
+		Serial.print(iSensor2OffsetValue);Serial.print("\t");
+		Serial.print(iSensor3OffsetValue);Serial.print("\t");
+		Serial.print(iSensor4OffsetValue);Serial.print("\t");
+
+
 }
 
 void calibrateAtBeginning()
@@ -649,6 +662,18 @@ void calibrateAtBeginning()
 	Serial.println(iSensor4OffsetValue);
 	ledSetBlinking(TIMEOUT_5s, BUTTON_TIME_2s, 0.1);
 }
+
+void inline sensorValueAveraging()
+{
+	//filling up the array
+	iSampleIterator=(iSampleIterator==SamplesToCalibrate)?(0):(iSampleIterator++);
+	iSensor1ValueArray[iSampleIterator]=cm1;
+	iSensor2ValueArray[iSampleIterator]=cm2;
+	iSensor3ValueArray[iSampleIterator]=cm3;
+	iSensor4ValueArray[iSampleIterator]=cm4;
+}
+
+
 
 //////////////////////////////////   SETUP   //////////////////////////////////////////////
 void setup()
@@ -751,24 +776,29 @@ void loop()
   if (usend)
   {
     usend = false;
-	/*Serial.print("z1: ");Serial.print(zone1);
-	Serial.print("\t z2: ");Serial.print(zone2);*/
-	Serial.print("\t colorNo: ");Serial.print(x);
-	Serial.print("\t set: ");Serial.println(bColorSettled);
+	Serial.print("z1: ");Serial.print(zone1);
+	Serial.print("\t z2: ");Serial.print(zone2);
+	Serial.print("\t cNo: ");Serial.print(x);
+	//Serial.print("\t set: ");Serial.print(bColorSettled);
 	/*Serial.print("\t z1tr?: ");Serial.print(zonetrig(iZone1Radius));
 	Serial.print("\t z2tr?: ");Serial.print(zonetrig(iZone2Radius));*/
 
 
 /*
+ * working
 	Serial.print("\t r: ");Serial.print(finR);
+	Serial.print(": ");Serial.print(curR);
 	Serial.print("\t g: ");Serial.print(finG);
-	Serial.print("\t b: ");Serial.println(finB);
+	Serial.print(": ");Serial.print(curG);
+	Serial.print("\t b: ");Serial.print(finB);
+	Serial.print(": ");Serial.print(curB);
 */
 
 	Serial.print("\t");
-	Serial.print(cm1);Serial.print("\t");
+	Serial.println(cm1);
+	/*Serial.print("\t");
 	Serial.print(cm2);Serial.print("\t");
 	Serial.println(cm3);
-
+*/
   }
 }

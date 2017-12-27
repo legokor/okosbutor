@@ -169,6 +169,7 @@ void buttonRead()
 		{
 			pushedAgainAt=k;
 			colorPalette=(colorPalette==(u8ColorPalettesCount-1))?(0):(colorPalette+1);
+			myDFPlayer.next();
 			nyomogomb=PushedAgain;
 			// Serial.println("pushed twice - switch palette");
 		}
@@ -190,7 +191,6 @@ void buttonRead()
 	case PushedAgain:
 
 
-		myDFPlayer.next();
 		if(!bButtonPushed)
 		{
 			nyomogomb=NotPushed;
@@ -353,8 +353,12 @@ void ledBlinking()
 				  }
 			  }// 1 periodus vege
 			  iBlinkPeriodStart=k;
-		  }// teljes villogasi ido vege
-	  ledstrip=Normal; //mar nincs villogasi modban
+		  }
+		  // teljes villogasi ido vege
+		  else
+		  {
+		  ledstrip=Automatic; //mar nincs villogasi modban
+		  }
 	  }
   }
 
@@ -371,36 +375,36 @@ void sensor()
 	delayMicroseconds(8000);// seems no effect, max 1.8m..2.1m
 
 
-	cm[2][iSensorArrayIterator]=sensor2.distanceRead();
-	if(cm[2][iSensorArrayIterator]==0)
+	cm[1][iSensorArrayIterator]=sensor2.distanceRead();
+	if(cm[1][iSensorArrayIterator]==0)
 	{
-		cm[2][iSensorArrayIterator]=401;
+		cm[1][iSensorArrayIterator]=401;
 	}
 
 	delayMicroseconds(15000);	//ensure 3.2m viewrange
 
-	cm[1][iSensorArrayIterator]=sensor1.distanceRead();
-	if(cm[1][iSensorArrayIterator]==0)
+	cm[0][iSensorArrayIterator]=sensor1.distanceRead();
+	if(cm[0][iSensorArrayIterator]==0)
 	{
-		cm[1][iSensorArrayIterator]=401;
+		cm[0][iSensorArrayIterator]=401;
 	}
 		//Serial.print("a");
 
 	#if sensorValuesToAverage>2
 	delayMicroseconds(14000); // seems no effect, max 1.8m
 
-	cm[3][iSensorArrayIterator]=sensor3.distanceRead();
-	if(cm[3][iSensorArrayIterator]==0)
+	cm[2][iSensorArrayIterator]=sensor3.distanceRead();
+	if(cm[2][iSensorArrayIterator]==0)
 	{
-		cm[3][iSensorArrayIterator]=401;
+		cm[2][iSensorArrayIterator]=401;
 	}
 	#endif
 	#if sensorValuesToAverage==4
 
-	cm[4][iSensorArrayIterator]=sensor4.distanceRead();
-	if(cm[4][iSensorArrayIterator]==0)
+	cm[3][iSensorArrayIterator]=sensor4.distanceRead();
+	if(cm[3][iSensorArrayIterator]==0)
 	{
-		cm[4][iSensorArrayIterator]=401;
+		cm[3][iSensorArrayIterator]=401;
 	}
 
 	#endif
@@ -427,18 +431,6 @@ inline void sensor_mid()
 	{
 			cmAveraged[i]=cm[i][0];
 	}
-/*
-	Serial.print("raw: (2nd)");
-	Serial.print(cm[0][2]);Serial.print("\t\t");
-	Serial.print(cm[1][2]);Serial.print("\t\t");
-	Serial.print(cm[2][2]);Serial.print("\t\t");
-	Serial.println(cm[3][2]);
-
-	Serial.print(cmAveraged[0]);Serial.print("\t\t");
-	Serial.print(cmAveraged[1]);Serial.print("\t\t");
-	Serial.print(cmAveraged[2]);Serial.print("\t\t");
-	Serial.println(cmAveraged[3]);
-	*/
 }
 
 void sound()
@@ -664,6 +656,7 @@ inline void initialCalibrate()
     digitalWrite(chargeRed, 0);
 
 }
+
 inline void calibrate()
 {
 	// in every ~5 min, recalculating.
@@ -820,8 +813,8 @@ void loop()
 
 	*/
 	//Serial.print("\t set: ");Serial.print(bColorSettled);
-	/*Serial.print("\t z1tr?: ");Serial.print(zonetrig(iZone1Radius));
-	Serial.print("\t z2tr?: ");Serial.print(zonetrig(iZone2Radius));*/
+	Serial.print("\t z1tr?: ");Serial.print(zonetrig(iZone1Radius));
+	Serial.print("\t z2tr?: ");Serial.print(zonetrig(iZone2Radius));
 
 
 /*
@@ -838,10 +831,11 @@ void loop()
 	//Serial.print("\t sIter: ");Serial.print(iSensorIterator);
 
 
-	Serial.print("\t \t");
+	Serial.print("\t \t 0");
 	Serial.print(cmAveraged[0]);Serial.print("\t\t");
 	Serial.print(cmAveraged[1]);Serial.print("\t\t");
-	Serial.println(cmAveraged[2]);
+	Serial.print(cmAveraged[2]);Serial.print("\t\t");
+	Serial.println(cmAveraged[3]);
 	/*Serial.print("\t");
 	Serial.println(cm4);
 	*/

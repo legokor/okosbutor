@@ -8,7 +8,7 @@
 
 
 //sensor
-Ultrasonic sensor1(trig1, echo1, 50000UL); Ultrasonic sensor2(trig2, echo2, 50000UL); Ultrasonic sensor3(trig3, echo3, 50000UL); Ultrasonic sensor4(trig4, echo4, 50000UL);
+Ultrasonic sensor1(trig1, echo1, 20000UL); Ultrasonic sensor2(trig2, echo2, 15000UL); Ultrasonic sensor3(trig3, echo3, 15000UL); Ultrasonic sensor4(trig4, echo4, 15000UL);
 int cm1=400,cm2=400,cm3=400,cm4=400;
 //mp3
 DFRobotDFPlayerMini myDFPlayer;
@@ -22,7 +22,7 @@ void timingISR(void)
 
   if(akku!=VoltageCriticalLow)
   {
-	  //uled = true;
+	  uled = true;
 	  if (!(iISR % TIMEOUT_100ms*2))
 	  {
 		  usound = true;
@@ -31,24 +31,26 @@ void timingISR(void)
 
   if (!(iISR % TIMEOUT_100ms))
   {
-	  ubutton = true;
-  }
-
-  if (!(iISR % TIMEOUT_500ms*2))
-  {
 	  usensor = true;
-	 Serial.print("s: \t ");Serial.println(iSensorIterator); //correct
 	  uzone=true;
+	  ubutton = true;
+
+  }
+  if (!(iISR % TIMEOUT_500ms))
+  {
 	  usend = true;
   }
+
+
   if (!(iISR % TIMEOUT_10s))
   {
-	  ubattery=true;
 	  sensorValueAveraging();
 	  //ritka dolgok, pl calibration
   }
   if (!(iISR % TIMEOUT_20s*10))
     {
+	  ubattery=true;
+
 
 	  Serial.println("soft reset");	  //ubattery = false;
 	  ubutton=false;
@@ -355,8 +357,45 @@ void ledBlinking()
  * 3rd section:
  * 		ULTRASONIC
  */
-
 void sensor()
+{
+	delayMicroseconds(10000);
+
+	cm2=sensor2.distanceRead();// seems no effect, max 1.8m
+	if(cm2==0)
+	{
+		cm2=401;
+	}
+
+	delayMicroseconds(15000);	//ensure 3.2m viewrange
+
+	cm1=sensor1.distanceRead();
+	if(cm1==0)
+	{
+		cm1=401;
+	}
+		//Serial.print("a");
+
+	delayMicroseconds(14000); // seems no effect, max 1.8m
+
+	cm3=sensor3.distanceRead();
+	if(cm3==0)
+	{
+		cm3=401;
+	}
+
+	/*
+	cm4=sensor4.distanceRead();
+	if(cm4==0)
+	{
+		cm4=401;
+	}
+	Serial.print("d");
+	*/
+}
+
+
+void sensorIter()
   {
   //kb. 50-100ms-kent kellene meghivni
   //atlagolni nem kell, vagy csak keveset, mert nincs zavarjel
@@ -770,7 +809,7 @@ void setup()
    * 	- pin mode setup
    * 	- register magics
    */
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("serial enabled");
 
   	pinMode(redPin, OUTPUT);
@@ -823,45 +862,45 @@ void setup()
 
 void loop()
 {
-	if(ucalibrate)
-	{
-		ucalibrate=false;
-		calibrateAtBeginning();
-	}
-	if (ubattery)
-	{
-		ubattery = false;
-		batteryMonitor();
-	}
-	if (ubutton)
-	{
-		ubutton = false;
-		buttonRead();
-	}
-	if (uled)
-	{
-		uled = false;
-		led();
-	}
 	if (usensor)
 	{
 		usensor = false;
 		sensor();
 	}
-	if (usound)
+	else if (uled)
+	{
+		uled = false;
+		led();
+	}
+
+	else if (usound)
 	{
 		usound = false;
 		sound();
 	}
-	if(uzone)
+	else if (uzone)
 	{
 		uzone=false;
 		allzonetrigger();
 	}
+	else if (ubutton)
+	{
+		ubutton = false;
+		buttonRead();
+	}
+	else if (ucalibrate)
+	{
+		ucalibrate=false;
+		calibrateAtBeginning();
+	}
+	else if (ubattery)
+	{
+		ubattery = false;
+		batteryMonitor();
+	}
+	else if (usend)
 
-
-  if (usend)
-  {
+	{
     usend = false;
 	//Serial.print("z1: ");Serial.print(zone1);
 	Serial.print("\t z2: ");Serial.print(zone2);

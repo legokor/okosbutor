@@ -380,7 +380,8 @@ void sensor()
 		}
 		else
 		{
-			cm1=(cm1+iSensor1Previous)/2;
+			cm1=iSensor1Previous-0.9*(cm1-iSensor1Previous);
+			//cm1=(cm1+iSensor1Previous)/2;
 		}
 
 	  	//exp atlagolassal: (bambi 34.dia)
@@ -418,7 +419,8 @@ void sensor()
 		}
 		else
 		{
-			cm3=(cm3+iSensor3Previous)/2;
+			cm3=iSensor3Previous-0.9*(cm3-iSensor3Previous);
+			//cm3=(cm3+iSensor3Previous)/2;
 		}
 
 	  	//exp atlagolassal: (bambi 34.dia)
@@ -436,6 +438,7 @@ void sensor()
 		}
 		else
 		{
+			//cm4=iSensor4Previous-0.9*(cm4-iSensor4Previous);
 			cm4=(cm4+iSensor4Previous)/2;
 		}
 

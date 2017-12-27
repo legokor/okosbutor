@@ -68,10 +68,10 @@ void timingISR(void)
 
   }
 
-  if(k<TIMEOUT_10s && (nyomogomb==ShortPush))
+  if(k<TIMEOUT_20s && (nyomogomb==ShortPush) && (Calibrated!=Done))
   {
 	  ucalibrate=true;
-	  Serial.println("entering calibration");
+	  //Serial.println("entering calibration");
   }
 
   if (!(iISR % 4800)) //4 perc
@@ -159,6 +159,7 @@ void buttonRead()
 		{
 			//u8LedSpeed=(u8LedSpeed==1)?(4):(1);
 			ledSetBlinking(TIMEOUT_5s, TIMEOUT_1s, 0.5);
+			myDFPlayer.randomAll();
 			nyomogomb=LongPush;
 			//Serial.println("now pushed 5s long");
 		}
@@ -201,10 +202,10 @@ void buttonRead()
 	case LongPush:
 		// calibrate
 		//ledSetBlinking(TIMEOUT_5s, BUTTON_TIME_1s, 0.5);
-		myDFPlayer.randomAll();
-		Serial.println("Blinking initiated");
 		if(!bButtonPushed)
 		{
+			Serial.println("Blinking initiated");
+
 			nyomogomb=NotPushed;
 		}
 		break;
@@ -474,7 +475,7 @@ void sound()
 
 	if 		(curVol < finVol)		// hangosabb lesz
 	{
-		curVol = ((curVol + 4) > finVol) ? (finVol) : (curVol + 4);	//4-es lepeskoz, szaturalassal
+		curVol = ((curVol + 1) > finVol) ? (finVol) : (curVol + 1);
 		myDFPlayer.volume(curVol);
 		digitalWrite(mutePin, 0);
 
@@ -482,7 +483,7 @@ void sound()
 	}
 	else if	(curVol > finVol)		// halkabb lesz
 	{
-		curVol = ((curVol - 4) < finVol) ? (finVol) : (curVol - 4);	//4-es lepeskoz, szaturalassal
+		curVol = ((curVol - 1) < finVol) ? (finVol) : (curVol - 1);
 		myDFPlayer.volume(curVol);
 		digitalWrite(mutePin, 0);
 
@@ -539,9 +540,6 @@ void allzonetrigger()
 			ledstrip=Automatic;
 			colorPalette=0;
 			digitalWrite(onboardLed,1);//led
-
-			myDFPlayer.randomAll();
-			//myDFPlayer.enableLoopAll();
 			zone1=triggered;
 		}
 		break;
@@ -558,7 +556,7 @@ void allzonetrigger()
 		//ido eltelt:
 		if(k>iZone1TimeoutStart+TIMEOUT_10s)
 		{
-			digitalWrite(13,0);//led
+			digitalWrite(onboardLed,0);//led
 			zone1=idle;
 		}
 		else if(zonetrig(iZone1Radius))
@@ -574,8 +572,8 @@ void allzonetrigger()
 			if(zonetrig(iZone2Radius))
 			{
 				zone2=triggered;
-				//myDFPlayer.enableLoopAll();
-				//Serial.println("z2 trig");//
+				myDFPlayer.randomAll();
+				//TODO: next-ekkel bekkelj-k ki
 			}
 			break;
 
@@ -600,6 +598,10 @@ void allzonetrigger()
 				myDFPlayer.stop();	// zone 2 goes idle, music stop
 				zone2=idle;
 			}
+			if(k>iZone2TimeoutStart+TIMEOUT_10s)
+			{
+				finVol=0;
+			}
 			else if(zonetrig(iZone2Radius))
 			{
 				zone2=triggered;
@@ -620,42 +622,72 @@ void allzonetrigger()
  * 		CALIBRATION OF SENSORS
  *
  */
+void dummywait()
+{
+	return;
+}
+
 inline void initialCalibrate()
 {
-	Serial.println("Initial calibrate");
-
-	sensor();
-	delayMicroseconds(50000);	//50ms
-	sensor();
-	delayMicroseconds(50000);	//50ms
-	sensor();
-
-    digitalWrite(onboardLed, 1);
-    digitalWrite(chargeGreen, 0);
-    digitalWrite(chargeRed, 1);
-	Serial.println("start 5s wait:");
-	delay(5000);
-    digitalWrite(onboardLed, 0);
-	Serial.println("end 5s wait:");
-
-	for(int j=0; j<SensorsToRead; j++)
+	switch(Calibrated)
 	{
-		cmOffsets[j]=cmAveraged[j];
+	case NotYet:
+
+		Serial.println("Initial calibrate");
+
+		digitalWrite(onboardLed, 1);
+		digitalWrite(chargeGreen, 0);
+		digitalWrite(chargeRed, 1);
+		Serial.println("start 5s wait:");
+
+		k_start=k;
+		Calibrated=Initiated;
+		break;
+
+	case Initiated:
+
+		if(k>(k_start+TIMEOUT_5s))
+		{
+			Serial.println("5s elapsed!");
+			Calibrated=InProgress;
+		}
+		break;
+
+	case InProgress:
+	{
+		sensor();
+		delayMicroseconds(50000);	//50ms
+		sensor();
+		delayMicroseconds(50000);	//50ms
+		sensor();
+
+		Serial.println("end 5s wait:");
+
+		for(int j=0; j<SensorsToRead; j++)
+		{
+			cmOffsets[j]=cmAveraged[j];
+		}
+
+		Serial.println("Calibrated with:");
+		Serial.print(cmOffsets[0]);Serial.print("\t");
+		Serial.print(cmOffsets[1]);Serial.print("\t");
+		Serial.print(cmOffsets[2]);Serial.print("\t");
+
+		#if sensorValuesToAverage==4
+		Serial.print(cmOffsets[3]);Serial.print("\t");
+		#endif
+
+		digitalWrite(chargeGreen, 1);
+		digitalWrite(chargeRed, 0);
+		Calibrated=Done;
+		break;
 	}
-
-	Serial.println("Calibrated with:");
-	Serial.print(cmOffsets[0]);Serial.print("\t");
-	Serial.print(cmOffsets[1]);Serial.print("\t");
-	Serial.print(cmOffsets[2]);Serial.print("\t");
-
-	#if sensorValuesToAverage==4
-	Serial.print(cmOffsets[3]);Serial.print("\t");
-	#endif
-
-    digitalWrite(chargeGreen, 1);
-    digitalWrite(chargeRed, 0);
-
-}
+	case Done:
+		//already calibrated
+		ucalibrate=false;
+		break;
+	}//eof switch
+}// eof calibrate
 
 inline void calibrate()
 {
@@ -708,7 +740,7 @@ void setup()
    * 	- pin mode setup
    * 	- register magics
    */
-  Serial.begin(115200);
+  Serial.begin(230400);
   Serial.println("serial enabled");
 
   	pinMode(redPin, OUTPUT);
@@ -760,84 +792,87 @@ void setup()
 
 void loop()
 {
-	if (usensor)
-	{
-		usensor = false;
-		sensor();
-	}
-	if (usensormid)
-	{
-		usensormid = false;
-		sensor_mid();
-	}
-
-	if (uled)
-	{
-		uled = false;
-		led();
-	}
-
-	if (usound)
-	{
-		usound = false;
-		sound();
-	}
-	if (uzone)
-	{
-		uzone=false;
-		allzonetrigger();
-	}
-	if (ubutton)
-	{
-		ubutton = false;
-		buttonRead();
-	}
 	if (ucalibrate)
 	{
-		ucalibrate=false;
 		calibrateAtBeginning();
 	}
-	if (ubattery)
+	else
 	{
-		ubattery = false;
-		batteryMonitor();
-	}
-	if (usend)
+		if (usensor)
+		{
+			usensor = false;
+			sensor();
+		}
+		if (usensormid)
+		{
+			usensormid = false;
+			sensor_mid();
+		}
 
-	{
-    usend = false;
-	Serial.print("z1: ");Serial.print(zone1);
-	Serial.print("\t z2: ");Serial.print(zone2);
+		if (uled)
+		{
+			uled = false;
+			led();
+		}
+
+		if (usound)
+		{
+			usound = false;
+			sound();
+		}
+		if (uzone)
+		{
+			uzone=false;
+			allzonetrigger();
+		}
+		if (ubutton)
+		{
+			ubutton = false;
+			buttonRead();
+		}
+
+		if (ubattery)
+		{
+			ubattery = false;
+			batteryMonitor();
+		}
+		if (usend)
+
+		{
+		usend = false;
+		Serial.print("z1: ");Serial.print(zone1);
+		Serial.print("\t z2: ");Serial.print(zone2);
+		/*
+		Serial.print("\t cNo: ");Serial.print(x);
+
+		*/
+		//Serial.print("\t set: ");Serial.print(bColorSettled);
+		//Serial.print("\t z1tr?: ");Serial.print(zonetrig(iZone1Radius));
+		//Serial.print("\t z2tr?: ");Serial.print(zonetrig(iZone2Radius));
+
+
 	/*
-	Serial.print("\t cNo: ");Serial.print(x);
-
+	 * working
+		Serial.print("\t r: ");Serial.print(finR);
+		Serial.print(": ");Serial.print(curR);
+		Serial.print("\t g: ");Serial.print(finG);
+		Serial.print(": ");Serial.print(curG);
+		Serial.print("\t b: ");Serial.print(finB);
+		Serial.print(": ");Serial.print(curB);
 	*/
-	//Serial.print("\t set: ");Serial.print(bColorSettled);
-	Serial.print("\t z1tr?: ");Serial.print(zonetrig(iZone1Radius));
-	Serial.print("\t z2tr?: ");Serial.print(zonetrig(iZone2Radius));
+
+		//Serial.print("\t fV: ");Serial.print(finVol);
+		//Serial.print("\t sIter: ");Serial.print(iSensorIterator);
 
 
-/*
- * working
-	Serial.print("\t r: ");Serial.print(finR);
-	Serial.print(": ");Serial.print(curR);
-	Serial.print("\t g: ");Serial.print(finG);
-	Serial.print(": ");Serial.print(curG);
-	Serial.print("\t b: ");Serial.print(finB);
-	Serial.print(": ");Serial.print(curB);
-*/
-
-	//Serial.print("\t fV: ");Serial.print(finVol);
-	//Serial.print("\t sIter: ");Serial.print(iSensorIterator);
-
-
-	Serial.print("\t \t 0");
-	Serial.print(cmAveraged[0]);Serial.print("\t\t");
-	Serial.print(cmAveraged[1]);Serial.print("\t\t");
-	Serial.print(cmAveraged[2]);Serial.print("\t\t");
-	Serial.println(cmAveraged[3]);
-	/*Serial.print("\t");
-	Serial.println(cm4);
-	*/
-  }
+		Serial.print("\t \t");
+		Serial.print(cmAveraged[0]);Serial.print("\t\t");
+		Serial.print(cmAveraged[1]);Serial.print("\t\t");
+		Serial.print(cmAveraged[2]);Serial.print("\t\t");
+		Serial.println(cmAveraged[3]);
+		/*Serial.print("\t");
+		Serial.println(cm4);
+		*/
+	  }
+		}
 }

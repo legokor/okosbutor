@@ -36,25 +36,13 @@ unsigned char iSensorIterator=0;
 //unsigned char iMidValueIterator=0;
 unsigned char iSensorArrayIterator=0;
 
-
-/*
-int iSensor1ValueArray[SamplesToCalibrate];
-int iSensor2ValueArray[SamplesToCalibrate];
-int iSensor3ValueArray[SamplesToCalibrate];
-int iSensor4ValueArray[SamplesToCalibrate];
-
-int iSensor1OffsetValue=85;
-int iSensor2OffsetValue=85;
-int iSensor3OffsetValue=60;
-int iSensor4OffsetValue=95;
-*/
+int k_start=0;
 int iSumToCalibrate=0;
-/*
-int sensor1Mid=399;
-int sensor2Mid=399;
-int sensor3Mid=399;
-int sensor4Mid=399;
-*/
+bool bNotCalibrated=true;
+
+typedef enum  {NotYet=0, Initiated, InProgress, Done} calibrationStateMachine;
+calibrationStateMachine Calibrated=NotYet;
+
 
 
 #endif

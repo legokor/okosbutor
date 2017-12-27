@@ -20,6 +20,7 @@ bool ubutton=false;
 bool uled=false;
 bool usend=false;
 bool usensor=false;
+bool usensormid=false;
 bool usound=false;
 bool uzone=false;
 bool ucalibrate=false;

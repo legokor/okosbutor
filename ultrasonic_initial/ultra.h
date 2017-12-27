@@ -22,15 +22,14 @@
 /*					For calibrating:			 		*/
 //////////////////////////////////////////////////////////
 #define SamplesToCalibrate 20
-#define SensorsToRead 3
+#define SensorsToRead 4
 #define sensorValuesToAverage 3
 
 //works with 3^^
-int cm1[sensorValuesToAverage]={400,400,400};
-int cm2[sensorValuesToAverage]={400,400,400};
-int cm3[sensorValuesToAverage]={400,400,400};
-int cm4[sensorValuesToAverage]={400,400,400};
-
+int cm[SensorsToRead][sensorValuesToAverage]; //init to 400 with function
+int cmAveraged[SensorsToRead];
+int cmOffsets[SensorsToRead];
+int cmSamples[SensorsToRead][SamplesToCalibrate];
 
 unsigned char iSampleIterator=0;
 unsigned char iSensorIterator=0;
@@ -38,7 +37,7 @@ unsigned char iSensorIterator=0;
 unsigned char iSensorArrayIterator=0;
 
 
-
+/*
 int iSensor1ValueArray[SamplesToCalibrate];
 int iSensor2ValueArray[SamplesToCalibrate];
 int iSensor3ValueArray[SamplesToCalibrate];
@@ -48,14 +47,14 @@ int iSensor1OffsetValue=85;
 int iSensor2OffsetValue=85;
 int iSensor3OffsetValue=60;
 int iSensor4OffsetValue=95;
-
+*/
 int iSumToCalibrate=0;
-
+/*
 int sensor1Mid=399;
 int sensor2Mid=399;
 int sensor3Mid=399;
 int sensor4Mid=399;
-
+*/
 
 
 #endif

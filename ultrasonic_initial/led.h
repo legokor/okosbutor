@@ -6,6 +6,8 @@ bool targetReached=0;
 
 bool colorBlack = false;
 
+#define onboardLed  13  //r
+
 #define redPin  5  //r
 #define grnPin  6  //g
 #define bluPin  3	 //b

@@ -19,6 +19,12 @@ void timingISR(void)
   iISR++;
   k++;				//very long count
 
+  usensor = true;
+  if (!(iISR % 3))
+  {
+	  usensormid = true;
+  }
+
   if(akku!=VoltageCriticalLow)
   {
 	  uled = true;
@@ -30,11 +36,11 @@ void timingISR(void)
 
   if (!(iISR % TIMEOUT_100ms))
   {
-	  usensor = true;
 	  uzone=true;
 	  ubutton = true;
 
   }
+
   if (!(iISR % TIMEOUT_500ms))
   {
 	  usend = true;
@@ -151,7 +157,8 @@ void buttonRead()
 		}
 		else if(k>(pushStartedAt+BUTTON_TIME_5s))
 		{
-			u8LedSpeed=(u8LedSpeed==1)?(4):(1);
+			//u8LedSpeed=(u8LedSpeed==1)?(4):(1);
+			ledSetBlinking(TIMEOUT_5s, TIMEOUT_1s, 0.5);
 			nyomogomb=LongPush;
 			//Serial.println("now pushed 5s long");
 		}
@@ -161,7 +168,7 @@ void buttonRead()
 		if(bButtonPushed)
 		{
 			pushedAgainAt=k;
-			colorPalette=(colorPalette==(u8ColorPalettesCount-1))?(0):(colorPalette++);
+			colorPalette=(colorPalette==(u8ColorPalettesCount-1))?(0):(colorPalette+1);
 			nyomogomb=PushedAgain;
 			// Serial.println("pushed twice - switch palette");
 		}
@@ -363,154 +370,77 @@ void sensor()
 	iSensorArrayIterator=(iSensorArrayIterator<sensorValuesToAverage-1)?(iSensorArrayIterator+1):(0);
 	delayMicroseconds(8000);// seems no effect, max 1.8m..2.1m
 
-	cm2[iSensorArrayIterator]=sensor2.distanceRead();
-	if(cm2[iSensorArrayIterator]==0)
+
+	cm[2][iSensorArrayIterator]=sensor2.distanceRead();
+	if(cm[2][iSensorArrayIterator]==0)
 	{
-		cm2[iSensorArrayIterator]=401;
+		cm[2][iSensorArrayIterator]=401;
 	}
 
 	delayMicroseconds(15000);	//ensure 3.2m viewrange
 
-	cm1[iSensorArrayIterator]=sensor1.distanceRead();
-	if(cm1[iSensorArrayIterator]==0)
+	cm[1][iSensorArrayIterator]=sensor1.distanceRead();
+	if(cm[1][iSensorArrayIterator]==0)
 	{
-		cm1[iSensorArrayIterator]=401;
+		cm[1][iSensorArrayIterator]=401;
 	}
 		//Serial.print("a");
 
+	#if sensorValuesToAverage>2
 	delayMicroseconds(14000); // seems no effect, max 1.8m
 
-	cm3[iSensorArrayIterator]=sensor3.distanceRead();
-	if(cm3[iSensorArrayIterator]==0)
+	cm[3][iSensorArrayIterator]=sensor3.distanceRead();
+	if(cm[3][iSensorArrayIterator]==0)
 	{
-		cm3[iSensorArrayIterator]=401;
+		cm[3][iSensorArrayIterator]=401;
+	}
+	#endif
+	#if sensorValuesToAverage==4
+
+	cm[4][iSensorArrayIterator]=sensor4.distanceRead();
+	if(cm[4][iSensorArrayIterator]==0)
+	{
+		cm[4][iSensorArrayIterator]=401;
 	}
 
-
-	cm4[iSensorArrayIterator]=sensor4.distanceRead();
-	if(cm4[iSensorArrayIterator]==0)
-	{
-		cm4[iSensorArrayIterator]=401;
-	}
-
+	#endif
 	//tobbsegi szavazas, a kozepsot tartjuk meg:
+
 }
 
-void sensor_mid()
+inline void sensor_mid()
 {
-
+	for(int i=0;i<SensorsToRead;i++)
 	if(
-			((cm1[0]<=cm1[1])&&(cm1[1]<=cm1[2]))	||	// ( 1.) <= ( 2.) <= ( 3.) ----> 2. is the middle,,, etc.
-			((cm1[2]<=cm1[1])&&(cm1[1]<=cm1[0]))	)
+			((cm[i][0]<=cm[i][1])&&(cm[i][1]<=cm[i][2]))	||	// ( 1.) <= ( 2.) <= ( 3.) ----> 2. is the middle,,, etc.
+			((cm[i][2]<=cm[i][1])&&(cm[i][1]<=cm[i][0]))	)
 	{
-			sensor1Mid=cm1[1];
+			cmAveraged[i]=cm[i][1];
 	}
 	else if(
-			((cm1[0]<=cm1[2])&&(cm1[2]<=cm1[1]))	||
-			((cm1[1]<=cm1[2])&&(cm1[2]<=cm1[0]))	)
+			((cm[i][0]<=cm[i][2])&&(cm[i][2]<=cm[i][1]))	||
+			((cm[i][1]<=cm[i][2])&&(cm[i][2]<=cm[i][0]))	)
 	{
-			sensor1Mid=cm1[2];
+			cmAveraged[i]=cm[i][2];
 	}
 	else
 	{
-			sensor1Mid=cm1[0];
+			cmAveraged[i]=cm[i][0];
 	}
+/*
+	Serial.print("raw: (2nd)");
+	Serial.print(cm[0][2]);Serial.print("\t\t");
+	Serial.print(cm[1][2]);Serial.print("\t\t");
+	Serial.print(cm[2][2]);Serial.print("\t\t");
+	Serial.println(cm[3][2]);
 
+	Serial.print(cmAveraged[0]);Serial.print("\t\t");
+	Serial.print(cmAveraged[1]);Serial.print("\t\t");
+	Serial.print(cmAveraged[2]);Serial.print("\t\t");
+	Serial.println(cmAveraged[3]);
+	*/
 }
 
-/*
-void sensorIter()
-  {
-  //kb. 50-100ms-kent kellene meghivni
-  //atlagolni nem kell, vagy csak keveset, mert nincs zavarjel
-	long int kdel=k;
-	iSensor2Previous=cm2;
-	iSensor3Previous=cm3;
-	iSensor4Previous=cm4;
-
-	iSensorIterator=(iSensorIterator==SensorsToRead)?(1):(iSensorIterator+1);
-
-
-	if(iSensorIterator==1)
-	{
-		iSensor1Previous=cm1;
-		cm1=sensor1.distanceRead();
-		if(cm1==0)
-		{
-			//cm1=401;
-			Serial.println("!1");
-
-		}
-		else
-		{
-			cm1=iSensor1Previous-0.9*(cm1-iSensor1Previous);
-			//cm1=(cm1+iSensor1Previous)/2;
-		}
-
-	  	//exp atlagolassal: (bambi 34.dia)
-	  	//cm1=iSensor1Previous-0.9*(cm1-iSensor1Previous);
-	}
-
-
-	if(iSensorIterator==2)
-	{
-		iSensor2Previous=cm2;
-		cm2=sensor2.distanceRead();
-		if(cm2==0)
-		{
-			Serial.println("!2");
-		}
-		else
-		{
-			cm2=(cm2+iSensor2Previous)/2;
-		  			//exp atlagolassal: (bambi 34.dia)
-		  	//cm2=iSensor2Previous-0.9*(cm2-iSensor2Previous);
-		}
-
-
-	}
-	//sensor3
-	if(iSensorIterator==3)
-	{
-		iSensor3Previous=cm3;
-		cm1=sensor3.distanceRead();
-		if(cm1==0)
-		{
-			//cm1=401;
-			Serial.println("!3");
-
-		}
-		else
-		{
-			cm3=iSensor3Previous-0.9*(cm3-iSensor3Previous);
-			//cm3=(cm3+iSensor3Previous)/2;
-		}
-
-	  	//exp atlagolassal: (bambi 34.dia)
-	  	//cm1=iSensor1Previous-0.9*(cm1-iSensor1Previous);
-	}
-	//sensor4
-	if(iSensorIterator==4)
-	{
-		iSensor4Previous=cm4;
-		cm4=sensor4.distanceRead();
-		if(cm4==0)
-		{
-			//cm4=401;
-			Serial.println("!4");
-		}
-		else
-		{
-			//cm4=iSensor4Previous-0.9*(cm4-iSensor4Previous);
-			cm4=(cm4+iSensor4Previous)/2;
-		}
-
-	  	//exp atlagolassal: (bambi 34.dia)
-	  	//cm1=iSensor1Previous-0.9*(cm1-iSensor1Previous);
-	}
-  }
-
-  */
 void sound()
 {
 
@@ -547,7 +477,6 @@ void sound()
 		}
 	break;
 	}
-
 
   //SOUND FADING PART
 
@@ -593,36 +522,18 @@ bool zonetrig(int zone_border_cm)
 {
 	iMinCm=400;			//visszaad egy tavolsagot is a legkozelebbivel
 
-	if(cm1<iSensor1OffsetValue && cm1<zone_border_cm)
+	//iterating all sensor
+
+	for (int sensorsCount=0;sensorsCount<SensorsToRead;sensorsCount++)
 	{
-		iMinCm=(cm1<iMinCm)?(cm1):(iMinCm);
-		return true;
+		//midvalue:
+		if(cmAveraged[sensorsCount]<cmOffsets[sensorsCount] && cmAveraged[sensorsCount]<zone_border_cm)
+			{
+				iMinCm=(cmAveraged[sensorsCount]<iMinCm)?(cmAveraged[sensorsCount]):(iMinCm);
+				return true;
+			}
 	}
-
-	if(cm2<iSensor2OffsetValue && cm2<zone_border_cm)
-	{
-		iMinCm=(cm2<iMinCm)?(cm2):(iMinCm);
-		return true;
-
-	}
-
-	if(cm3<iSensor3OffsetValue && cm3<zone_border_cm)
-	{
-		iMinCm=(cm3<iMinCm)?(cm3):(iMinCm);
-		return true;
-
-	}
-
-	if( cm4<iSensor4OffsetValue && cm4<zone_border_cm)
-	{
-		iMinCm=(cm4<iMinCm)?(cm4):(iMinCm);
-
-		return true;
-	}
-
 	//TODO: cm1>iSensor1OffsetValue elvben nem lehetseges
-
-
 	return false;
 }
 
@@ -635,15 +546,11 @@ void allzonetrigger()
 		{
 			ledstrip=Automatic;
 			colorPalette=0;
-			digitalWrite(13,1);//led
+			digitalWrite(onboardLed,1);//led
 
 			myDFPlayer.randomAll();
-
 			//myDFPlayer.enableLoopAll();
-
-
 			zone1=triggered;
-			//Serial.println("now triggered from idle"); - meghivodik ez is
 		}
 		break;
 
@@ -652,17 +559,14 @@ void allzonetrigger()
 		{
 			zone1=timeouting;
 			iZone1TimeoutStart=k;
-			//Serial.println("now timeout started"); - eljut ide
-
 		}
 		break;
 
 	case timeouting :
 		//ido eltelt:
-		if(k>iZone1TimeoutStart+TIMEOUT_5s)
+		if(k>iZone1TimeoutStart+TIMEOUT_10s)
 		{
 			digitalWrite(13,0);//led
-
 			zone1=idle;
 		}
 		else if(zonetrig(iZone1Radius))
@@ -699,9 +603,8 @@ void allzonetrigger()
 
 		case timeouting :
 			//ido eltelt:
-			if(k>iZone2TimeoutStart+TIMEOUT_10s)
+			if(k>iZone2TimeoutStart+TIMEOUT_20s)
 			{
-				//digitalWrite(13,1);//led
 				myDFPlayer.stop();	// zone 2 goes idle, music stop
 				zone2=idle;
 			}
@@ -727,96 +630,79 @@ void allzonetrigger()
  */
 inline void initialCalibrate()
 {
-	int k_wait=k;
+	Serial.println("Initial calibrate");
+
+	sensor();
+	delayMicroseconds(50000);	//50ms
+	sensor();
+	delayMicroseconds(50000);	//50ms
+	sensor();
+
+    digitalWrite(onboardLed, 1);
+    digitalWrite(chargeGreen, 0);
+    digitalWrite(chargeRed, 1);
 	Serial.println("start 5s wait:");
-
-	do
-	{
-	    digitalWrite(13, 1);
-	}
-	while(k_wait<TIMEOUT_5s);
-    digitalWrite(13, 0);
-
+	delay(5000);
+    digitalWrite(onboardLed, 0);
 	Serial.println("end 5s wait:");
 
-	//delay(10000);	//menekulj!! not working
+	for(int j=0; j<SensorsToRead; j++)
+	{
+		cmOffsets[j]=cmAveraged[j];
+	}
 
-	iSensor1OffsetValue=sensor1.distanceRead();
-	/*
-	while(k_wait<(TIMEOUT_5s+TIMEOUT_100ms)) {	}
+	Serial.println("Calibrated with:");
+	Serial.print(cmOffsets[0]);Serial.print("\t");
+	Serial.print(cmOffsets[1]);Serial.print("\t");
+	Serial.print(cmOffsets[2]);Serial.print("\t");
 
-	iSensor2OffsetValue=sensor2.distanceRead();
-	while(k_wait<(TIMEOUT_5s+2*TIMEOUT_100ms)) { }
+	#if sensorValuesToAverage==4
+	Serial.print(cmOffsets[3]);Serial.print("\t");
+	#endif
 
-	iSensor3OffsetValue=sensor3.distanceRead();
-  	delay(1000);
-
-	iSensor4OffsetValue=sensor4.distanceRead();
-	*/
-	Serial.println("end calibration");
+    digitalWrite(chargeGreen, 1);
+    digitalWrite(chargeRed, 0);
 
 }
 inline void calibrate()
 {
 	// in every ~5 min, recalculating.
 	// for each sensor in sensors  //- python <3
-	iSumToCalibrate=0;
-	for(int i=0; i<SamplesToCalibrate; i++)
+	for(int j=0; j<SensorsToRead; j++)
 	{
-		iSumToCalibrate+=iSensor1ValueArray[i];
+		iSumToCalibrate=0;
+		for(int i=0; i<SamplesToCalibrate; i++)
+		{
+			iSumToCalibrate+=cmSamples[j][i];
+		}
+		cmOffsets[j]=iSumToCalibrate/SamplesToCalibrate;
 	}
-	iSensor1OffsetValue=iSumToCalibrate/SamplesToCalibrate;
-
-	iSumToCalibrate=0;
-	for(int i=0; i<SamplesToCalibrate; i++)
-	{
-		iSumToCalibrate+=iSensor2ValueArray[i];
-	}
-	iSensor2OffsetValue=iSumToCalibrate/SamplesToCalibrate;
-
-	iSumToCalibrate=0;
-	for(int i=0; i<SamplesToCalibrate; i++)
-	{
-		iSumToCalibrate+=iSensor3ValueArray[i];
-	}
-	iSensor3OffsetValue=iSumToCalibrate/SamplesToCalibrate;
-
-	iSumToCalibrate=0;
-	for(int i=0; i<SamplesToCalibrate; i++)
-	{
-		iSumToCalibrate+=iSensor4ValueArray[i];
-	}
-	iSensor4OffsetValue=iSumToCalibrate/SamplesToCalibrate;
 
 	Serial.println("Calibrated with:");
-		Serial.print(iSensor1OffsetValue);Serial.print("\t");
-		Serial.print(iSensor2OffsetValue);Serial.print("\t");
-		Serial.print(iSensor3OffsetValue);Serial.print("\t");
-		Serial.print(iSensor4OffsetValue);Serial.print("\t");
-
+		Serial.print(cmOffsets[0]);Serial.print("\t");
+		Serial.print(cmOffsets[1]);Serial.print("\t");
+		Serial.print(cmOffsets[2]);Serial.print("\t");
+		#if sensorValuesToAverage==4
+		Serial.print(cmOffsets[3]);Serial.print("\t");
+		#endif
 
 }
 
 void calibrateAtBeginning()
 {
-	ledSetBlinking(TIMEOUT_1s*2, BUTTON_TIME_1s, 0.5); //won't work in setup
+	//ledSetBlinking(TIMEOUT_1s*2, BUTTON_TIME_1s, 0.5); //won't work in setup
 	initialCalibrate();
-	Serial.println("Calibrated with:");
-	Serial.print(iSensor1OffsetValue);Serial.print("\t");
-	Serial.print(iSensor2OffsetValue);Serial.print("\t");
-	Serial.print(iSensor3OffsetValue);Serial.print("\t");
-	Serial.println(iSensor4OffsetValue);
-	ledSetBlinking(TIMEOUT_5s, BUTTON_TIME_2s, 0.1);
+	//ledSetBlinking(TIMEOUT_5s, BUTTON_TIME_2s, 0.1);
 }
 
 void inline sensorValueAveraging()
 {
 	//filling up the array
-	iSampleIterator=(iSampleIterator==SamplesToCalibrate)?(0):(iSampleIterator+1);
-	iSensor1ValueArray[iSampleIterator]=cm1;
-	iSensor2ValueArray[iSampleIterator]=cm2;
-	iSensor3ValueArray[iSampleIterator]=cm3;
-	iSensor4ValueArray[iSampleIterator]=cm4;
+	iSampleIterator=(iSampleIterator>SamplesToCalibrate-1)?(0):(iSampleIterator+1);
+	for(int i=0;i<SensorsToRead;i++)
+	{
+		cmSamples[i][iSampleIterator]=cmAveraged[i];
+	}
 }
 
 
@@ -863,8 +749,6 @@ void setup()
 	delay(100);
 	Timer1.attachInterrupt(timingISR);
 
-	Serial.println("Start Blink");
-
 	Serial.println("ena mute");
 	mySoftwareSerial.begin(9600); // maybe higher baud leads to less noise?!
 	Serial.println(F("Initializing DFPlayer."));
@@ -874,6 +758,7 @@ void setup()
 		delay(1000);
 	}
 	Serial.println(F("done."));
+
 
     digitalWrite(chargeGreen, 1);
     digitalWrite(chargeRed, 0);
@@ -887,38 +772,44 @@ void loop()
 		usensor = false;
 		sensor();
 	}
-	else if (uled)
+	if (usensormid)
+	{
+		usensormid = false;
+		sensor_mid();
+	}
+
+	if (uled)
 	{
 		uled = false;
 		led();
 	}
 
-	else if (usound)
+	if (usound)
 	{
 		usound = false;
 		sound();
 	}
-	else if (uzone)
+	if (uzone)
 	{
 		uzone=false;
 		allzonetrigger();
 	}
-	else if (ubutton)
+	if (ubutton)
 	{
 		ubutton = false;
 		buttonRead();
 	}
-	else if (ucalibrate)
+	if (ucalibrate)
 	{
 		ucalibrate=false;
 		calibrateAtBeginning();
 	}
-	else if (ubattery)
+	if (ubattery)
 	{
 		ubattery = false;
 		batteryMonitor();
 	}
-	else if (usend)
+	if (usend)
 
 	{
     usend = false;
@@ -948,9 +839,9 @@ void loop()
 
 
 	Serial.print("\t \t");
-	Serial.print(cm1);Serial.print("\t\t");
-	Serial.print(cm2);Serial.print("\t\t");
-	Serial.println(cm3);
+	Serial.print(cmAveraged[0]);Serial.print("\t\t");
+	Serial.print(cmAveraged[1]);Serial.print("\t\t");
+	Serial.println(cmAveraged[2]);
 	/*Serial.print("\t");
 	Serial.println(cm4);
 	*/

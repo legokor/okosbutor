@@ -2,7 +2,7 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2017-12-27 19:45:30
+//This file has been generated on 2017-12-27 20:50:58
 
 #include "Arduino.h"
 #include "battery.h"
@@ -20,7 +20,7 @@ void led(void);
 void ledSetBlinking(int duration_k_increments, int period_k_increments, double fill)   ;
 void ledBlinking()   ;
 void sensor() ;
-void sensor_mid() ;
+inline void sensor_mid() ;
 void sound() ;
 bool zonetrig(int zone_border_cm) ;
 void allzonetrigger() ;

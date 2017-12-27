@@ -17,22 +17,24 @@ bool colorBlack = false;
 #define curR OCR0B
 #define curG OCR0A
 
-byte finR=0;
-byte finG=0;
-byte finB=0;
+unsigned char finR=0;
+unsigned char finG=0;
+unsigned char finB=0;
 
 signed char dR = 0;//step
 signed char dB = 0;
 signed char dG = 0;
 
-byte x=0;
-byte increaseRate=1;
-byte colorPalette=0;
+unsigned char x=0;
+unsigned char increaseRate=1;
+unsigned char colorPalette=0;
+
+
 #define u8ColorPalettesCount 5
-byte u8LedSpeed = 1;
+unsigned char u8LedSpeed = 1;
 bool bContinousLight = false;
 
-byte rgb[u8ColorPalettesCount][7][3] =
+unsigned char rgb[u8ColorPalettesCount][7][3] =
 						{{{ 0, 0, 255 },       	{ 255, 255, 255 }, 	{ 255, 0, 0 },     { 0, 255, 0 },		{ 0, 0, 255 },		{ 255, 255, 0 },	{ 80, 80, 80 }    },
                      	 {{0x8d, 0x6e, 0x63},	{0xff, 0x57, 0x22},	{0xff, 0x6f, 0x00},{0xcd, 0xdc, 0x39},	{0x4c, 0xaf, 0x50},	{0x00, 0x96, 0x88},	{0x7e, 0x57, 0xc2}},
                      	 {{0, 125, 0},     		{0, 125, 65},     	{125, 125, 0},     {125, 65, 0},     	{0, 65, 0},       	{0, 65, 125},    	{0, 0, 125}       },

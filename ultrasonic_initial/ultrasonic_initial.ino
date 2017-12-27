@@ -9,7 +9,6 @@
 
 //sensor
 Ultrasonic sensor1(trig1, echo1, 20000UL); Ultrasonic sensor2(trig2, echo2, 15000UL); Ultrasonic sensor3(trig3, echo3, 15000UL); Ultrasonic sensor4(trig4, echo4, 15000UL);
-int cm1=400,cm2=400,cm3=400,cm4=400;
 //mp3
 DFRobotDFPlayerMini myDFPlayer;
 							//  rx tx
@@ -357,44 +356,69 @@ void ledBlinking()
  * 3rd section:
  * 		ULTRASONIC
  */
+
+
 void sensor()
 {
-	delayMicroseconds(10000);
+	iSensorArrayIterator=(iSensorArrayIterator<sensorValuesToAverage-1)?(iSensorArrayIterator+1):(0);
+	delayMicroseconds(8000);// seems no effect, max 1.8m..2.1m
 
-	cm2=sensor2.distanceRead();// seems no effect, max 1.8m
-	if(cm2==0)
+	cm2[iSensorArrayIterator]=sensor2.distanceRead();
+	if(cm2[iSensorArrayIterator]==0)
 	{
-		cm2=401;
+		cm2[iSensorArrayIterator]=401;
 	}
 
 	delayMicroseconds(15000);	//ensure 3.2m viewrange
 
-	cm1=sensor1.distanceRead();
-	if(cm1==0)
+	cm1[iSensorArrayIterator]=sensor1.distanceRead();
+	if(cm1[iSensorArrayIterator]==0)
 	{
-		cm1=401;
+		cm1[iSensorArrayIterator]=401;
 	}
 		//Serial.print("a");
 
 	delayMicroseconds(14000); // seems no effect, max 1.8m
 
-	cm3=sensor3.distanceRead();
-	if(cm3==0)
+	cm3[iSensorArrayIterator]=sensor3.distanceRead();
+	if(cm3[iSensorArrayIterator]==0)
 	{
-		cm3=401;
+		cm3[iSensorArrayIterator]=401;
 	}
 
-	/*
-	cm4=sensor4.distanceRead();
-	if(cm4==0)
+
+	cm4[iSensorArrayIterator]=sensor4.distanceRead();
+	if(cm4[iSensorArrayIterator]==0)
 	{
-		cm4=401;
+		cm4[iSensorArrayIterator]=401;
 	}
-	Serial.print("d");
-	*/
+
+	//tobbsegi szavazas, a kozepsot tartjuk meg:
 }
 
+void sensor_mid()
+{
 
+	if(
+			((cm1[0]<=cm1[1])&&(cm1[1]<=cm1[2]))	||	// ( 1.) <= ( 2.) <= ( 3.) ----> 2. is the middle,,, etc.
+			((cm1[2]<=cm1[1])&&(cm1[1]<=cm1[0]))	)
+	{
+			sensor1Mid=cm1[1];
+	}
+	else if(
+			((cm1[0]<=cm1[2])&&(cm1[2]<=cm1[1]))	||
+			((cm1[1]<=cm1[2])&&(cm1[2]<=cm1[0]))	)
+	{
+			sensor1Mid=cm1[2];
+	}
+	else
+	{
+			sensor1Mid=cm1[0];
+	}
+
+}
+
+/*
 void sensorIter()
   {
   //kb. 50-100ms-kent kellene meghivni
@@ -485,6 +509,8 @@ void sensorIter()
 	  	//cm1=iSensor1Previous-0.9*(cm1-iSensor1Previous);
 	}
   }
+
+  */
 void sound()
 {
 

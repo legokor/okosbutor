@@ -23,7 +23,7 @@ void timingISR(void)
   if(akku!=VoltageCriticalLow)
   {
 	  uled = true;
-	  if (!(iISR % TIMEOUT_100ms*2))
+	  if (!(iISR % (TIMEOUT_100ms*2)))
 	  {
 		  usound = true;
 	  }
@@ -47,7 +47,7 @@ void timingISR(void)
 	  sensorValueAveraging();
 	  //ritka dolgok, pl calibration
   }
-  if (!(iISR % TIMEOUT_20s*10))
+  if (!(iISR % (TIMEOUT_20s*10)))
     {
 	  ubattery=true;
 
@@ -565,35 +565,29 @@ void sound()
   */
 bool zonetrig(int zone_border_cm)
 {
-	//bZoneTriggered=false;
-	iMinCm=400;
-	//visszaad egy tavolsagot is a legkozelebbivel
+	iMinCm=400;			//visszaad egy tavolsagot is a legkozelebbivel
+
 	if(cm1<iSensor1OffsetValue && cm1<zone_border_cm)
 	{
 		iMinCm=(cm1<iMinCm)?(cm1):(iMinCm);
-		//Serial.print("sensor 1 triggers z1 with cm of ");Serial.println(cm1);
-		//bZoneTriggered = true;
 		return true;
 	}
 
-	if(iSensorIterator==2 &&cm2<iSensor2OffsetValue && cm2<zone_border_cm)
+	if(cm2<iSensor2OffsetValue && cm2<zone_border_cm)
 	{
 		iMinCm=(cm2<iMinCm)?(cm2):(iMinCm);
-		//Serial.print("sensor 2 triggers z1:");Serial.println(cm2);
-		//bZoneTriggered = true;
 		return true;
 
 	}
 
-	if(iSensorIterator==3 && cm3<iSensor3OffsetValue && cm3<zone_border_cm)
+	if(cm3<iSensor3OffsetValue && cm3<zone_border_cm)
 	{
 		iMinCm=(cm3<iMinCm)?(cm3):(iMinCm);
-		//bZoneTriggered = true;
 		return true;
 
 	}
 
-	if(iSensorIterator==4 && cm4<iSensor4OffsetValue && cm4<zone_border_cm)
+	if( cm4<iSensor4OffsetValue && cm4<zone_border_cm)
 	{
 		iMinCm=(cm4<iMinCm)?(cm4):(iMinCm);
 
@@ -902,7 +896,7 @@ void loop()
 
 	{
     usend = false;
-	//Serial.print("z1: ");Serial.print(zone1);
+	Serial.print("z1: ");Serial.print(zone1);
 	Serial.print("\t z2: ");Serial.print(zone2);
 	/*
 	Serial.print("\t cNo: ");Serial.print(x);

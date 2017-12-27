@@ -27,11 +27,17 @@ signed char dG = 0;
 
 byte x=0;
 byte increaseRate=1;
-int colorPalette=0;
+byte colorPalette=0;
+#define u8ColorPalettesCount 5
+byte u8LedSpeed = 1;
+bool bContinousLight = false;
 
-byte rgb[3][7][3] = {{{ 0, 0, 255 },       	{ 255, 255, 255 }, 	{ 255, 0, 0 },     { 0, 255, 0 },		{ 0, 0, 255 },		{ 255, 255, 0 },	{ 80, 80, 80 }    },
-                     {{0x8d, 0x6e, 0x63},	{0xff, 0x57, 0x22},	{0xff, 0x6f, 0x00},{0xcd, 0xdc, 0x39},	{0x4c, 0xaf, 0x50},	{0x00, 0x96, 0x88},	{0x7e, 0x57, 0xc2}},
-                     {{0, 125, 0},     		{0, 125, 65},     	{125, 125, 0},     {125, 65, 0},     	{0, 65, 0},       	{0, 65, 125},    	{0, 0, 125}       }
+byte rgb[u8ColorPalettesCount][7][3] =
+						{{{ 0, 0, 255 },       	{ 255, 255, 255 }, 	{ 255, 0, 0 },     { 0, 255, 0 },		{ 0, 0, 255 },		{ 255, 255, 0 },	{ 80, 80, 80 }    },
+                     	 {{0x8d, 0x6e, 0x63},	{0xff, 0x57, 0x22},	{0xff, 0x6f, 0x00},{0xcd, 0xdc, 0x39},	{0x4c, 0xaf, 0x50},	{0x00, 0x96, 0x88},	{0x7e, 0x57, 0xc2}},
+                     	 {{0, 125, 0},     		{0, 125, 65},     	{125, 125, 0},     {125, 65, 0},     	{0, 65, 0},       	{0, 65, 125},    	{0, 0, 125}       },
+						 {{ 0, 0, 255 },       	{ 255, 40, 255 }, 	{ 255, 0, 0 },     { 150, 40, 50 },		{ 20, 0, 255 },		{ 255, 100, 20 },	{ 100, 100, 100 } },
+						 {{ 215, 100, 0 },       	{ 215, 167, 36 }, 	{ 255, 0, 0 },     { 150, 40, 50 },		{ 20, 0, 255 },		{ 255, 100, 20 },	{ 100, 100, 100 }  }
                     };
 
 typedef enum  {Off=0, Normal, Automatic, Manual,Blinking} ledStateMachine;
@@ -50,7 +56,7 @@ int iColorSteppedAt=0;
 int iBlinkPeriod=0;
 int iBlinkPeriodStart=0;
 int iBlinkDuration=0;
-int iBlinkStart=0;
+long int iBlinkStart=0;
 double iBlinkFill=0.5;
 
 typedef enum  {IndicatorsOff=0, GreenIsOn,GreenBlink,RedBlinking,BothAreOn} indicatorLedStateMachine;

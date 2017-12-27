@@ -27,8 +27,8 @@
 
 ///////////// TIMEOUT VARIABLES /////
 
-int iZone1TimeoutStart=0;
-int iZone2TimeoutStart=0;
+long int iZone1TimeoutStart=0;
+long int iZone2TimeoutStart=0;
 int iZone3TimeoutStart=0;
 
 
@@ -38,7 +38,7 @@ zoneStateMachine zone2=idle;
 zoneStateMachine zone3=idle;
 
 
-volatile bool bZoneTriggered=false;
+bool bZoneTriggered=false;
 int iMinCm=400;
 
 #endif /* ZONE_H_ */

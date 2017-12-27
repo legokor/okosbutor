@@ -37,9 +37,9 @@ void timingISR(void)
 	  usensor = true;
   }
 
-  if (!(iISR % TIMEOUT_500ms))
+  if (!(iISR % TIMEOUT_100ms))
   {
-	  usend = true;
+	  //usend = true;
   }
   if (!(iISR % TIMEOUT_10s))
   {
@@ -137,8 +137,9 @@ void buttonRead()
 		}
 		else if(k>(pushStartedAt+BUTTON_TIME_5s))
 		{
+			u8LedSpeed=(u8LedSpeed==1)?(4):(1);
 			nyomogomb=LongPush;
-			Serial.println("now pushed 5s long");
+			//Serial.println("now pushed 5s long");
 		}
 		break;
 	case Released:
@@ -146,13 +147,15 @@ void buttonRead()
 		if(bButtonPushed)
 		{
 			pushedAgainAt=k;
+			colorPalette=(colorPalette==(u8ColorPalettesCount-1))?(0):(colorPalette++);
 			nyomogomb=PushedAgain;
-			Serial.println("pushed twice");
+			// Serial.println("pushed twice - switch palette");
 		}
 		else if(k>(pushReleasedAt+BUTTON_TIME_1s))
 		{
+			bContinousLight=(bContinousLight)?(false):(true);
 			nyomogomb=ShortPush;
-			Serial.println("short push");
+			// Serial.println("short push - continuous light");
 		}
 		break;
 	case ShortPush:
@@ -174,7 +177,7 @@ void buttonRead()
 
 	case LongPush:
 		// calibrate
-		ledSetBlinking(TIMEOUT_5s, BUTTON_TIME_1s, 0.5);
+		//ledSetBlinking(TIMEOUT_5s, BUTTON_TIME_1s, 0.5);
 		Serial.println("Blinking initiated");
 		if(!bButtonPushed)
 		{
@@ -209,15 +212,15 @@ void buttonRead()
 */
 inline void calcColorDifference()
 {
-	dR=(0<(finR-curR))?(1):(-1);  // fol vagy le fele kell valtozni
+	dR=(0<(finR-curR))?(u8LedSpeed):(-u8LedSpeed);  // fol vagy le fele kell valtozni
 	if(0 == (finR-curR)){dR=0;}
 	  //dR=(0==(finR-curR))?(0):(dR); // elerte a celt
 
-	dG=(0<(finG-curG))?(1):(-1);
+	dG=(0<(finG-curG))?(u8LedSpeed):(-u8LedSpeed);
 	if(0 == (finG-curG)){dG=0;}
 		  //dG=(0==(finG-curG))?(0):(dG);
 
-	dB=(0<(finB-curB))?(1):(-1);
+	dB=(0<(finB-curB))?(u8LedSpeed):(-u8LedSpeed);
 	if(0 == (finB-curB)){dB=0;}
 		  //dB=(0==(finB-curB))?(0):(dB);
 
@@ -342,8 +345,13 @@ void sensor()
   //kb. 50-100ms-kent kellene meghivni
   //atlagolni nem kell, vagy csak keveset, mert nincs zavarjel
 	long int kdel=k;
-	byte dummy=0;
-  	cm1=sensor1.distanceRead();
+	iSensor1Previous=cm1;
+	iSensor2Previous=cm2;
+	iSensor3Previous=cm3;
+	iSensor4Previous=cm4;
+
+
+	cm1=sensor1.distanceRead();
   	if(cm1==0)
   	{
   		cm1=401;
@@ -374,12 +382,18 @@ void sensor()
   			cm4=401;
   		}
   		*/
+  	cm1=(cm1+iSensor1Previous)/2;
+  	cm2=(cm2+iSensor2Previous)/2;
+  	cm3=(cm3+iSensor3Previous)/2;
+  	cm4=(cm4+iSensor4Previous)/2;
+
   }
 void sound()
 {
 
   //felkapcsolas a zone triggernel
   //itt csak hangero
+
 	switch (zone1)
 	{
 	case triggered:
@@ -535,12 +549,14 @@ void allzonetrigger()
 			if(zonetrig(iZone2Radius))
 			{
 				zone2=triggered;
-				Serial.println("z2 trig");//
+				myDFPlayer.enableLoopAll();
+				//Serial.println("z2 trig");//
 			}
 			break;
 
 		case triggered:
 			ledstrip=Automatic;
+			digitalWrite(mutePin,0);
 			//digitalWrite(13,1);//led
 			colorPalette=2;
 			if(!zonetrig(iZone2Radius))
@@ -557,6 +573,7 @@ void allzonetrigger()
 			if(k>iZone2TimeoutStart+TIMEOUT_10s)
 			{
 				//digitalWrite(13,1);//led
+				myDFPlayer.stop();	// zone 2 goes idle, music stop
 				zone2=idle;
 			}
 			else if(zonetrig(iZone2Radius))
@@ -566,7 +583,7 @@ void allzonetrigger()
 			break;
 		}//end of switch
 
-	colorBlack=(zone1==idle); //NOT(all idle)
+	colorBlack=!(zone1!=idle || bContinousLight); //NOT(all idle)
 
 	//if zone1 triggered ---> intensity big
 	//if zone2 triggered ---> int med
@@ -776,9 +793,11 @@ void loop()
   if (usend)
   {
     usend = false;
-	Serial.print("z1: ");Serial.print(zone1);
+	/*Serial.print("z1: ");Serial.print(zone1);
 	Serial.print("\t z2: ");Serial.print(zone2);
 	Serial.print("\t cNo: ");Serial.print(x);
+
+	*/
 	//Serial.print("\t set: ");Serial.print(bColorSettled);
 	/*Serial.print("\t z1tr?: ");Serial.print(zonetrig(iZone1Radius));
 	Serial.print("\t z2tr?: ");Serial.print(zonetrig(iZone2Radius));*/
@@ -795,10 +814,9 @@ void loop()
 */
 
 	Serial.print("\t");
-	Serial.println(cm1);
-	/*Serial.print("\t");
+	Serial.print(cm1);Serial.print("\t");
 	Serial.print(cm2);Serial.print("\t");
 	Serial.println(cm3);
-*/
+
   }
 }

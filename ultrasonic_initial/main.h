@@ -56,7 +56,7 @@ bool nextSound=false;
 #else
 	#define SOUND_MAX_VOL_ZONE1 14
 	#define SOUND_OFFSET_VOL_ZONE1 6
-	#define SOUND_MAX_VOL_ZONE2 10
+	#define SOUND_MAX_VOL_ZONE2 8
 	#define SOUND_OFFSET_VOL_ZONE2 3
 #endif
 

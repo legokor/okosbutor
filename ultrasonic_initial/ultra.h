@@ -22,8 +22,11 @@
 /*					For calibrating:			 		*/
 //////////////////////////////////////////////////////////
 #define SamplesToCalibrate 20
+#define SensorsToRead 3
 
 byte iSampleIterator=0;
+byte iSensorIterator=0;
+
 
 int iSensor1ValueArray[SamplesToCalibrate];
 int iSensor2ValueArray[SamplesToCalibrate];

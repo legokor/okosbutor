@@ -551,7 +551,7 @@ void sound()
 		myDFPlayer.volume(curVol);
 		digitalWrite(mutePin, 0);
 
-			Serial.println("vol++");
+			//Serial.println("vol++");
 	}
 	else if	(curVol > finVol)		// halkabb lesz
 	{
@@ -559,11 +559,12 @@ void sound()
 		myDFPlayer.volume(curVol);
 		digitalWrite(mutePin, 0);
 
-			Serial.println("vol--");
+			//Serial.println("vol--");
 	}
 
 	if (0 == curVol)
 	{			//ha 0 a hangero, akkor mute-ol
+		Serial.println("to mute");
 		digitalWrite(mutePin, 1);
 	}
 }
@@ -662,7 +663,7 @@ void allzonetrigger()
 			{
 				zone2=triggered;
 				Serial.println("randomAll - zone2 idle-> T'D");
-
+				digitalWrite(mutePin,0);
 				myDFPlayer.next();
 				//TODO: next-ekkel bekkeljuk ki
 			}
@@ -670,7 +671,6 @@ void allzonetrigger()
 
 		case triggered:
 			ledstrip=Automatic;
-			digitalWrite(mutePin,0);
 			colorPalette=2;
 			if(!zonetrig(iZone2Radius,2))
 			{
@@ -841,7 +841,7 @@ void setup()
 	pinMode(chargeRed, OUTPUT);
 	pinMode(mutePin, OUTPUT);
 
-    digitalWrite(mutePin, 1);
+    digitalWrite(mutePin, 0);
     digitalWrite(chargeGreen, 1);
     digitalWrite(chargeRed, 1);
 
@@ -874,6 +874,9 @@ void setup()
 		delay(1000);
 	}
 	Serial.println(F("done."));
+
+    digitalWrite(mutePin, 0);
+
 	myDFPlayer.volume(10);
 	myDFPlayer.enableLoopAll();
 

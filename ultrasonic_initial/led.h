@@ -11,6 +11,7 @@ bool colorBlack = false;
 #define redPin  5  //r
 #define grnPin  6  //g
 #define bluPin  3	 //b
+#define posztamensLed 2 //NOT ABLE TO PWM
 
 #define chargeGreen 17		//A3
 #define chargeRed 	18		//A4

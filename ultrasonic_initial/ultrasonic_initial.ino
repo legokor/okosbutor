@@ -275,7 +275,7 @@ void led(void){               //may increase an int to perform other tasks
   				  finR = 0;
   				  finG = 0;
   				  finB = 0;
-
+  				  digitalWrite(posztamensLed,0);
   			  }
   			  else //if(k>(iColorSettledAt+iFinalColorStepTime))
   			  {
@@ -286,6 +286,7 @@ void led(void){               //may increase an int to perform other tasks
 				finB = rgb[colorPalette][x][2];
 					//a zona valt ColorPalette-t
 	  			bColorSettled=false;
+	  			digitalWrite(posztamensLed,1);
   			  }
   		  }
   	  break;

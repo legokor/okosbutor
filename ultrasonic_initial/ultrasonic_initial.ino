@@ -441,7 +441,7 @@ void sensor()
 		cm[2][iSensorArrayIterator]=401;
 	}
 	#endif
-	#if sensorValuesToAverage==4
+	#if SensorsToRead==4
 
 	cm[3][iSensorArrayIterator]=sensor4.distanceRead();
 	if(cm[3][iSensorArrayIterator]==0)
@@ -565,7 +565,7 @@ void sound()
 
 	if (0 == curVol)
 	{			//ha 0 a hangero, akkor mute-ol
-		Serial.println("to mute");
+		//Serial.println("to mute");
 		digitalWrite(mutePin, 1);
 	}
 }
@@ -735,6 +735,7 @@ inline void initialCalibrate()
 		break;
 
 	case Initiated:
+		digitalWrite(posztamensLed,1);
 
 		if(k>(k_start+TIMEOUT_5s))
 		{
@@ -755,7 +756,7 @@ inline void initialCalibrate()
 
 		for(int j=0; j<SensorsToRead; j++)
 		{
-			cmOffsets[j]=cmAveraged[j];
+			cmOffsets[j]=(cmAveraged[j]-3>0)?(cmAveraged[j]-3):(cmAveraged[j]);
 		}
 
 		Serial.println("Calibrated with:");
@@ -763,13 +764,15 @@ inline void initialCalibrate()
 		Serial.print(cmOffsets[1]);Serial.print("\t");
 		Serial.print(cmOffsets[2]);Serial.print("\t");
 
-		#if sensorValuesToAverage==4
+		#if SensorsToRead==4
 		Serial.print(cmOffsets[3]);Serial.print("\t");
 		#endif
 
-		digitalWrite(chargeGreen, 1);
-		digitalWrite(chargeRed, 0);
+		digitalWrite(chargeGreen, 0);	//turn on?
+		digitalWrite(chargeRed, 1);	//turn off
 		Calibrated=Done;
+		digitalWrite(posztamensLed,0);
+
 		colorBlack=false;
 		//desired color set!
 		break;
@@ -842,7 +845,7 @@ void setup()
 	pinMode(chargeRed, OUTPUT);
 	pinMode(mutePin, OUTPUT);
 
-    digitalWrite(mutePin, 0);
+    digitalWrite(mutePin, 1);	//muting works with molex set
     digitalWrite(chargeGreen, 1);
     digitalWrite(chargeRed, 1);
 
@@ -947,8 +950,8 @@ void loop()
 		//Serial.print("\t z1tr?: ");Serial.print(zonetrig(iZone1Radius));
 		//Serial.print("\t z2tr?: ");Serial.print(zonetrig(iZone2Radius));
 
-		Serial.print("\t cvol:\t");Serial.print(curVol);
-		Serial.print("\t fvol:\t");Serial.print(finVol);
+		//Serial.print("\t cvol:\t");Serial.print(curVol);
+		//Serial.print("\t fvol:\t");Serial.print(finVol);
 
 
 	/*
@@ -965,7 +968,7 @@ void loop()
 		//Serial.print("\t sIter: ");Serial.print(iSensorIterator);
 
 
-		Serial.print("\t \t");
+		Serial.print("\t \tcm-s:");
 		Serial.print(cmAveraged[0]);Serial.print("\t\t");
 		Serial.print(cmAveraged[1]);Serial.print("\t\t");
 		Serial.print(cmAveraged[2]);Serial.print("\t\t");

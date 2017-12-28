@@ -39,6 +39,9 @@ zoneStateMachine zone3=idle;
 
 
 bool bZoneTriggered=false;
-int iMinCm=400;
+int iMinZone=400;			//at zoning
+
+int iMinZone1=400;
+int iMinZone2=400;
 
 #endif /* ZONE_H_ */

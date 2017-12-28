@@ -87,7 +87,6 @@ void timingISR(void)
  */
 void batteryMonitor()
 {
-
 	batteryAnalog = analogRead(batteryAnalogPin); 	//updating
 	batteryVoltage=map(batteryAnalog, 0, 1024, 0, 2190);
 	//Mapping: 1500 means 15V. (not using double^^)
@@ -552,9 +551,10 @@ void sound()
   * 	bool-t ad vissza hogy a hatosugar triggerelve van-e.
   * 	iMinCm-t allitja: minimalis triggerelt tavolsag
   */
-bool zonetrig(int zone_border_cm)
+bool zonetrig(int zone_border_cm, int cm_output_zone)
 {
-	iMinCm=400;			//visszaad egy tavolsagot is a legkozelebbivel
+	bool retval=false;
+	iMinZone=400;			//visszaad egy tavolsagot is a legkozelebbivel
 
 	//iterating all sensor
 
@@ -563,12 +563,25 @@ bool zonetrig(int zone_border_cm)
 		//midvalue:
 		if(cmAveraged[sensorsCount]<cmOffsets[sensorsCount] && cmAveraged[sensorsCount]<zone_border_cm)
 			{
-				iMinCm=(cmAveraged[sensorsCount]<iMinCm)?(cmAveraged[sensorsCount]):(iMinCm);
-				return true;
+				iMinZone=(cmAveraged[sensorsCount]<iMinZone)?(cmAveraged[sensorsCount]):(iMinZone);
+				retval =  true;
 			}
 	}
 	//TODO: cm1>iSensor1OffsetValue elvben nem lehetseges
-	return false;
+
+	switch(cm_output_zone)
+	{
+	case 1:
+		iMinZone1=iMinZone;
+		break;
+	case 2:
+		iMinZone2=iMinZone;
+		break;
+	default:
+		break;
+	}
+
+	return retval;
 }
 
 void allzonetrigger()
@@ -576,7 +589,7 @@ void allzonetrigger()
 	switch (zone1)
 	{
 	case idle :
-		if(zonetrig(iZone1Radius))
+		if(zonetrig(iZone1Radius,1))
 		{
 			//ha az 1. zonat triggereljuk...
 			ledstrip=Automatic;
@@ -587,7 +600,7 @@ void allzonetrigger()
 		break;
 
 	case triggered:
-		if(!zonetrig(iZone1Radius))
+		if(!zonetrig(iZone1Radius,1))
 		{
 			zone1=timeouting;
 			iZone1TimeoutStart=k;
@@ -601,7 +614,7 @@ void allzonetrigger()
 			digitalWrite(onboardLed,0);//led
 			zone1=idle;
 		}
-		else if(zonetrig(iZone1Radius))
+		else if(zonetrig(iZone1Radius,1))
 		{
 			zone1=triggered;
 		}
@@ -613,7 +626,7 @@ void allzonetrigger()
 	switch (zone2)
 		{
 		case idle :
-			if(zonetrig(iZone2Radius))
+			if(zonetrig(iZone2Radius,2))
 			{
 				zone2=triggered;
 				myDFPlayer.randomAll();
@@ -626,7 +639,8 @@ void allzonetrigger()
 			digitalWrite(mutePin,0);
 			//digitalWrite(13,1);//led
 			colorPalette=2;
-			if(!zonetrig(iZone2Radius))
+			//iMinZone2; //to volume
+			if(!zonetrig(iZone2Radius,2))
 			{
 				zone2=timeouting;
 				iZone2TimeoutStart=k;
@@ -646,7 +660,7 @@ void allzonetrigger()
 			{
 				finVol=0;
 			}
-			else if(zonetrig(iZone2Radius))
+			else if(zonetrig(iZone2Radius,2))
 			{
 				zone2=triggered;
 			}
@@ -891,6 +905,9 @@ void loop()
 		//Serial.print("\t set: ");Serial.print(bColorSettled);
 		//Serial.print("\t z1tr?: ");Serial.print(zonetrig(iZone1Radius));
 		//Serial.print("\t z2tr?: ");Serial.print(zonetrig(iZone2Radius));
+
+		Serial.print("\tz1cm:\t");Serial.print(iMinZone1);
+		Serial.print("\tz2cm:\t");Serial.print(iMinZone2);
 
 
 	/*

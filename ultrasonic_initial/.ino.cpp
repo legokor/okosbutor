@@ -2,7 +2,7 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2017-12-28 01:22:03
+//This file has been generated on 2017-12-28 09:41:38
 
 #include "Arduino.h"
 #include "battery.h"
@@ -23,7 +23,7 @@ void ledBlinking()   ;
 void sensor() ;
 inline void sensor_mid() ;
 void sound() ;
-bool zonetrig(int zone_border_cm) ;
+bool zonetrig(int zone_border_cm, int cm_output_zone) ;
 void allzonetrigger() ;
 inline void initialCalibrate() ;
 inline void calibrate() ;

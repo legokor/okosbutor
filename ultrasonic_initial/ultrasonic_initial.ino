@@ -487,14 +487,19 @@ void sound()
 		if(iMinZone1<20)
 		{
 			finVol = SOUND_MAX_VOL_ZONE1+SOUND_OFFSET_VOL_ZONE1;
+			colorPalette=0;
 		}
 		else if (iMinZone1<30)
 		{
 			finVol = SOUND_MID_VOL_ZONE1+SOUND_OFFSET_VOL_ZONE1;
+			colorPalette=5;
+
 		}
 		else // useless: if(iMinZone1<50)
 		{
 			finVol = SOUND_MID_VOL_ZONE1+SOUND_OFFSET_VOL_ZONE1;
+			colorPalette=5;
+
 		}
 				//finVol = SOUND_MAX_VOL_ZONE1;
 				//map(iMinZone1, iZone1Radius, 1, 0, SOUND_MAX_VOL_ZONE1) + SOUND_OFFSET_VOL_ZONE1;
@@ -511,14 +516,20 @@ void sound()
 			if(iMinZone2<60)
 			{
 				finVol = SOUND_MAX_VOL_ZONE2+SOUND_OFFSET_VOL_ZONE2;
+				colorPalette=6;
+
 			}
 			else if (iMinZone2<80)
 			{
 				finVol = SOUND_MID_VOL_ZONE2+SOUND_OFFSET_VOL_ZONE2;
+				colorPalette=6;
+
 			}
 			else // useless: if(iMinZone1<50)
 			{
 				finVol = SOUND_MID_VOL_ZONE2+SOUND_OFFSET_VOL_ZONE2;
+				colorPalette=7;
+
 			}
 			//finVol =SOUND_MAX_VOL_ZONE2;
 			finVol = (finVol<(SOUND_MAX_VOL_ZONE2+ SOUND_OFFSET_VOL_ZONE2))?(finVol+1):(SOUND_MAX_VOL_ZONE2+ SOUND_OFFSET_VOL_ZONE2);
@@ -527,8 +538,6 @@ void sound()
 		case timeouting:
 			break;
 		case idle:
-			finVol=0;
-			//Serial.println("zone2 inactive");
 			break;
 		}
 	break;
@@ -652,7 +661,9 @@ void allzonetrigger()
 			if(zonetrig(iZone2Radius,2))
 			{
 				zone2=triggered;
-				myDFPlayer.randomAll();
+				Serial.println("randomAll - zone2 idle-> T'D");
+
+				myDFPlayer.next();
 				//TODO: next-ekkel bekkeljuk ki
 			}
 			break;
@@ -660,32 +671,33 @@ void allzonetrigger()
 		case triggered:
 			ledstrip=Automatic;
 			digitalWrite(mutePin,0);
-			//digitalWrite(13,1);//led
 			colorPalette=2;
-			//iMinZone2; //to volume
 			if(!zonetrig(iZone2Radius,2))
 			{
 				zone2=timeouting;
 				iZone2TimeoutStart=k;
-				//Serial.println("now timeout started"); - eljut ide
-
+						//Serial.println("now timeout started");
 			}
 			break;
 
 		case timeouting :
-			//ido eltelt:
 			if(k>iZone2TimeoutStart+TIMEOUT_20s)
 			{
-				myDFPlayer.stop();	// zone 2 goes idle, music stop
+				myDFPlayer.pause();	// zone 2 goes idle, music stop
+				Serial.println("pause - zone2 idle-> T'D");
+				//maybe pause instead
 				zone2=idle;
 			}
 			if(k>iZone2TimeoutStart+TIMEOUT_10s)
 			{
 				finVol=0;
 			}
-			else if(zonetrig(iZone2Radius,2))
+			if(zonetrig(iZone2Radius,2))
 			{
 				zone2=triggered;
+				Serial.println("timeout -> T'D");
+
+				//maybe "start df?"
 			}
 			break;
 		}//end of switch
@@ -862,7 +874,8 @@ void setup()
 		delay(1000);
 	}
 	Serial.println(F("done."));
-
+	myDFPlayer.volume(10);
+	myDFPlayer.enableLoopAll();
 
     digitalWrite(chargeGreen, 1);
     digitalWrite(chargeRed, 0);
@@ -873,6 +886,7 @@ void loop()
 {
 	if (ucalibrate)
 	{
+		myDFPlayer.pause();
 		calibrateAtBeginning();
 	}
 	else
@@ -929,8 +943,8 @@ void loop()
 		//Serial.print("\t z1tr?: ");Serial.print(zonetrig(iZone1Radius));
 		//Serial.print("\t z2tr?: ");Serial.print(zonetrig(iZone2Radius));
 
-		Serial.print("\tz1cm:\t");Serial.print(iMinZone1);
-		Serial.print("\tz2cm:\t");Serial.print(iMinZone2);
+		Serial.print("\t cvol:\t");Serial.print(curVol);
+		Serial.print("\t fvol:\t");Serial.print(finVol);
 
 
 	/*

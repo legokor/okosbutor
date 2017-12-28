@@ -8,7 +8,7 @@
 
 
 //sensor
-Ultrasonic sensor1(trig1, echo1, 20000UL); Ultrasonic sensor2(trig2, echo2, 15000UL); Ultrasonic sensor3(trig3, echo3, 15000UL); Ultrasonic sensor4(trig4, echo4, 15000UL);
+Ultrasonic sensor1(trig1, echo1, 20000UL); Ultrasonic sensor2(trig2, echo2,20000UL); Ultrasonic sensor3(trig3, echo3, 20000UL); Ultrasonic sensor4(trig4, echo4, 20000UL);
 //mp3
 DFRobotDFPlayerMini myDFPlayer;
 							//  rx tx
@@ -111,11 +111,8 @@ void batteryMonitor()
 	switch(akku)
 	{
 	case VoltageCriticalLow:
-	  if (!(iISR % TIMEOUT_500ms))
-		{
 		  twoleds=RedBlinking;
 		  Serial.println("Voltage Critical!");
-		}
 	  break;
 	case VoltageNormal:
 	  //if (!(iISR % TIMEOUT_5s))
@@ -131,6 +128,12 @@ void batteryMonitor()
 	}
 }
 
+void blinkIndicators(bool greenToBlink, bool redToBlink)
+{
+	//	number of blinks	>>	proportional with voltage. Blink to button event
+	//	longPush initiates.
+}
+
 void buttonRead()
 {
 	buttonVal = analogRead(buttonAnalogPin); 	//updating
@@ -143,55 +146,49 @@ void buttonRead()
 		{
 			pushStartedAt=k;
 			nyomogomb=Pushed;
-				//Serial.println("now pushed");
 		}
 		break;
 	case Pushed:
-		//timer ticking from pushStartedAt
+				//timer ticking from pushStartedAt
 		if(!bButtonPushed)
 		{
 			pushReleasedAt=k;
 			nyomogomb=Released;
-				//Serial.println("now released");
-
 		}
 		else if(k>(pushStartedAt+BUTTON_TIME_5s))
 		{
-			//u8LedSpeed=(u8LedSpeed==1)?(4):(1);
+					//u8LedSpeed=(u8LedSpeed==1)?(4):(1);
 			ledSetBlinking(TIMEOUT_5s, TIMEOUT_1s, 0.5);
 			myDFPlayer.randomAll();
 			nyomogomb=LongPush;
-			//Serial.println("now pushed 5s long");
+					//Serial.println("now pushed 5s long");
 		}
 		break;
 	case Released:
-		//timer ticking from pushReleasedAt
+				//timer ticking from pushReleasedAt
 		if(bButtonPushed)
 		{
 			pushedAgainAt=k;
 			colorPalette=(colorPalette==(u8ColorPalettesCount-1))?(0):(colorPalette+1);
 			myDFPlayer.next();
 			nyomogomb=PushedAgain;
-			// Serial.println("pushed twice - switch palette");
+					// Serial.println("pushed twice - switch palette");
 		}
 		else if(k>(pushReleasedAt+BUTTON_TIME_1s))
 		{
 			bContinousLight=(bContinousLight)?(false):(true);
 			nyomogomb=ShortPush;
-			// Serial.println("short push - continuous light");
+					// Serial.println("short push - continuous light");
 		}
 		break;
 	case ShortPush:
 		//next sound
-
 		if(!bButtonPushed)
 		{
 			nyomogomb=NotPushed;
 		}
 		break;
 	case PushedAgain:
-
-
 		if(!bButtonPushed)
 		{
 			nyomogomb=NotPushed;
@@ -200,17 +197,12 @@ void buttonRead()
 
 
 	case LongPush:
-		// calibrate
-		//ledSetBlinking(TIMEOUT_5s, BUTTON_TIME_1s, 0.5);
 		if(!bButtonPushed)
 		{
-			Serial.println("Blinking initiated");
-
+			//Serial.println("Blinking initiated");
 			nyomogomb=NotPushed;
 		}
 		break;
-
-		//why
 	}//end of switch
 
 }
@@ -306,7 +298,7 @@ void led(void){               //may increase an int to perform other tasks
   //		  finG = rgb[colorPalette][x][1];
   //		  finB = rgb[colorPalette][x][2];
 
-  	  case Blinking:
+  	  case BlinkingStart:
   		  ledBlinking();
   		  break;
   	  default:
@@ -324,17 +316,66 @@ void led(void){               //may increase an int to perform other tasks
 
 void ledSetBlinking(int duration_k_increments, int period_k_increments, double fill)
   {
-	  ledstrip=Blinking;
-	  iBlinkStart=k;
-	  iBlinkPeriodStart=k;
-	  iBlinkDuration=duration_k_increments;
-	  iBlinkPeriod=period_k_increments;
-	  iBlinkFill=fill;
+	switch(ledstrip)
+	{
+	case Automatic:
+	{
+		ledstrip=BlinkingStart;
+		iBlinkStart=k;
+		iBlinkPeriodStart=k;
+		iBlinkDuration=duration_k_increments;
+		iBlinkPeriod=period_k_increments;
+		iBlinkFill=fill;
+		break;
+	}
+	/*case BlinkingStart:
+	{
+		if(k>(iBlinkStart+iBlinkDuration))							// meddig?
+		{
+			//ido letelt
+			ledstrip=Automatic;
+		}
+		else if (k<(iBlinkPeriodStart+iBlinkPeriod*iBlinkFill))
+		{
+			ledstrip=BlinkingPeriodOn;
+		}
+		else if (k<(iBlinkPeriodStart+iBlinkPeriod))
+		{
+			//meg period-on belul de a fill (bekapcsolt) allapoton kivul:
+			ledstrip=BlinkingPeriodOff;
+		}
+		else
+		{
+			//period ended
+			iBlinkPeriod=period_k_increments;
+		}
+
+		break;
+	}*/
+	default:
+		//first to be tested this way:
+		ledBlinking();
+		break;
+
+	}//eof switch
+
+	/*if(ledstrip==BlinkingPeriodOn)
+	{
+		curR=0;
+		curB=255;
+		curG=255;
+	}
+	else
+	{
+		  curR=0;
+		  curB=0;
+		  curG=0;
+	}*/
 
   }
 void ledBlinking()
   {
-	  if(Blinking==ledstrip)											// villogni fog
+	  if(BlinkingStart==ledstrip)											// villogni fog
 	  {
 		  if(k<(iBlinkStart+iBlinkDuration))							// meddig?
 		  {
@@ -349,8 +390,8 @@ void ledBlinking()
 				  else
 				  {
 					  curR=0;
-					  curB=255;
-					  curG=255;
+					  curB=0;
+					  curG=0;
 				  }
 			  }// 1 periodus vege
 			  iBlinkPeriodStart=k;
@@ -537,9 +578,10 @@ void allzonetrigger()
 	case idle :
 		if(zonetrig(iZone1Radius))
 		{
+			//ha az 1. zonat triggereljuk...
 			ledstrip=Automatic;
 			colorPalette=0;
-			digitalWrite(onboardLed,1);//led
+			digitalWrite(onboardLed,1);//led, teszthez
 			zone1=triggered;
 		}
 		break;
@@ -566,6 +608,8 @@ void allzonetrigger()
 		break;
 	}//end of switch
 
+	//ftn-ul: zone 2 trig
+
 	switch (zone2)
 		{
 		case idle :
@@ -573,7 +617,7 @@ void allzonetrigger()
 			{
 				zone2=triggered;
 				myDFPlayer.randomAll();
-				//TODO: next-ekkel bekkelj-k ki
+				//TODO: next-ekkel bekkeljuk ki
 			}
 			break;
 
@@ -622,10 +666,6 @@ void allzonetrigger()
  * 		CALIBRATION OF SENSORS
  *
  */
-void dummywait()
-{
-	return;
-}
 
 inline void initialCalibrate()
 {
@@ -638,7 +678,7 @@ inline void initialCalibrate()
 		digitalWrite(onboardLed, 1);
 		digitalWrite(chargeGreen, 0);
 		digitalWrite(chargeRed, 1);
-		Serial.println("start 5s wait:");
+		//Serial.println("start 5s wait:");
 
 		k_start=k;
 		Calibrated=Initiated;
@@ -661,7 +701,7 @@ inline void initialCalibrate()
 		delayMicroseconds(50000);	//50ms
 		sensor();
 
-		Serial.println("end 5s wait:");
+		//Serial.println("end 5s wait:");
 
 		for(int j=0; j<SensorsToRead; j++)
 		{
@@ -680,6 +720,8 @@ inline void initialCalibrate()
 		digitalWrite(chargeGreen, 1);
 		digitalWrite(chargeRed, 0);
 		Calibrated=Done;
+		colorBlack=false;
+		//desired color set!
 		break;
 	}
 	case Done:

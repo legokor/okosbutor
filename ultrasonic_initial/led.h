@@ -32,7 +32,7 @@ unsigned char increaseRate=1;
 unsigned char colorPalette=0;
 
 
-#define u8ColorPalettesCount 5
+#define u8ColorPalettesCount 8
 unsigned char u8LedSpeed = 1;
 bool bContinousLight = false;
 
@@ -41,11 +41,17 @@ unsigned char rgb[u8ColorPalettesCount][7][3] =
                      	 {{0x8d, 0x6e, 0x63},	{0xff, 0x57, 0x22},	{0xff, 0x6f, 0x00},{0xcd, 0xdc, 0x39},	{0x4c, 0xaf, 0x50},	{0x00, 0x96, 0x88},	{0x7e, 0x57, 0xc2}},
                      	 {{0, 125, 0},     		{0, 125, 65},     	{125, 125, 0},     {125, 65, 0},     	{0, 65, 0},       	{0, 65, 125},    	{0, 0, 125}       },
 						 {{ 0, 0, 255 },       	{ 255, 40, 255 }, 	{ 255, 0, 0 },     { 150, 40, 50 },		{ 20, 0, 255 },		{ 255, 100, 20 },	{ 100, 100, 100 } },
-						 {{ 215, 100, 0 },       	{ 215, 167, 36 }, 	{ 120, 120, 120 },     { 50, 70,  255 },		{ 0, 160, 255 },		{ 60, 40, 130 },	{ 120, 80, 40 }  }
+						 {{ 215, 100, 0 },       	{ 215, 167, 36 }, 	{ 120, 120, 120 },     { 50, 70,  255 },		{ 0, 160, 255 },		{ 60, 40, 130 },	{ 120, 80, 40 }  },
+
+
+		/* 5 */			 {{ 0, 0, 200 },       	{ 200, 200, 200 }, 	{ 200, 0, 0 },     { 0, 200, 0 },		{ 0, 0, 200 },		{ 200, 200, 0 },	{ 50, 50, 50 }    },
+		/* 6 */			 {{ 0, 0, 100},       	{ 100, 100, 100 }, 	{ 100, 0, 0 },     { 0, 100, 0 },		{ 0, 0, 100 },		{ 100, 100, 0 },	{ 50, 50, 50 }    },
+		/* 7 */			 {{ 0, 0, 255 },       	{ 255, 255, 255 }, 	{ 255, 0, 0 },     { 0, 255, 0 },		{ 0, 0, 255 },		{ 255, 255, 0 },	{ 80, 80, 80 }    }
                     };
 
-typedef enum  {Off=0, Normal, Automatic, Manual,Blinking} ledStateMachine;
+typedef enum  { Off=0, Normal, Automatic, Manual, BlinkingStart, BlinkingPeriodOn, BlinkingPeriodOff } ledStateMachine;
 ledStateMachine ledstrip=Off;
+
 int colorNum=0;
 
 bool bBlinkingModeActive=false;

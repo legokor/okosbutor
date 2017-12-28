@@ -2,7 +2,7 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2017-12-27 22:13:56
+//This file has been generated on 2017-12-28 01:22:03
 
 #include "Arduino.h"
 #include "battery.h"
@@ -14,6 +14,7 @@
 #include "zone.h"
 void timingISR(void) ;
 void batteryMonitor() ;
+void blinkIndicators(bool greenToBlink, bool redToBlink) ;
 void buttonRead() ;
 inline void calcColorDifference() ;
 void led(void);
@@ -24,7 +25,6 @@ inline void sensor_mid() ;
 void sound() ;
 bool zonetrig(int zone_border_cm) ;
 void allzonetrigger() ;
-void dummywait() ;
 inline void initialCalibrate() ;
 inline void calibrate() ;
 void calibrateAtBeginning() ;

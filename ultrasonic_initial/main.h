@@ -26,20 +26,6 @@
 
 bool nextSound=false;
 
-//bool sensorstate = 0;
-//volatile word max_adc;
-//
-
-//// Output variables /////
-//bool prevsensorstate = 0;
-//bool button=0;
-//bool prevButton=0;
-
-
-//for color/music changes
-//int buttonTimer = 0;
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*                      Sound                      */
@@ -55,8 +41,12 @@ bool nextSound=false;
 	#define SOUND_OFFSET_VOL_ZONE2 1
 #else
 	#define SOUND_MAX_VOL_ZONE1 14
+	#define SOUND_MID_VOL_ZONE1 10
+	#define SOUND_LOW_VOL_ZONE1 6
 	#define SOUND_OFFSET_VOL_ZONE1 6
 	#define SOUND_MAX_VOL_ZONE2 8
+	#define SOUND_MID_VOL_ZONE2 6
+	#define SOUND_MIN_VOL_ZONE2 4
 	#define SOUND_OFFSET_VOL_ZONE2 3
 #endif
 

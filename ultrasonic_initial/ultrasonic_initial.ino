@@ -483,10 +483,21 @@ void sound()
 	switch (zone1)
 	{
 	case triggered:
-		// iMinCm biztosan kisebb mint iZoneRad, hisz triggered.
-		finVol = SOUND_MAX_VOL_ZONE1;
-
-				//map(iMinCm, iZone1Radius, 1, 0, SOUND_MAX_VOL_ZONE1) + SOUND_OFFSET_VOL_ZONE1;
+		// iMinZone1 biztosan kisebb mint iZoneRad, hisz triggered.
+		if(iMinZone1<20)
+		{
+			finVol = SOUND_MAX_VOL_ZONE1+SOUND_OFFSET_VOL_ZONE1;
+		}
+		else if (iMinZone1<30)
+		{
+			finVol = SOUND_MID_VOL_ZONE1+SOUND_OFFSET_VOL_ZONE1;
+		}
+		else // useless: if(iMinZone1<50)
+		{
+			finVol = SOUND_MID_VOL_ZONE1+SOUND_OFFSET_VOL_ZONE1;
+		}
+				//finVol = SOUND_MAX_VOL_ZONE1;
+				//map(iMinZone1, iZone1Radius, 1, 0, SOUND_MAX_VOL_ZONE1) + SOUND_OFFSET_VOL_ZONE1;
 		break;
 
 	case timeouting:
@@ -497,7 +508,19 @@ void sound()
 		switch (zone2)
 		{
 		case triggered:
-					//finVol =SOUND_MAX_VOL_ZONE2;
+			if(iMinZone2<60)
+			{
+				finVol = SOUND_MAX_VOL_ZONE2+SOUND_OFFSET_VOL_ZONE2;
+			}
+			else if (iMinZone2<80)
+			{
+				finVol = SOUND_MID_VOL_ZONE2+SOUND_OFFSET_VOL_ZONE2;
+			}
+			else // useless: if(iMinZone1<50)
+			{
+				finVol = SOUND_MID_VOL_ZONE2+SOUND_OFFSET_VOL_ZONE2;
+			}
+			//finVol =SOUND_MAX_VOL_ZONE2;
 			finVol = (finVol<(SOUND_MAX_VOL_ZONE2+ SOUND_OFFSET_VOL_ZONE2))?(finVol+1):(SOUND_MAX_VOL_ZONE2+ SOUND_OFFSET_VOL_ZONE2);
 					//finVol =map(iMinCm, iZone2Radius, 1, 0, SOUND_MAX_VOL_ZONE2) + SOUND_OFFSET_VOL_ZONE2;
 			break;
@@ -519,7 +542,7 @@ void sound()
 		myDFPlayer.volume(curVol);
 		digitalWrite(mutePin, 0);
 
-			//Serial.println("vol++");
+			Serial.println("vol++");
 	}
 	else if	(curVol > finVol)		// halkabb lesz
 	{
@@ -527,7 +550,7 @@ void sound()
 		myDFPlayer.volume(curVol);
 		digitalWrite(mutePin, 0);
 
-			//Serial.println("vol--");
+			Serial.println("vol--");
 	}
 
 	if (0 == curVol)

@@ -16,42 +16,43 @@ SoftwareSerial mySoftwareSerial(7, 4);
 
 void timingISR(void)
 {
-  iISR++;
-  k++;				//very long count
+	iISR++;
+	k++;				//very long count
 
-  usensor = true;
-  usensormid = true;
+	usensor = true;
+	usensormid = true;
+	ubutton = true;
 
 
-  if(akku!=VoltageCriticalLow)
-  {
+
+	if(akku!=VoltageCriticalLow)
+	{
 	  uled = true;
 	  if (!(iISR % (TIMEOUT_100ms*2)))
 	  {
 		  usound = true;
 	  }
-  }
+	}
 
-  if (!(iISR % TIMEOUT_100ms))
-  {
+	if (!(iISR % TIMEOUT_100ms))
+	{
 	  uzone=true;
-	  ubutton = true;
 	  uindicator=true;
-  }
+	}
 
-  if (!(iISR % TIMEOUT_1s))
-  {
+	if (!(iISR % TIMEOUT_1s))
+	{
 	  usend = true;
-  }
+	}
 
 
-  if (!(iISR % TIMEOUT_10s))
-  {
+	if (!(iISR % TIMEOUT_10s))
+	{
 	  sensorValueAveraging();
 	  //ritka dolgok, pl calibration
-  }
-  if (!(iISR % (TIMEOUT_20s*10)))
-    {
+	}
+	if (!(iISR % (TIMEOUT_20s*10)))
+	{
 	  ubattery=true;
 
 
@@ -64,35 +65,36 @@ void timingISR(void)
 	  uzone=false;
 	  ucalibrate=false;
 
-  }
+	}
 
-  if(k<TIMEOUT_20s && (nyomogomb==ShortPush) && (Calibrated!=Done))
-  {
+	if(k<TIMEOUT_20s && (nyomogomb==ShortPush) && (Calibrated!=Done))
+	{
 	  ucalibrate=true;
-	  ubattery=true;
 
 	  myDFPlayer.pause();
 	  //Serial.println("entering calibration");
-  }
+	}
+	else if (k>TIMEOUT_20s && k<TIMEOUT_30s && (Calibrated==Done))
+	{
+		digitalWrite(chargeGreen,0);
+	}
 
-  if(k<TIMEOUT_20s && (nyomogomb==PushedAgain))
-   {
- 	  ubattery=true;
- 	 indicatorRed.state=ToBlink;
- 	 indicatorRed.blinkCount=5;
+	if(k<TIMEOUT_5s && (nyomogomb==PushedAgain))
+	{
+		//ubattery=true;
+		indicatorRed.state=ToBlink;
+		indicatorRed.blinkCount=1;
 
- 	indicatorGreen.state=ToBlink;
- 	indicatorGreen.blinkCount=2;
- 	  uindicator=true;
- 	  //Serial.println("battery info");
-   }
+		indicatorGreen.state=ToBlink;
+		indicatorGreen.blinkCount=1;
+		//uindicator=true; automatic performed
+		Serial.println("blink test");
+	}
 
-
-
-  if (!(iISR % 4800)) //4 perc
-    {
-  	  calibrate();
-    }
+	if (!(iISR % 4800)) //4 perc
+	{
+		calibrate();
+	}
 }
 
 
@@ -105,53 +107,62 @@ void batteryMonitor()
 	batteryAnalog = analogRead(batteryAnalogPin); 	//updating
 	batteryVoltage=map(batteryAnalog, 0, 1024, 0, 2190);
 	//Mapping: 1500 means 15V. (not using double^^)
-	if(batteryVoltage<1100)
+	if(batteryVoltage<1050)
+	{
+		akku=VoltageCriticalLow;
+		indicatorRed.onTime=TIMEOUT_500ms;
+		indicatorRed.offTime=TIMEOUT_100ms;
+		indicatorRed.blinkCount=5;
+	}
+	else if (batteryVoltage<1100)
 	{
 		akku=VoltageBelow11V;
+		indicatorRed.onTime=TIMEOUT_500ms;
+		indicatorRed.offTime=TIMEOUT_500ms;
+		indicatorRed.blinkCount=2;
+		Serial.println("2 piros 50%");
+
 	}
-	else if(batteryVoltage<1200)
+	else if(batteryVoltage<=1200)
 	{
 		akku=VoltageBelow12V;
+		indicatorGreen.onTime=TIMEOUT_100ms;
+		indicatorGreen.offTime=TIMEOUT_1s;
+		indicatorGreen.blinkCount=2;
+		Serial.println("2 zold -10%");
 	}
-	else if(batteryVoltage>=1200)
+	else if(batteryVoltage<=1330)
 	{
 		akku=VoltageNormal;
-	}
-	else if (batteryVoltage>=1330)
-	{
-		akku=VoltageHigh;
+		indicatorGreen.onTime=TIMEOUT_500ms;
+		indicatorGreen.offTime=TIMEOUT_500ms;
+		indicatorGreen.blinkCount=2;
+		Serial.println("2 zold - 50%");
 	}
 	else
 	{
-		akku=VoltageCriticalLow;
+		akku=VoltageHigh;
+		indicatorGreen.onTime=TIMEOUT_1s;
+		indicatorGreen.offTime=TIMEOUT_100ms;
+		indicatorGreen.blinkCount=3;
 	}
 
 	switch(akku)
 	{
 	case VoltageCriticalLow:
 	{
-
-		  indicatorRed.state=ToBlink;
-		  indicatorRed.blinkCount=3;
-
-		  Serial.println("Voltage Critical!");
-	  break;
+		Serial.println("Voltage Critical!");
+		break;
 	}
 	case VoltageHigh:
-
 	  //				AC / DC
 	{
-		indicatorGreen.state=ToBlink;
-		indicatorGreen.blinkCount=3;
-
-
-	  Serial.println("Voltage High, blinking");
-	  break;
+		Serial.println("Voltage High");
+		break;
 	}
 	default:
 		//dummy:
-		Serial.println("Voltage tested");
-
+		Serial.println("Voltage tested, normal  ");Serial.println(batteryVoltage);
 	}
 }
 
@@ -160,68 +171,110 @@ void blinkIndicators()
 	switch(indicatorRed.state)
 	{
 	case ToBlink:
-		if(indicatorRed.blinkCount>0)
+		//indicatorRed.WaitStartedAt=k;
+		//indicatorRed.state=Waiting;
+		indicatorRed.LitUpAt=k;
+		indicatorRed.state=IsOn;
+
+		break;
+	/*case Waiting:
+		if(k>indicatorRed.WaitStartedAt+indicatorRed.waitTime)
 		{
 			indicatorRed.LitUpAt=k;
 			indicatorRed.state=IsOn;
-			digitalWrite(chargeRed,1);
+		}
+		else
+		{
+			digitalWrite(chargeRed,0);
+		}
+		break;
+*/
+	case IsOn:
+		if(indicatorRed.blinkCount>0)
+		{
+			if(k>(indicatorRed.LitUpAt+indicatorRed.onTime))
+			{
+				indicatorRed.state=IsOff;
+				indicatorRed.TurnedOffAt=k;
+				digitalWrite(chargeRed,0);
+			}
+			else
+			{
+				digitalWrite(chargeRed,1);
+			}
 			indicatorRed.blinkCount--;
 		}
 		else
 		{
 			indicatorRed.state=IndicatorOff;
 		}
-
-		break;
-	case IsOn:
-		if(k>(indicatorRed.LitUpAt+(indicatorRed.onTime)))
-		{
-			indicatorRed.state=IsOff;
-			indicatorRed.TurnedOffAt=k;
-			digitalWrite(chargeRed,0);
-		}
 		break;
 	case IsOff:
 		if(k>(indicatorRed.TurnedOffAt+(indicatorRed.offTime)))
 		{
-			indicatorRed.state=ToBlink;
+			indicatorRed.state=IsOn;
+			indicatorRed.LitUpAt=k;
+
 
 		}
 		break;
 	}//end of switch red led
 
 	switch(indicatorGreen.state)
+	{
+	case ToBlink:
+		if(indicatorGreen.blinkCount>0)
 		{
-		case ToBlink:
-			if(indicatorGreen.blinkCount>0)
-			{
-				indicatorGreen.LitUpAt=k;
-				indicatorGreen.state=IsOn;
-				digitalWrite(chargeGreen,1);
-				indicatorGreen.blinkCount--;
-			}
-			else
-			{
-				indicatorGreen.state=IndicatorOff;
-			}
+//		indicatorGreen.WaitStartedAt=k;
+//		indicatorGreen.state=Waiting;
+			indicatorGreen.LitUpAt=k;
+			indicatorGreen.state=IsOn;
+			digitalWrite(chargeGreen,1);
+			indicatorGreen.blinkCount--;
+		}
+		else
+		{
+			indicatorGreen.state=IndicatorOff;
+		}
 
-			break;
-		case IsOn:
-			if(k>(indicatorGreen.LitUpAt+(indicatorGreen.onTime)))
-			{
-				indicatorGreen.state=IsOff;
-				indicatorGreen.TurnedOffAt=k;
-				digitalWrite(chargeGreen,0);
-			}
-			break;
-		case IsOff:
-			if(k>(indicatorGreen.TurnedOffAt+(indicatorGreen.offTime)))
-			{
-				indicatorGreen.state=ToBlink;
-			}
-			break;
-		}//end of switch red led
 
+		break;
+	/*case Waiting:
+	 * rossz helyre tettem az allpotgepben - mar nem javitom
+		Serial.println("wait");
+
+		if(k>(indicatorGreen.WaitStartedAt+indicatorGreen.waitTime))
+		{
+			indicatorGreen.LitUpAt=k;
+			indicatorGreen.state=IsOn;
+			digitalWrite(chargeGreen,1);
+
+		}
+		else
+		{
+			digitalWrite(chargeGreen,0);
+		}
+		break;*/
+
+	case IsOn:
+		Serial.println("on");
+		digitalWrite(chargeGreen,1);
+		if(k>(indicatorGreen.LitUpAt+indicatorGreen.onTime))
+		{
+			indicatorGreen.state=IsOff;
+			indicatorGreen.TurnedOffAt=k;
+			digitalWrite(chargeGreen,0);
+		}
+		break;
+	case IsOff:
+		Serial.println("off");
+
+		if(k>(indicatorGreen.TurnedOffAt+(indicatorGreen.offTime)))
+		{
+			indicatorGreen.state=ToBlink;
+		}
+		break;
+	}//end of switch green
 
 	//	number of blinks	>>	proportional with voltage. Blink to button event
 	//	longPush initiates.
@@ -259,20 +312,25 @@ void buttonRead()
 		break;
 	case Released:
 				//timer ticking from pushReleasedAt
-		if(bButtonPushed)
-		{
-			pushedAgainAt=k;
-			//colorPalette=(colorPalette==(u8ColorPalettesCount-1))?(0):(colorPalette+1);
-			uindicator=true;
-			myDFPlayer.next();
-			nyomogomb=PushedAgain;
-					// Serial.println("pushed twice - switch palette");
-		}
-		else if(k>(pushReleasedAt+BUTTON_TIME_1s))
+		if(k>(pushReleasedAt+BUTTON_TIME_1s))
 		{
 			//bContinousLight=(bContinousLight)?(false):(true);
 			nyomogomb=ShortPush;
-					 Serial.println("short push");
+			Serial.println("short push");
+		}
+		else if(bButtonPushed)
+		{
+			pushedAgainAt=k;
+			//colorPalette=(colorPalette==(u8ColorPalettesCount-1))?(0):(colorPalette+1);
+			ubattery=true;
+			uindicator=true;
+			indicatorGreen.state=ToBlink;
+			indicatorRed.state=ToBlink;
+
+			myDFPlayer.next();
+			Serial.println("double push");
+			nyomogomb=PushedAgain;
+					// Serial.println("pushed twice - switch palette");
 		}
 		break;
 	case ShortPush:
@@ -874,8 +932,8 @@ inline void initialCalibrate()
 		Serial.print(cmOffsets[3]);Serial.print("\t");
 		#endif
 
-		digitalWrite(chargeGreen, 0);	//turn on?
-		digitalWrite(chargeRed, 1);	//turn off
+		digitalWrite(chargeGreen, 1);
+		digitalWrite(chargeRed, 0);
 		Calibrated=Done;
 		digitalWrite(posztamensLed,0);
 
@@ -892,6 +950,7 @@ inline void initialCalibrate()
 
 inline void calibrate()
 {
+	Calibrated=Done;
 	// in every ~5 min, recalculating.
 	// for each sensor in sensors  //- python <3
 	for(int j=0; j<SensorsToRead; j++)

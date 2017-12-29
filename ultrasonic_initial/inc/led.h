@@ -17,8 +17,8 @@ bool colorBlack = false;
 #define bluPin  3	 //b
 #define posztamensLed 2 //NOT ABLE TO PWM
 
-#define chargeGreen 17		//A3
-#define chargeRed 	18		//A4
+#define chargeGreen 18		//A4 - bal felso = barna
+#define chargeRed 	17		//A3 - bal also = fekete
 
 #define curB OCR2B
 #define curR OCR0B
@@ -74,14 +74,16 @@ double iBlinkFill=0.5;
 typedef enum  { Off=0, Normal, Automatic, Manual, BlinkingStart, BlinkingPeriodOn, BlinkingPeriodOff } ledStateMachine;
 ledStateMachine ledstrip;
 
-typedef enum  {IndicatorOff=0, ToBlink,IsOn,IsOff} indicatorLedStateMachine;
+typedef enum  {IndicatorOff=0, ToBlink, Waiting,IsOn,IsOff} indicatorLedStateMachine;
 
 typedef struct
 {
 	indicatorLedStateMachine state;
+	long int WaitStartedAt;
 	long int LitUpAt;
 	long int TurnedOffAt;
 	unsigned char blinkCount;
+	int waitTime=TIMEOUT_500ms;
 	int onTime=TIMEOUT_100ms;
 	int offTime=TIMEOUT_2s;
 	/*

@@ -19,11 +19,13 @@ void timingISR(void)
   iISR++;
   k++;				//very long count
 
-  usensor = true;
-  if (!(iISR % 3))
-  {
-	  usensormid = true;
-  }
+//  usensor = true;
+//  usensormid = true;
+
+//  if (!(iISR % 3))
+//  {
+//	  usensormid = true;
+//  }
 
   if(akku!=VoltageCriticalLow)
   {
@@ -41,9 +43,11 @@ void timingISR(void)
 
   }
 
-  if (!(iISR % TIMEOUT_500ms))
+  if (!(iISR % TIMEOUT_1s))
   {
-	  usend = true;
+	  usensor = true;
+	  usensormid = true;
+	  //usend = true;
   }
 
 
@@ -464,24 +468,52 @@ void sensor()
 inline void sensor_mid()
 {
 	for(int i=0;i<SensorsToRead;i++)
-	if(
-			((cm[i][0]<=cm[i][1])&&(cm[i][1]<=cm[i][2]))	||	// ( 1.) <= ( 2.) <= ( 3.) ----> 2. is the middle,,, etc.
-			((cm[i][2]<=cm[i][1])&&(cm[i][1]<=cm[i][0]))	)
 	{
-			cmAveraged[i]=cm[i][1];
+		if(
+				((cm[i][0]<=cm[i][1])&&(cm[i][1]<=cm[i][2]))	||	// ( 1.) <= ( 2.) <= ( 3.) ----> 2. is the middle,,, etc.
+				((cm[i][2]<=cm[i][1])&&(cm[i][1]<=cm[i][0]))	)
+		{
+				cmAveraged[i]=cm[i][1];
+		}
+		else if(
+				((cm[i][0]<=cm[i][2])&&(cm[i][2]<=cm[i][1]))	||
+				((cm[i][1]<=cm[i][2])&&(cm[i][2]<=cm[i][0]))	)
+		{
+				cmAveraged[i]=cm[i][2];
+		}
+		else
+		{
+				cmAveraged[i]=cm[i][0];
+		}
+		Serial.print(i);Serial.print(": ");Serial.print(cm[i][0]);Serial.print("\t");Serial.print(cm[i][1]);Serial.print("\t");Serial.print(cm[i][2]);Serial.print("\t mid:");Serial.println(cmAveraged[i]);
 	}
-	else if(
-			((cm[i][0]<=cm[i][2])&&(cm[i][2]<=cm[i][1]))	||
-			((cm[i][1]<=cm[i][2])&&(cm[i][2]<=cm[i][0]))	)
-	{
-			cmAveraged[i]=cm[i][2];
-	}
-	else
-	{
-			cmAveraged[i]=cm[i][0];
-	}
+	Serial.println("-");
 }
 
+/*
+inline void sensor_max()
+{
+	for(int i=0;i<SensorsToRead;i++)
+	{
+		int max=cm[i][0];
+
+	if(
+				cm[i][1]
+		{
+				cmAveraged[i]=cm[i][1];
+		}
+		else if(
+				((cm[i][0]<=cm[i][2])&&(cm[i][2]<=cm[i][1]))	||
+				((cm[i][1]<=cm[i][2])&&(cm[i][2]<=cm[i][0]))	)
+		{
+				cmAveraged[i]=cm[i][2];
+		}
+		else
+		{
+				cmAveraged[i]=cm[i][0];
+		}
+}
+*/
 void sound()
 {
 

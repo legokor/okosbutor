@@ -82,8 +82,8 @@ typedef struct
 	long int LitUpAt;
 	long int TurnedOffAt;
 	unsigned char blinkCount;
-	int onTime=TIMEOUT_200ms;
-	int offTime=TIMEOUT_500ms;
+	int onTime=TIMEOUT_100ms;
+	int offTime=TIMEOUT_2s;
 	/*
 	int onTime=TIMEOUT_200ms;
 	int offTime=TIMEOUT_500ms;

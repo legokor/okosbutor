@@ -79,7 +79,7 @@ void timingISR(void)
    {
  	  ubattery=true;
  	 indicatorRed.state=ToBlink;
- 	 indicatorRed.blinkCount=3;
+ 	 indicatorRed.blinkCount=5;
 
  	indicatorGreen.state=ToBlink;
  	indicatorGreen.blinkCount=2;
@@ -174,14 +174,15 @@ void blinkIndicators()
 
 		break;
 	case IsOn:
-		if(k>(indicatorRed.LitUpAt+(2*TIMEOUT_100ms)))
+		if(k>(indicatorRed.LitUpAt+(indicatorRed.onTime)))
 		{
 			indicatorRed.state=IsOff;
+			indicatorRed.TurnedOffAt=k;
 			digitalWrite(chargeRed,0);
 		}
 		break;
 	case IsOff:
-		if(k>(indicatorRed.TurnedOffAt+(TIMEOUT_500ms)))
+		if(k>(indicatorRed.TurnedOffAt+(indicatorRed.offTime)))
 		{
 			indicatorRed.state=ToBlink;
 
@@ -206,14 +207,15 @@ void blinkIndicators()
 
 			break;
 		case IsOn:
-			if(k>(indicatorGreen.LitUpAt+(2*TIMEOUT_100ms)))
+			if(k>(indicatorGreen.LitUpAt+(indicatorGreen.onTime)))
 			{
 				indicatorGreen.state=IsOff;
+				indicatorGreen.TurnedOffAt=k;
 				digitalWrite(chargeGreen,0);
 			}
 			break;
 		case IsOff:
-			if(k>(indicatorGreen.TurnedOffAt+(TIMEOUT_500ms)))
+			if(k>(indicatorGreen.TurnedOffAt+(indicatorGreen.offTime)))
 			{
 				indicatorGreen.state=ToBlink;
 			}

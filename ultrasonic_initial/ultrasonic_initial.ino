@@ -874,7 +874,7 @@ inline void initialCalibrate()
 
 		for(int j=0; j<SensorsToRead; j++)
 		{
-			cmOffsets[j]=cmAveraged[j]+3;
+			cmOffsets[j]=(cmAveraged[j]-3>0)(cmAveraged[j]-3):(0);
 		}
 
 		Serial.println("Calibrated with:");

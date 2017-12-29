@@ -11,14 +11,15 @@
  C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\cores\arduino/Arduino.h \
  C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\variants\eightanaloginputs/pins_arduino.h \
  C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\variants\eightanaloginputs/../standard/pins_arduino.h \
- ..\battery.h ..\button.h ..\handlers.h ..\led.h ..\main.h \
+ ..\inc/battery.h ..\inc/button.h ..\inc/handlers.h ..\inc/led.h \
+ ..\inc/global_time.h ..\inc/main.h \
  C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\libraries\SoftwareSerial\src/SoftwareSerial.h \
  C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\cores\arduino/Stream.h \
  C:\sloeber\arduinoPlugin\libraries\DFRobotDFPlayerMini\1.0.1/DFRobotDFPlayerMini.h \
  C:\sloeber\arduinoPlugin\libraries\TimerOne\1.1.0/TimerOne.h \
  C:\sloeber\arduinoPlugin\libraries\TimerOne\1.1.0/config/known_16bit_timers.h \
  C:\sloeber\arduinoPlugin\libraries\Ultrasonic\2.1.0\src/Ultrasonic.h \
- ..\global_time.h ..\ultra.h ..\zone.h ..\ultrasonic_initial.ino
+ ..\inc/ultra.h ..\inc/zone.h ..\ultrasonic_initial.ino
 
 C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\cores\arduino/Arduino.h:
 
@@ -44,15 +45,17 @@ C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\variants\eightanal
 
 C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\variants\eightanaloginputs/../standard/pins_arduino.h:
 
-..\battery.h:
+..\inc/battery.h:
 
-..\button.h:
+..\inc/button.h:
 
-..\handlers.h:
+..\inc/handlers.h:
 
-..\led.h:
+..\inc/led.h:
 
-..\main.h:
+..\inc/global_time.h:
+
+..\inc/main.h:
 
 C:\sloeber\arduinoPlugin\packages\arduino\hardware\avr\1.6.20\libraries\SoftwareSerial\src/SoftwareSerial.h:
 
@@ -66,10 +69,8 @@ C:\sloeber\arduinoPlugin\libraries\TimerOne\1.1.0/config/known_16bit_timers.h:
 
 C:\sloeber\arduinoPlugin\libraries\Ultrasonic\2.1.0\src/Ultrasonic.h:
 
-..\global_time.h:
+..\inc/ultra.h:
 
-..\ultra.h:
-
-..\zone.h:
+..\inc/zone.h:
 
 ..\ultrasonic_initial.ino:

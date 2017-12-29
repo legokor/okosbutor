@@ -17,12 +17,12 @@
  *
  */
 
-#ifndef MAIN_H_
-#define MAIN_H_
-
 
 #include "Arduino.h"
 #include "global_time.h"
+
+#ifndef MAIN_H_
+#define MAIN_H_
 
 bool nextSound=false;
 

@@ -1,10 +1,10 @@
-#include "battery.h"
-#include "button.h"
-#include "handlers.h"
-#include "led.h"
-#include "main.h"
-#include "ultra.h"
-#include "zone.h"
+#include "inc/battery.h"
+#include "inc/button.h"
+#include "inc/handlers.h"
+#include "inc/led.h"
+#include "inc/main.h"
+#include "inc/ultra.h"
+#include "inc/zone.h"
 
 
 //sensor
@@ -69,9 +69,25 @@ void timingISR(void)
   if(k<TIMEOUT_20s && (nyomogomb==ShortPush) && (Calibrated!=Done))
   {
 	  ucalibrate=true;
+	  ubattery=true;
+
 	  myDFPlayer.pause();
 	  //Serial.println("entering calibration");
   }
+
+  if(k<TIMEOUT_20s && (nyomogomb==PushedAgain))
+   {
+ 	  ubattery=true;
+ 	 indicatorRed.state=ToBlink;
+ 	 indicatorRed.blinkCount=3;
+
+ 	indicatorGreen.state=ToBlink;
+ 	indicatorGreen.blinkCount=2;
+ 	  uindicator=true;
+ 	  //Serial.println("battery info");
+   }
+
+
 
   if (!(iISR % 4800)) //4 perc
     {
@@ -92,7 +108,6 @@ void batteryMonitor()
 	if(batteryVoltage<1100)
 	{
 		akku=VoltageBelow11V;
-		//3 pirosat villan
 	}
 	else if(batteryVoltage<1200)
 	{
@@ -106,7 +121,6 @@ void batteryMonitor()
 	{
 		akku=VoltageHigh;
 	}
-
 	else
 	{
 		akku=VoltageCriticalLow;
@@ -131,7 +145,7 @@ void batteryMonitor()
 		indicatorGreen.blinkCount=3;
 
 
-	  //Serial.print("Voltage Normal\t");  Serial.println(batteryVoltage);
+	  Serial.println("Voltage High, blinking");
 	  break;
 	}
 	default:
@@ -151,6 +165,7 @@ void blinkIndicators()
 			indicatorRed.LitUpAt=k;
 			indicatorRed.state=IsOn;
 			digitalWrite(chargeRed,1);
+			indicatorRed.blinkCount--;
 		}
 		else
 		{
@@ -169,9 +184,42 @@ void blinkIndicators()
 		if(k>(indicatorRed.TurnedOffAt+(TIMEOUT_500ms)))
 		{
 			indicatorRed.state=ToBlink;
+
 		}
 		break;
 	}//end of switch red led
+
+	switch(indicatorGreen.state)
+		{
+		case ToBlink:
+			if(indicatorGreen.blinkCount>0)
+			{
+				indicatorGreen.LitUpAt=k;
+				indicatorGreen.state=IsOn;
+				digitalWrite(chargeGreen,1);
+				indicatorGreen.blinkCount--;
+			}
+			else
+			{
+				indicatorGreen.state=IndicatorOff;
+			}
+
+			break;
+		case IsOn:
+			if(k>(indicatorGreen.LitUpAt+(2*TIMEOUT_100ms)))
+			{
+				indicatorGreen.state=IsOff;
+				digitalWrite(chargeGreen,0);
+			}
+			break;
+		case IsOff:
+			if(k>(indicatorGreen.TurnedOffAt+(TIMEOUT_500ms)))
+			{
+				indicatorGreen.state=ToBlink;
+			}
+			break;
+		}//end of switch red led
+
 
 	//	number of blinks	>>	proportional with voltage. Blink to button event
 	//	longPush initiates.
@@ -212,7 +260,8 @@ void buttonRead()
 		if(bButtonPushed)
 		{
 			pushedAgainAt=k;
-			colorPalette=(colorPalette==(u8ColorPalettesCount-1))?(0):(colorPalette+1);
+			//colorPalette=(colorPalette==(u8ColorPalettesCount-1))?(0):(colorPalette+1);
+			uindicator=true;
 			myDFPlayer.next();
 			nyomogomb=PushedAgain;
 					// Serial.println("pushed twice - switch palette");
@@ -518,35 +567,11 @@ inline void sensor_mid()
 		{
 				cmAveraged[i]=cm[i][0];
 		}
-		Serial.print(i);Serial.print(": ");Serial.print(cm[i][0]);Serial.print("\t");Serial.print(cm[i][1]);Serial.print("\t");Serial.print(cm[i][2]);Serial.print("\t mid:");Serial.println(cmAveraged[i]);
+		//Serial.print(i);Serial.print(": ");Serial.print(cm[i][0]);Serial.print("\t");Serial.print(cm[i][1]);Serial.print("\t");Serial.print(cm[i][2]);Serial.print("\t mid:");Serial.println(cmAveraged[i]);
 	}
-	Serial.println("-");
+	//Serial.println("-");
 }
 
-/*
-inline void sensor_max()
-{
-	for(int i=0;i<SensorsToRead;i++)
-	{
-		int max=cm[i][0];
-
-	if(
-				cm[i][1]
-		{
-				cmAveraged[i]=cm[i][1];
-		}
-		else if(
-				((cm[i][0]<=cm[i][2])&&(cm[i][2]<=cm[i][1]))	||
-				((cm[i][1]<=cm[i][2])&&(cm[i][2]<=cm[i][0]))	)
-		{
-				cmAveraged[i]=cm[i][2];
-		}
-		else
-		{
-				cmAveraged[i]=cm[i][0];
-		}
-}
-*/
 void sound()
 {
 
@@ -993,11 +1018,6 @@ void loop()
 			uled = false;
 			led();
 		}
-		if (uindicator)
-		{
-			uindicator=false;
-			led
-		}
 		if (usound)
 		{
 			usound = false;
@@ -1018,6 +1038,12 @@ void loop()
 		{
 			ubattery = false;
 			batteryMonitor();
+		}
+
+		if (uindicator)
+		{
+			uindicator=false;
+			blinkIndicators();
 		}
 		if (usend)
 

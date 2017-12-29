@@ -1,9 +1,10 @@
 //source is the 5fb709 commit.
-#ifndef LED_H
-#define LED_H
 
 #include "global_time.h"
+#include "Arduino.h"
 
+#ifndef LED_H
+#define LED_H
 
 bool targetReached=0;
 
@@ -32,13 +33,13 @@ signed char dB = 0;
 signed char dG = 0;
 
 unsigned char x=0;
-unsigned char increaseRate=1;
 unsigned char colorPalette=0;
 
 
 #define u8ColorPalettesCount 8
 unsigned char u8LedSpeed = 1;
 bool bContinousLight = false;
+int colorNum=0;
 
 unsigned char rgb[u8ColorPalettesCount][7][3] =
 						{{{ 0, 0, 255 },       	{ 255, 255, 255 }, 	{ 255, 0, 0 },     { 0, 255, 0 },		{ 0, 0, 255 },		{ 255, 255, 0 },	{ 80, 80, 80 }    },
@@ -51,12 +52,8 @@ unsigned char rgb[u8ColorPalettesCount][7][3] =
 		/* 5 */			 {{ 0, 0, 200 },       	{ 200, 200, 200 }, 	{ 200, 0, 0 },     { 0, 200, 0 },		{ 0, 0, 200 },		{ 200, 200, 0 },	{ 50, 50, 50 }    },
 		/* 6 */			 {{ 0, 0, 100},       	{ 100, 100, 100 }, 	{ 100, 0, 0 },     { 0, 100, 0 },		{ 0, 0, 100 },		{ 100, 100, 0 },	{ 50, 50, 50 }    },
 		/* 7 */			 {{ 0, 0, 255 },       	{ 255, 255, 255 }, 	{ 255, 0, 0 },     { 0, 255, 0 },		{ 0, 0, 255 },		{ 255, 255, 0 },	{ 80, 80, 80 }    }
-                    };
 
-typedef enum  { Off=0, Normal, Automatic, Manual, BlinkingStart, BlinkingPeriodOn, BlinkingPeriodOff } ledStateMachine;
-ledStateMachine ledstrip=Off;
-
-int colorNum=0;
+						};
 
 bool bBlinkingModeActive=false;
 bool bColorSettled=false;
@@ -74,27 +71,26 @@ long int iBlinkStart=0;
 double iBlinkFill=0.5;
 
 
+typedef enum  { Off=0, Normal, Automatic, Manual, BlinkingStart, BlinkingPeriodOn, BlinkingPeriodOff } ledStateMachine;
+ledStateMachine ledstrip;
+
 typedef enum  {IndicatorOff=0, ToBlink,IsOn,IsOff} indicatorLedStateMachine;
 
 typedef struct
 {
 	indicatorLedStateMachine state;
-	long int LitUpAt=0;
-	long int TurnedOffAt=0;
+	long int LitUpAt;
+	long int TurnedOffAt;
 	unsigned char blinkCount;
 	int onTime=TIMEOUT_200ms;
 	int offTime=TIMEOUT_500ms;
-
-	void blinkIndicator();
+	/*
+	int onTime=TIMEOUT_200ms;
+	int offTime=TIMEOUT_500ms;
+	*/
+	//void blinkIndicator();
 
 }indicatorLed;
-
-indicatorLed::blinkIndicator()
-{
-
-
-
-}
 
 indicatorLed indicatorGreen;
 indicatorLed indicatorRed;

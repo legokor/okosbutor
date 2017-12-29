@@ -8,7 +8,7 @@
 #ifndef HANDLERS_H_
 #define HANDLERS_H_
 
-word iISR=0;
+int iISR=0;
 long int k=0; //lasts as long as 29h
 
 #define inEachCycle 1

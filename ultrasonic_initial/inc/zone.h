@@ -5,11 +5,12 @@
  *      Author: László
  */
 
+#include "global_time.h"
 
 #ifndef ZONE_H_
 #define ZONE_H_
 
-#include "global_time.h"
+
 
 /*
 //period=50.000 => 1s 20inc

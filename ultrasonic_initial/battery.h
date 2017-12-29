@@ -13,11 +13,8 @@
 
 int batteryVoltage;
 int batteryAnalog;
-//int batteryLastCheckedAt=0;
-int batteryGreenBlinkedAt=0;
-int batteryRedBlinkedAt=0;
 
-typedef enum  {VoltageNormal=0, VoltageBelow12V, VoltageBelow11V, VoltageCriticalLow} batteryStateMachine;
+typedef enum  {VoltageNormal=0, VoltageBelow12V, VoltageBelow11V, VoltageCriticalLow, VoltageHigh} batteryStateMachine;
 batteryStateMachine akku=VoltageNormal;
 
 

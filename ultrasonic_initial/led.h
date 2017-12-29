@@ -2,6 +2,9 @@
 #ifndef LED_H
 #define LED_H
 
+#include "global_time.h"
+
+
 bool targetReached=0;
 
 bool colorBlack = false;
@@ -70,7 +73,30 @@ int iBlinkDuration=0;
 long int iBlinkStart=0;
 double iBlinkFill=0.5;
 
-typedef enum  {IndicatorsOff=0, GreenIsOn,GreenBlink,RedBlinking,BothAreOn} indicatorLedStateMachine;
-indicatorLedStateMachine twoleds=IndicatorsOff;
+
+typedef enum  {IndicatorOff=0, ToBlink,IsOn,IsOff} indicatorLedStateMachine;
+
+typedef struct
+{
+	indicatorLedStateMachine state;
+	long int LitUpAt=0;
+	long int TurnedOffAt=0;
+	unsigned char blinkCount;
+	int onTime=TIMEOUT_200ms;
+	int offTime=TIMEOUT_500ms;
+
+	void blinkIndicator();
+
+}indicatorLed;
+
+indicatorLed::blinkIndicator()
+{
+
+
+
+}
+
+indicatorLed indicatorGreen;
+indicatorLed indicatorRed;
 
 #endif

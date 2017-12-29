@@ -17,6 +17,7 @@ long int k=0; //lasts as long as 29h
 
 bool ubattery = false;
 bool ubutton=false;
+bool uindicator=false;
 bool uled=false;
 bool usend=false;
 bool usensor=false;

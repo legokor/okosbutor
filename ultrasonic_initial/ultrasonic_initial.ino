@@ -19,13 +19,9 @@ void timingISR(void)
   iISR++;
   k++;				//very long count
 
-//  usensor = true;
-//  usensormid = true;
+  usensor = true;
+  usensormid = true;
 
-//  if (!(iISR % 3))
-//  {
-//	  usensormid = true;
-//  }
 
   if(akku!=VoltageCriticalLow)
   {
@@ -40,14 +36,12 @@ void timingISR(void)
   {
 	  uzone=true;
 	  ubutton = true;
-
+	  uindicator=true;
   }
 
   if (!(iISR % TIMEOUT_1s))
   {
-	  usensor = true;
-	  usensormid = true;
-	  //usend = true;
+	  usend = true;
   }
 
 
@@ -110,7 +104,7 @@ void batteryMonitor()
 	}
 	else if (batteryVoltage>=1330)
 	{
-		//3 zoldet villan bekapcsolaskor
+		akku=VoltageHigh;
 	}
 
 	else
@@ -121,16 +115,25 @@ void batteryMonitor()
 	switch(akku)
 	{
 	case VoltageCriticalLow:
-		  twoleds=RedBlinking;
+	{
+
+		  indicatorRed.state=ToBlink;
+		  indicatorRed.blinkCount=3;
+
 		  Serial.println("Voltage Critical!");
 	  break;
-	case VoltageNormal:
-	  //if (!(iISR % TIMEOUT_5s))
-		{
-		  twoleds=GreenBlink;
-		  //Serial.print("Voltage Normal\t");  Serial.println(batteryVoltage);
-		  break;
-		}
+	}
+	case VoltageHigh:
+
+	  //				AC / DC
+	{
+		indicatorGreen.state=ToBlink;
+		indicatorGreen.blinkCount=3;
+
+
+	  //Serial.print("Voltage Normal\t");  Serial.println(batteryVoltage);
+	  break;
+	}
 	default:
 		//dummy:
 		Serial.println("Voltage tested");
@@ -138,8 +141,38 @@ void batteryMonitor()
 	}
 }
 
-void blinkIndicators(bool greenToBlink, bool redToBlink)
+void blinkIndicators()
 {
+	switch(indicatorRed.state)
+	{
+	case ToBlink:
+		if(indicatorRed.blinkCount>0)
+		{
+			indicatorRed.LitUpAt=k;
+			indicatorRed.state=IsOn;
+			digitalWrite(chargeRed,1);
+		}
+		else
+		{
+			indicatorRed.state=IndicatorOff;
+		}
+
+		break;
+	case IsOn:
+		if(k>(indicatorRed.LitUpAt+(2*TIMEOUT_100ms)))
+		{
+			indicatorRed.state=IsOff;
+			digitalWrite(chargeRed,0);
+		}
+		break;
+	case IsOff:
+		if(k>(indicatorRed.TurnedOffAt+(TIMEOUT_500ms)))
+		{
+			indicatorRed.state=ToBlink;
+		}
+		break;
+	}//end of switch red led
+
 	//	number of blinks	>>	proportional with voltage. Blink to button event
 	//	longPush initiates.
 }
@@ -960,7 +993,11 @@ void loop()
 			uled = false;
 			led();
 		}
-
+		if (uindicator)
+		{
+			uindicator=false;
+			led
+		}
 		if (usound)
 		{
 			usound = false;

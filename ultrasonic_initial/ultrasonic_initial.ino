@@ -57,7 +57,7 @@ void timingISR(void)
 	  ubattery=true;
 
 
-	  Serial.println("soft reset");	  //ubattery = false;
+	  Serial.println("soft reset");
 	  ubutton=false;
 	  uled=false;
 	  usend=false;
@@ -71,6 +71,7 @@ void timingISR(void)
   if(k<TIMEOUT_20s && (nyomogomb==ShortPush) && (Calibrated!=Done))
   {
 	  ucalibrate=true;
+	  myDFPlayer.pause();
 	  //Serial.println("entering calibration");
   }
 
@@ -93,6 +94,7 @@ void batteryMonitor()
 	if(batteryVoltage<1100)
 	{
 		akku=VoltageBelow11V;
+		//3 pirosat villan
 	}
 	else if(batteryVoltage<1200)
 	{
@@ -102,6 +104,11 @@ void batteryMonitor()
 	{
 		akku=VoltageNormal;
 	}
+	else if (batteryVoltage>=1330)
+	{
+		//3 zoldet villan bekapcsolaskor
+	}
+
 	else
 	{
 		akku=VoltageCriticalLow;
@@ -158,7 +165,7 @@ void buttonRead()
 		{
 					//u8LedSpeed=(u8LedSpeed==1)?(4):(1);
 			ledSetBlinking(TIMEOUT_5s, TIMEOUT_1s, 0.5);
-			myDFPlayer.randomAll();
+			//myDFPlayer.randomAll();
 			nyomogomb=LongPush;
 					//Serial.println("now pushed 5s long");
 		}
@@ -175,9 +182,9 @@ void buttonRead()
 		}
 		else if(k>(pushReleasedAt+BUTTON_TIME_1s))
 		{
-			bContinousLight=(bContinousLight)?(false):(true);
+			//bContinousLight=(bContinousLight)?(false):(true);
 			nyomogomb=ShortPush;
-					// Serial.println("short push - continuous light");
+					 Serial.println("short push");
 		}
 		break;
 	case ShortPush:
@@ -450,7 +457,7 @@ void sensor()
 	}
 
 	#endif
-	//tobbsegi szavazas, a kozepsot tartjuk meg:
+	//tobbsegi szavazas, a kozepsot tartjuk meg: sensor_mid()
 
 }
 
@@ -564,8 +571,8 @@ void sound()
 	}
 
 	if (0 == curVol)
-	{			//ha 0 a hangero, akkor mute-ol
-		//Serial.println("to mute");
+	{				//ha 0 a hangero, akkor mute-ol
+			//Serial.println("to mute");
 		digitalWrite(mutePin, 1);
 	}
 }
@@ -696,14 +703,21 @@ void allzonetrigger()
 			if(zonetrig(iZone2Radius,2))
 			{
 				zone2=triggered;
-				Serial.println("timeout -> T'D");
+				//Serial.println("timeout -> T'D");
 
-				//maybe "start df?"
 			}
 			break;
 		}//end of switch
 
 	colorBlack=!(zone1!=idle || bContinousLight); //NOT(all idle)
+	if(zone2!=idle)
+	{
+		digitalWrite(posztamensLed, 1);	//on
+	}
+	else
+	{
+		digitalWrite(posztamensLed, 0);	//off when zone 2 idle
+	}
 
 	//if zone1 triggered ---> intensity big
 	//if zone2 triggered ---> int med
@@ -756,7 +770,7 @@ inline void initialCalibrate()
 
 		for(int j=0; j<SensorsToRead; j++)
 		{
-			cmOffsets[j]=(cmAveraged[j]-3>0)?(cmAveraged[j]-3):(cmAveraged[j]);
+			cmOffsets[j]=cmAveraged[j]+3;
 		}
 
 		Serial.println("Calibrated with:");
@@ -893,7 +907,7 @@ void loop()
 {
 	if (ucalibrate)
 	{
-		myDFPlayer.pause();
+		// szandekosan nincs itt: majd a kalibralas vegen nullazodik ucalibrate=false;
 		calibrateAtBeginning();
 	}
 	else
@@ -968,7 +982,7 @@ void loop()
 		//Serial.print("\t sIter: ");Serial.print(iSensorIterator);
 
 
-		Serial.print("\t \tcm-s:");
+		Serial.print("\t cm-s:\t");
 		Serial.print(cmAveraged[0]);Serial.print("\t\t");
 		Serial.print(cmAveraged[1]);Serial.print("\t\t");
 		Serial.print(cmAveraged[2]);Serial.print("\t\t");

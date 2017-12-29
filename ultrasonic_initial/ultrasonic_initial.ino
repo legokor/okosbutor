@@ -391,7 +391,6 @@ void led(void){               //may increase an int to perform other tasks
   				  finR = 0;
   				  finG = 0;
   				  finB = 0;
-  				  digitalWrite(posztamensLed,0);
   			  }
   			  else //if(k>(iColorSettledAt+iFinalColorStepTime))
   			  {
@@ -402,7 +401,6 @@ void led(void){               //may increase an int to perform other tasks
 				finB = rgb[colorPalette][x][2];
 					//a zona valt ColorPalette-t
 	  			bColorSettled=false;
-	  			digitalWrite(posztamensLed,1);
   			  }
   		  }
   	  break;
@@ -791,6 +789,7 @@ void allzonetrigger()
 			break;
 
 		case triggered:
+			digitalWrite(posztamensLed,1);
 			ledstrip=Automatic;
 			colorPalette=2;
 			if(!zonetrig(iZone2Radius,2))
@@ -805,13 +804,14 @@ void allzonetrigger()
 			if(k>iZone2TimeoutStart+TIMEOUT_20s)
 			{
 				myDFPlayer.pause();	// zone 2 goes idle, music stop
-				Serial.println("pause - zone2 idle-> T'D");
-				//maybe pause instead
+				Serial.println("timeout - posztamens led ki");
+				digitalWrite(posztamensLed,0);
 				zone2=idle;
 			}
 			if(k>iZone2TimeoutStart+TIMEOUT_10s)
 			{
 				finVol=0;
+
 			}
 			if(zonetrig(iZone2Radius,2))
 			{
@@ -823,14 +823,6 @@ void allzonetrigger()
 		}//end of switch
 
 	colorBlack=!(zone1!=idle || bContinousLight); //NOT(all idle)
-	if(zone2!=idle)
-	{
-		digitalWrite(posztamensLed, 1);	//on
-	}
-	else
-	{
-		digitalWrite(posztamensLed, 0);	//off when zone 2 idle
-	}
 
 	//if zone1 triggered ---> intensity big
 	//if zone2 triggered ---> int med
@@ -862,8 +854,7 @@ inline void initialCalibrate()
 		break;
 
 	case Initiated:
-		digitalWrite(posztamensLed,1);
-
+		//posztaled
 		if(k>(k_start+TIMEOUT_5s))
 		{
 			Serial.println("5s elapsed!");
@@ -898,7 +889,9 @@ inline void initialCalibrate()
 		digitalWrite(chargeGreen, 1);
 		digitalWrite(chargeRed, 0);
 		Calibrated=Done;
-		digitalWrite(posztamensLed,0);
+		//digitalWrite(posztamensLed,0);
+		//Serial.println("poszta ki");
+
 
 		colorBlack=false;
 		//desired color set!
@@ -966,6 +959,7 @@ void setup()
   Serial.begin(230400);
   Serial.println("serial enabled");
 
+	pinMode(posztamensLed, OUTPUT);
   	pinMode(redPin, OUTPUT);
   	pinMode(grnPin, OUTPUT);
 	pinMode(bluPin, OUTPUT);

@@ -169,64 +169,47 @@ void batteryMonitor()
 void blinkIndicators()
 {
 	switch(indicatorRed.state)
-	{
-	case ToBlink:
-		//indicatorRed.WaitStartedAt=k;
-		//indicatorRed.state=Waiting;
-		indicatorRed.LitUpAt=k;
-		indicatorRed.state=IsOn;
+		{
+		case ToBlink:
+			if(indicatorRed.blinkCount>0)
+			{
+				indicatorRed.LitUpAt=k;
+				indicatorRed.state=IsOn;
+				digitalWrite(chargeRed,1);
+				indicatorRed.blinkCount--;
+			}
+			else
+			{
+				indicatorRed.state=IndicatorOff;
+				digitalWrite(chargeRed,0);
+			}
+			break;
 
-		break;
-	/*case Waiting:
-		if(k>indicatorRed.WaitStartedAt+indicatorRed.waitTime)
-		{
-			indicatorRed.LitUpAt=k;
-			indicatorRed.state=IsOn;
-		}
-		else
-		{
-			digitalWrite(chargeRed,0);
-		}
-		break;
-*/
-	case IsOn:
-		if(indicatorRed.blinkCount>0)
-		{
+		case IsOn:
+			Serial.println("on_red");
+			digitalWrite(chargeRed,1);
 			if(k>(indicatorRed.LitUpAt+indicatorRed.onTime))
 			{
 				indicatorRed.state=IsOff;
 				indicatorRed.TurnedOffAt=k;
 				digitalWrite(chargeRed,0);
 			}
-			else
+			break;
+		case IsOff:
+			Serial.println("off_red");
+
+			if(k>(indicatorRed.TurnedOffAt+(indicatorRed.offTime)))
 			{
-				digitalWrite(chargeRed,1);
+				indicatorRed.state=ToBlink;
 			}
-			indicatorRed.blinkCount--;
-		}
-		else
-		{
-			indicatorRed.state=IndicatorOff;
-		}
-		break;
-	case IsOff:
-		if(k>(indicatorRed.TurnedOffAt+(indicatorRed.offTime)))
-		{
-			indicatorRed.state=IsOn;
-			indicatorRed.LitUpAt=k;
-
-
-		}
-		break;
-	}//end of switch red led
+			break;
+		}//end of switch red led
 
 	switch(indicatorGreen.state)
 	{
 	case ToBlink:
 		if(indicatorGreen.blinkCount>0)
 		{
-//		indicatorGreen.WaitStartedAt=k;
-//		indicatorGreen.state=Waiting;
 			indicatorGreen.LitUpAt=k;
 			indicatorGreen.state=IsOn;
 			digitalWrite(chargeGreen,1);
@@ -235,29 +218,11 @@ void blinkIndicators()
 		else
 		{
 			indicatorGreen.state=IndicatorOff;
-		}
-
-
-		break;
-	/*case Waiting:
-	 * rossz helyre tettem az allpotgepben - mar nem javitom
-		Serial.println("wait");
-
-		if(k>(indicatorGreen.WaitStartedAt+indicatorGreen.waitTime))
-		{
-			indicatorGreen.LitUpAt=k;
-			indicatorGreen.state=IsOn;
-			digitalWrite(chargeGreen,1);
-
-		}
-		else
-		{
 			digitalWrite(chargeGreen,0);
 		}
-		break;*/
+		break;
 
 	case IsOn:
-		Serial.println("on");
 		digitalWrite(chargeGreen,1);
 		if(k>(indicatorGreen.LitUpAt+indicatorGreen.onTime))
 		{
@@ -267,8 +232,6 @@ void blinkIndicators()
 		}
 		break;
 	case IsOff:
-		Serial.println("off");
-
 		if(k>(indicatorGreen.TurnedOffAt+(indicatorGreen.offTime)))
 		{
 			indicatorGreen.state=ToBlink;

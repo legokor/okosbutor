@@ -761,12 +761,47 @@ void allzonetrigger()
 	case triggered:
 		if(!zonetrig(iZone1Radius,1))
 		{
-			zone1=timeouting;
+			zone1=leaved;
 			iZone1TimeoutStart=k;
 		}
 		break;
 
-	case timeouting :
+	case leaved:
+		//elmentek, de meg nem telt el 5s
+
+		if(k>iZone1TimeoutStart+TIMEOUT_5s)
+		{
+			//5s-nel tobb ido telt el
+			finVol=0;
+			digitalWrite(onboardLed,0);
+			zone1=smallTimeout;
+			//halkulas elkezdodik, meg nem allitjuk meg
+		}
+		else if(zonetrig(iZone1Radius,1))
+		{
+			zone1=triggered;
+		}
+
+		break;
+
+	case smallTimeout:
+		if(k>iZone1TimeoutStart+TIMEOUT_10s)
+		{
+			//mar eltelt 10s de 15 meg nem: megall
+			myDFPlayer.pause();
+			digitalWrite(mutePin,0);	//mute
+			zone1=bigTimeout;
+			//ha 10s utan jonnek vissza - folytat
+
+			if(zonetrig(iZone1Radius,1))
+			{
+				myDFPlayer.start();	// zone 2 goes idle, music stop
+				digitalWrite(mutePin,1);	//mute off
+				zone1=triggered;
+			}
+		}
+		break;
+	case bigTimeout:
 		//ido eltelt:
 		if(k>iZone1TimeoutStart+TIMEOUT_15s)
 		{
@@ -782,33 +817,6 @@ void allzonetrigger()
 				zone1=triggered;
 			}
 
-		}
-		else if(k>iZone1TimeoutStart+TIMEOUT_10s)
-		{
-			//mar eltelt 10s de 15 meg nem: megall
-			myDFPlayer.pause();
-			digitalWrite(mutePin,0);	//mute
-
-			//ha 10s utan jonnek vissza - folytat
-			if(zonetrig(iZone1Radius,1))
-			{
-				myDFPlayer.start();	// zone 2 goes idle, music stop
-				digitalWrite(mutePin,1);	//mute off
-				zone1=triggered;
-			}
-
-		}
-		else if(k>iZone1TimeoutStart+TIMEOUT_5s)
-		{
-			//5s-nel tobb ido telt el
-			finVol=0;
-			digitalWrite(onboardLed,0);
-
-			//halkulas elkezdodik, meg nem allitjuk meg
-		}
-		else if(zonetrig(iZone1Radius,1))
-		{
-			zone1=triggered;
 		}
 		break;
 	}//end of switch
@@ -832,35 +840,28 @@ void allzonetrigger()
 			colorPalette=2;
 			if(!zonetrig(iZone2Radius,2))
 			{
-				zone2=timeouting;
+				zone2=bigTimeout;
 				iZone2TimeoutStart=k;
 						//Serial.println("now timeout started");
 			}
 			break;
 
-		case timeouting :
-			if(k>iZone2TimeoutStart+TIMEOUT_20s)
-			{
-				myDFPlayer.pause();	// zone 2 goes idle, music stop
-				Serial.println("timeout - posztamens led ki");
-				digitalWrite(posztamensLed,0);
-				zone2=idle;
-			}
+		case leaved :
 			if(k>iZone2TimeoutStart+TIMEOUT_10s)
 			{
-				finVol=0;
-
+				Serial.println("timeout - posztamens led ki");
+				digitalWrite(posztamensLed,0);
+				//HALVANYODJON
+				zone2=idle;
 			}
 			if(zonetrig(iZone2Radius,2))
 			{
 				zone2=triggered;
-				//Serial.println("timeout -> T'D");
-
 			}
 			break;
-		}//end of switch
+		}
 
-	colorBlack=!(zone2!=idle); //NOT(all idle)
+	colorBlack=(zone2==triggered); // le kell kezelni a posztamensledet is
 
 	//if zone1 triggered ---> intensity big
 	//if zone2 triggered ---> int med

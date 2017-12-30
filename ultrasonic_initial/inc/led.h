@@ -13,9 +13,9 @@ bool colorBlack = false;
 #define onboardLed  13  // 13
 
 #define redPin  5  //r
-#define grnPin  6  //g
+#define grnPin  6  //g // 9 - ideiglenes posztamens led
 #define bluPin  3	 //b
-#define posztamensLed 2 //NOT ABLE TO PWM
+#define posztamensLed 2 //NOT ABLE TO PWM ---> 9 INSTEAD
 
 //3 sensor version:
 #define chargeGreen 17		//A3 - bal also = fekete

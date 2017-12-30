@@ -33,7 +33,7 @@ long int iZone2TimeoutStart=0;
 int iZone3TimeoutStart=0;
 
 
-typedef enum  {idle=0, triggered,timeouting} 	zoneStateMachine;
+typedef enum  {idle=0, triggered, leaved, smallTimeout, bigTimeout} 	zoneStateMachine;
 zoneStateMachine zone1=idle;
 zoneStateMachine zone2=idle;
 zoneStateMachine zone3=idle;

@@ -767,9 +767,9 @@ void allzonetrigger()
 	case leaved:
 		//elmentek, de meg nem telt el 5s
 
-		if(k>iZone1TimeoutStart+TIMEOUT_5s)
+		if(k>iZone1TimeoutStart+TIMEOUT_10s)
 		{
-			Serial.println("zone 1 5s elapsed --> small timeout");
+			Serial.println("zone 1 10s elapsed --> small timeout");
 
 			//5s-nel tobb ido telt el
 			finVol=0;
@@ -785,9 +785,9 @@ void allzonetrigger()
 		break;
 
 	case smallTimeout:
-		if(k>iZone1TimeoutStart+TIMEOUT_10s)
+		if(k>iZone1TimeoutStart+TIMEOUT_15s)
 		{
-			Serial.println("zone 1 10s elapsed --> big timeout");
+			Serial.println("zone 1 15s elapsed --> big timeout");
 
 			//mar eltelt 10s de 15 meg nem: megall
 			myDFPlayer.pause();
@@ -804,9 +804,9 @@ void allzonetrigger()
 		break;
 	case bigTimeout:
 		//ido eltelt:
-		if(k>iZone1TimeoutStart+TIMEOUT_15s)
+		if(k>iZone1TimeoutStart+TIMEOUT_20s)
 		{
-			Serial.println("zone 1 15s elapsed --> idle");
+			Serial.println("zone 1 20s elapsed --> idle");
 
 			//15s - nel tobb telt el
 			myDFPlayer.stop();
@@ -841,8 +841,10 @@ void allzonetrigger()
 			ledstrip=Automatic;
 			colorPalette=2;
 			if(!zonetrig(iZone2Radius,2))
+			colorBlack=false;
 			{
-				zone2=bigTimeout;
+				zone2=leaved;
+				colorBlack=true;
 				iZone2TimeoutStart=k;
 						//Serial.println("now timeout started");
 			}
@@ -863,7 +865,7 @@ void allzonetrigger()
 			break;
 		}
 
-	colorBlack=!(zone2==triggered); // le kell kezelni a posztamensledet is
+	//colorBlack=!(zone2==triggered); // le kell kezelni a posztamensledet is
 
 }
 

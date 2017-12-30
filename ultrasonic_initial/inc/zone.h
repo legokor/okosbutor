@@ -22,7 +22,7 @@
 */
 
 
-#define iZone1Radius 70 // [cm] -  dont get confused with Sharp values!
+#define iZone1Radius 60 // [cm] -  dont get confused with Sharp values!
 #define iZone2Radius 110
 
 

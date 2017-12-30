@@ -773,6 +773,15 @@ void allzonetrigger()
 			//15s - nel tobb telt el
 			myDFPlayer.stop();
 			zone1=idle;
+
+			//15s utan jon vissza - uj zene
+			if(zonetrig(iZone1Radius,1))
+			{
+				myDFPlayer.next();	// zone 2 goes idle, music stop
+				digitalWrite(mutePin,1);	//mute off
+				zone1=triggered;
+			}
+
 		}
 		else if(k>iZone1TimeoutStart+TIMEOUT_10s)
 		{

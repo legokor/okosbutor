@@ -625,9 +625,6 @@ void sound()
 		}
 		break;
 
-	case timeouting:
-		break;
-
 	case idle:
 
 		finVol=0;
@@ -747,7 +744,6 @@ void allzonetrigger()
 		if(zonetrig(iZone1Radius,1))
 		{
 			//ha az 1. zonat triggereljuk...
-			ledstrip=Automatic;
 			colorPalette=0;
 			digitalWrite(onboardLed,1);//led, teszthez
 			zone1=triggered;
@@ -762,6 +758,8 @@ void allzonetrigger()
 		if(!zonetrig(iZone1Radius,1))
 		{
 			zone1=leaved;
+			Serial.println("zone 1 leaved");
+
 			iZone1TimeoutStart=k;
 		}
 		break;
@@ -771,6 +769,8 @@ void allzonetrigger()
 
 		if(k>iZone1TimeoutStart+TIMEOUT_5s)
 		{
+			Serial.println("zone 1 5s elapsed --> small timeout");
+
 			//5s-nel tobb ido telt el
 			finVol=0;
 			digitalWrite(onboardLed,0);
@@ -787,37 +787,39 @@ void allzonetrigger()
 	case smallTimeout:
 		if(k>iZone1TimeoutStart+TIMEOUT_10s)
 		{
+			Serial.println("zone 1 10s elapsed --> big timeout");
+
 			//mar eltelt 10s de 15 meg nem: megall
 			myDFPlayer.pause();
 			digitalWrite(mutePin,0);	//mute
 			zone1=bigTimeout;
-			//ha 10s utan jonnek vissza - folytat
-
-			if(zonetrig(iZone1Radius,1))
-			{
-				myDFPlayer.start();	// zone 2 goes idle, music stop
-				digitalWrite(mutePin,1);	//mute off
-				zone1=triggered;
-			}
+		}
+		//ha 10s utan jonnek vissza - folytat
+		else if(zonetrig(iZone1Radius,1))
+		{
+			myDFPlayer.start();	// zone 2 goes idle, music stop
+			digitalWrite(mutePin,1);	//mute off
+			zone1=triggered;
 		}
 		break;
 	case bigTimeout:
 		//ido eltelt:
 		if(k>iZone1TimeoutStart+TIMEOUT_15s)
 		{
+			Serial.println("zone 1 15s elapsed --> idle");
+
 			//15s - nel tobb telt el
 			myDFPlayer.stop();
 			zone1=idle;
-
-			//15s utan jon vissza - uj zene
-			if(zonetrig(iZone1Radius,1))
-			{
-				myDFPlayer.next();	// zone 2 goes idle, music stop
-				digitalWrite(mutePin,1);	//mute off
-				zone1=triggered;
-			}
-
 		}
+		//15s utan jon vissza - uj zene
+		else if(zonetrig(iZone1Radius,1))
+		{
+			myDFPlayer.next();	// zone 2 goes idle, music stop
+			digitalWrite(mutePin,1);	//mute off
+			zone1=triggered;
+		}
+
 		break;
 	}//end of switch
 
@@ -835,7 +837,7 @@ void allzonetrigger()
 			break;
 
 		case triggered:
-			digitalWrite(posztamensLed,1);
+			digitalWrite(posztamensLed,1); //PWM LABRA
 			ledstrip=Automatic;
 			colorPalette=2;
 			if(!zonetrig(iZone2Radius,2))
@@ -849,7 +851,7 @@ void allzonetrigger()
 		case leaved :
 			if(k>iZone2TimeoutStart+TIMEOUT_10s)
 			{
-				Serial.println("timeout - posztamens led ki");
+				Serial.println("zone 2 10s timeout");
 				digitalWrite(posztamensLed,0);
 				//HALVANYODJON
 				zone2=idle;
@@ -861,10 +863,7 @@ void allzonetrigger()
 			break;
 		}
 
-	colorBlack=(zone2==triggered); // le kell kezelni a posztamensledet is
-
-	//if zone1 triggered ---> intensity big
-	//if zone2 triggered ---> int med
+	colorBlack=!(zone2==triggered); // le kell kezelni a posztamensledet is
 
 }
 
@@ -931,10 +930,6 @@ inline void initialCalibrate()
 		Calibrated=Done;
 		digitalWrite(posztamensLed,0);
 		//Serial.println("poszta ki");
-
-
-		colorBlack=false;
-		//desired color set!
 		break;
 	}
 	case Done:

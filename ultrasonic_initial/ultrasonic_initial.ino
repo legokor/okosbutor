@@ -186,7 +186,7 @@ void blinkIndicators()
 			break;
 
 		case IsOn:
-			Serial.println("on_red");
+			//Serial.println("on_red");
 			digitalWrite(chargeRed,1);
 			if(k>(indicatorRed.LitUpAt+indicatorRed.onTime))
 			{
@@ -196,7 +196,7 @@ void blinkIndicators()
 			}
 			break;
 		case IsOff:
-			Serial.println("off_red");
+			//Serial.println("off_red");
 
 			if(k>(indicatorRed.TurnedOffAt+(indicatorRed.offTime)))
 			{
@@ -874,7 +874,7 @@ inline void initialCalibrate()
 
 		for(int j=0; j<SensorsToRead; j++)
 		{
-			cmOffsets[j]=(cmAveraged[j]-3>0)(cmAveraged[j]-3):(0);
+			cmOffsets[j]=(cmAveraged[j]-4>0)?(cmAveraged[j]-4):(0);
 		}
 
 		Serial.println("Calibrated with:");
@@ -916,7 +916,9 @@ inline void calibrate()
 		{
 			iSumToCalibrate+=cmSamples[j][i];
 		}
-		cmOffsets[j]=iSumToCalibrate/SamplesToCalibrate;
+		//cmOffsets[j]=iSumToCalibrate/SamplesToCalibrate;
+		cmOffsets[j]=(iSumToCalibrate/SamplesToCalibrate-4>0)?(iSumToCalibrate/SamplesToCalibrate-4):(0);
+
 	}
 
 	Serial.println("Calibrated with:");

@@ -18,8 +18,10 @@
 #define TIMEOUT_5s 			100
 //#define TIMEOUT_5s 			(TIMEOUT_1s*5)
 #define TIMEOUT_10s 		200
+#define TIMEOUT_15s 		300
 #define TIMEOUT_20s 		400
 #define TIMEOUT_30s 		600
+#define TIMEOUT_40s 		800
 #define TIMEOUT_100ms 		2
 #define TIMEOUT_200ms 		4
 #define TIMEOUT_500ms 		10

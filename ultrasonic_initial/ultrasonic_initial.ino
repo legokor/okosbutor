@@ -527,10 +527,11 @@ void ledBlinking()
 
 void sensor()
 {
-	iSensorArrayIterator=(iSensorArrayIterator<sensorValuesToAverage-1)?(iSensorArrayIterator+1):(0);
-	delayMicroseconds(8000);// seems no effect, max 1.8m..2.1m
+	//hanyadik szenzort olvassuk be
+	iSensorArrayIterator=(iSensorArrayIterator<SensorsToRead-1)?(iSensorArrayIterator+1):(0);
+	delayMicroseconds(10000);// seems no effect, max 1.8m..2.1m
 
-
+	//2. szenzor
 	cm[1][iSensorArrayIterator]=sensor2.distanceRead();
 	if(cm[1][iSensorArrayIterator]==0)
 	{
@@ -539,6 +540,7 @@ void sensor()
 
 	delayMicroseconds(15000);	//ensure 3.2m viewrange
 
+	//1. szenzor
 	cm[0][iSensorArrayIterator]=sensor1.distanceRead();
 	if(cm[0][iSensorArrayIterator]==0)
 	{
@@ -564,6 +566,7 @@ void sensor()
 	}
 
 	#endif
+
 	//tobbsegi szavazas, a kozepsot tartjuk meg: sensor_mid()
 
 }
@@ -603,42 +606,43 @@ void sound()
 	{
 	case triggered:
 		// iMinZone1 biztosan kisebb mint iZoneRad, hisz triggered.
-		if(iMinZone1<20)
+		if(iMinZone1<25)
 		{
-			finVol = SOUND_MAX_VOL_ZONE1+SOUND_OFFSET_VOL_ZONE1;
+			finVol = SOUND_MAX_VOL_ZONE1;
 			colorPalette=0;
 		}
-		else if (iMinZone1<30)
+		else if (iMinZone1<45)
 		{
-			finVol = SOUND_MID_VOL_ZONE1+SOUND_OFFSET_VOL_ZONE1;
+			finVol = SOUND_MID_VOL_ZONE1;
 			colorPalette=5;
 
 		}
-		else // useless: if(iMinZone1<50)
+		else // useless: if(iMinZone1<75)
 		{
-			finVol = SOUND_MID_VOL_ZONE1+SOUND_OFFSET_VOL_ZONE1;
+			finVol = SOUND_LOW_VOL_ZONE1;
 			colorPalette=5;
 
 		}
-				//finVol = SOUND_MAX_VOL_ZONE1;
-				//map(iMinZone1, iZone1Radius, 1, 0, SOUND_MAX_VOL_ZONE1) + SOUND_OFFSET_VOL_ZONE1;
 		break;
 
 	case timeouting:
 		break;
 
 	case idle:
-		// if zone2 triggered
+
+		finVol=0;
+
+		/*// if zone2 triggered
 		switch (zone2)
 		{
 		case triggered:
-			if(iMinZone2<60)
+			if(iMinZone2<85)
 			{
 				finVol = SOUND_MAX_VOL_ZONE2+SOUND_OFFSET_VOL_ZONE2;
 				colorPalette=6;
 
 			}
-			else if (iMinZone2<80)
+			else if (iMinZone2<100)
 			{
 				finVol = SOUND_MID_VOL_ZONE2+SOUND_OFFSET_VOL_ZONE2;
 				colorPalette=6;
@@ -646,19 +650,18 @@ void sound()
 			}
 			else // useless: if(iMinZone1<50)
 			{
-				finVol = SOUND_MID_VOL_ZONE2+SOUND_OFFSET_VOL_ZONE2;
+				finVol = SOUND_LOW_VOL_ZONE2+SOUND_OFFSET_VOL_ZONE2;
 				colorPalette=7;
 
 			}
-			//finVol =SOUND_MAX_VOL_ZONE2;
-			finVol = (finVol<(SOUND_MAX_VOL_ZONE2+ SOUND_OFFSET_VOL_ZONE2))?(finVol+1):(SOUND_MAX_VOL_ZONE2+ SOUND_OFFSET_VOL_ZONE2);
-					//finVol =map(iMinCm, iZone2Radius, 1, 0, SOUND_MAX_VOL_ZONE2) + SOUND_OFFSET_VOL_ZONE2;
 			break;
 		case timeouting:
 			break;
 		case idle:
 			break;
 		}
+
+		*/
 	break;
 	}
 
@@ -748,6 +751,10 @@ void allzonetrigger()
 			colorPalette=0;
 			digitalWrite(onboardLed,1);//led, teszthez
 			zone1=triggered;
+
+			digitalWrite(mutePin,0);
+			myDFPlayer.next();
+			Serial.println("zone 1 T'D -> zene");
 		}
 		break;
 
@@ -761,10 +768,34 @@ void allzonetrigger()
 
 	case timeouting :
 		//ido eltelt:
-		if(k>iZone1TimeoutStart+TIMEOUT_10s)
+		if(k>iZone1TimeoutStart+TIMEOUT_15s)
 		{
-			digitalWrite(onboardLed,0);//led
+			//15s - nel tobb telt el
+			myDFPlayer.stop();
 			zone1=idle;
+		}
+		else if(k>iZone1TimeoutStart+TIMEOUT_10s)
+		{
+			//mar eltelt 10s de 15 meg nem: megall
+			myDFPlayer.pause();
+			digitalWrite(mutePin,0);	//mute
+
+			//ha 10s utan jonnek vissza - folytat
+			if(zonetrig(iZone1Radius,1))
+			{
+				myDFPlayer.start();	// zone 2 goes idle, music stop
+				digitalWrite(mutePin,1);	//mute off
+				zone1=triggered;
+			}
+
+		}
+		else if(k>iZone1TimeoutStart+TIMEOUT_5s)
+		{
+			//5s-nel tobb ido telt el
+			finVol=0;
+			digitalWrite(onboardLed,0);
+
+			//halkulas elkezdodik, meg nem allitjuk meg
 		}
 		else if(zonetrig(iZone1Radius,1))
 		{
@@ -781,9 +812,7 @@ void allzonetrigger()
 			if(zonetrig(iZone2Radius,2))
 			{
 				zone2=triggered;
-				Serial.println("randomAll - zone2 idle-> T'D");
-				digitalWrite(mutePin,0);
-				myDFPlayer.next();
+				Serial.println("zone 2 T'D -> spot, strip");
 				//TODO: next-ekkel bekkeljuk ki
 			}
 			break;
@@ -822,7 +851,7 @@ void allzonetrigger()
 			break;
 		}//end of switch
 
-	colorBlack=!(zone1!=idle || bContinousLight); //NOT(all idle)
+	colorBlack=!(zone2!=idle); //NOT(all idle)
 
 	//if zone1 triggered ---> intensity big
 	//if zone2 triggered ---> int med
@@ -844,6 +873,7 @@ inline void initialCalibrate()
 
 		Serial.println("Initial calibrate");
 
+		digitalWrite(posztamensLed, 1);
 		digitalWrite(onboardLed, 1);
 		digitalWrite(chargeGreen, 0);
 		digitalWrite(chargeRed, 1);
@@ -872,7 +902,7 @@ inline void initialCalibrate()
 
 		//Serial.println("end 5s wait:");
 
-		for(int j=0; j<SensorsToRead; j++)
+		for(int j=0; j<sensorValuesToAverage; j++)
 		{
 			cmOffsets[j]=(cmAveraged[j]-4>0)?(cmAveraged[j]-4):(0);
 		}
@@ -889,7 +919,7 @@ inline void initialCalibrate()
 		digitalWrite(chargeGreen, 1);
 		digitalWrite(chargeRed, 0);
 		Calibrated=Done;
-		//digitalWrite(posztamensLed,0);
+		digitalWrite(posztamensLed,0);
 		//Serial.println("poszta ki");
 
 
@@ -921,11 +951,12 @@ inline void calibrate()
 
 	}
 
+
 	Serial.println("Calibrated with:");
 		Serial.print(cmOffsets[0]);Serial.print("\t");
 		Serial.print(cmOffsets[1]);Serial.print("\t");
 		Serial.print(cmOffsets[2]);Serial.print("\t");
-		#if sensorValuesToAverage==4
+		#if SensorsToRead==4
 		Serial.print(cmOffsets[3]);Serial.print("\t");
 		#endif
 

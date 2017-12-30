@@ -17,8 +17,9 @@ bool colorBlack = false;
 #define bluPin  3	 //b
 #define posztamensLed 2 //NOT ABLE TO PWM
 
-#define chargeGreen 18		//A4 - bal felso = barna
-#define chargeRed 	17		//A3 - bal also = fekete
+//3 sensor version:
+#define chargeGreen 17		//A3 - bal also = fekete
+#define chargeRed 	18		//A4 - bal felso = barna
 
 #define curB OCR2B
 #define curR OCR0B

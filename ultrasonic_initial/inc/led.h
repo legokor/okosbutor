@@ -13,9 +13,9 @@ bool colorBlack = false;
 #define onboardLed  13  // 13
 
 #define redPin  5  //r
-#define grnPin  6  //g 6 // 9 - ideiglenes posztamens led
-#define bluPin  6	 //b
-#define posztamensLed 9 //NOT ABLE TO PWM ---> 9 INSTEAD
+#define grnPin  6  //g
+#define bluPin  3	 //b
+#define posztamensLed 11 //ABLE TO PWM 9 vagy 10 v 11
 
 //3 sensor version:
 #define chargeGreen 17		//A3 - bal also = fekete
@@ -24,14 +24,18 @@ bool colorBlack = false;
 #define curB OCR2B
 #define curR OCR0B
 #define curG OCR0A
+#define curS OCR2A
+
 
 unsigned char finR=0;
 unsigned char finG=0;
 unsigned char finB=0;
+unsigned char finS=0;
 
 signed char dR = 0;//step
 signed char dB = 0;
 signed char dG = 0;
+signed char dS = 0;
 
 unsigned char x=0;
 unsigned char colorPalette=0;

@@ -271,10 +271,9 @@ void buttonRead()
 		else if(k>(pushStartedAt+BUTTON_TIME_5s))
 		{
 					//u8LedSpeed=(u8LedSpeed==1)?(4):(1);
-			ledSetBlinking(TIMEOUT_5s, TIMEOUT_1s, 0.5);
 			//myDFPlayer.randomAll();
 			nyomogomb=LongPush;
-					//Serial.println("now pushed 5s long");
+					Serial.println("now pushed 5s long");
 		}
 		break;
 	case Released:
@@ -318,7 +317,6 @@ void buttonRead()
 	case LongPush:
 		if(!bButtonPushed)
 		{
-			//Serial.println("Blinking initiated");
 			nyomogomb=NotPushed;
 		}
 		break;
@@ -350,15 +348,16 @@ inline void calcColorDifference()
 {
 	dR=(0<(finR-curR))?(u8LedSpeed):(-u8LedSpeed);  // fol vagy le fele kell valtozni
 	if(0 == (finR-curR)){dR=0;}
-	  //dR=(0==(finR-curR))?(0):(dR); // elerte a celt
 
 	dG=(0<(finG-curG))?(u8LedSpeed):(-u8LedSpeed);
 	if(0 == (finG-curG)){dG=0;}
-		  //dG=(0==(finG-curG))?(0):(dG);
 
 	dB=(0<(finB-curB))?(u8LedSpeed):(-u8LedSpeed);
-	if(0 == (finB-curB)){dB=0;}
-		  //dB=(0==(finB-curB))?(0):(dB);
+		if(0 == (finB-curB)){dB=0;}
+
+		//spot lednek:
+	dS=(0<(finS-curS))?(u8LedSpeed):(-u8LedSpeed);
+		if(0 == (finS-curS)){dS=0;}
 
 
 	 if(dR || dG || dB){
@@ -369,6 +368,8 @@ inline void calcColorDifference()
 		 bColorSettled=true;
 		 iColorSettledAt=k;
 	 }
+
+
 }
 
 void led(void){               //may increase an int to perform other tasks
@@ -417,7 +418,6 @@ void led(void){               //may increase an int to perform other tasks
   //		  finB = rgb[colorPalette][x][2];
 
   	  case BlinkingStart:
-  		  ledBlinking();
   		  break;
   	  default:
   	  {
@@ -430,96 +430,6 @@ void led(void){               //may increase an int to perform other tasks
 
   		  break;
   	  }//end switch
-  }
-
-void ledSetBlinking(int duration_k_increments, int period_k_increments, double fill)
-  {
-	switch(ledstrip)
-	{
-	case Automatic:
-	{
-		ledstrip=BlinkingStart;
-		iBlinkStart=k;
-		iBlinkPeriodStart=k;
-		iBlinkDuration=duration_k_increments;
-		iBlinkPeriod=period_k_increments;
-		iBlinkFill=fill;
-		break;
-	}
-	/*case BlinkingStart:
-	{
-		if(k>(iBlinkStart+iBlinkDuration))							// meddig?
-		{
-			//ido letelt
-			ledstrip=Automatic;
-		}
-		else if (k<(iBlinkPeriodStart+iBlinkPeriod*iBlinkFill))
-		{
-			ledstrip=BlinkingPeriodOn;
-		}
-		else if (k<(iBlinkPeriodStart+iBlinkPeriod))
-		{
-			//meg period-on belul de a fill (bekapcsolt) allapoton kivul:
-			ledstrip=BlinkingPeriodOff;
-		}
-		else
-		{
-			//period ended
-			iBlinkPeriod=period_k_increments;
-		}
-
-		break;
-	}*/
-	default:
-		//first to be tested this way:
-		ledBlinking();
-		break;
-
-	}//eof switch
-
-	/*if(ledstrip==BlinkingPeriodOn)
-	{
-		curR=0;
-		curB=255;
-		curG=255;
-	}
-	else
-	{
-		  curR=0;
-		  curB=0;
-		  curG=0;
-	}*/
-
-  }
-void ledBlinking()
-  {
-	  if(BlinkingStart==ledstrip)											// villogni fog
-	  {
-		  if(k<(iBlinkStart+iBlinkDuration))							// meddig?
-		  {
-			  if(k<(iBlinkPeriodStart+iBlinkPeriod))					// milyen periodusidovel?
-			  {
-				  if(k<(iBlinkPeriodStart+iBlinkPeriod*iBlinkFill))		// milyen kitoltesi tenyezo?
-				  {//red - TODO: to be corrected to any color
-					  curR=0;
-					  curB=255;
-					  curG=255;
-				  }//vilagitas vege
-				  else
-				  {
-					  curR=0;
-					  curB=0;
-					  curG=0;
-				  }
-			  }// 1 periodus vege
-			  iBlinkPeriodStart=k;
-		  }
-		  // teljes villogasi ido vege
-		  else
-		  {
-		  ledstrip=Automatic; //mar nincs villogasi modban
-		  }
-	  }
   }
 
 
@@ -976,9 +886,7 @@ inline void calibrate()
 
 void calibrateAtBeginning()
 {
-	//ledSetBlinking(TIMEOUT_1s*2, BUTTON_TIME_1s, 0.5); //won't work in setup
 	initialCalibrate();
-	//ledSetBlinking(TIMEOUT_5s, BUTTON_TIME_2s, 0.1);
 }
 
 void inline sensorValueAveraging()

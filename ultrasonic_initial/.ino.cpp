@@ -2,7 +2,7 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2017-12-31 00:48:33
+//This file has been generated on 2017-12-31 01:57:06
 
 #include "Arduino.h"
 #include "inc/battery.h"
@@ -18,8 +18,6 @@ void blinkIndicators() ;
 void buttonRead() ;
 inline void calcColorDifference() ;
 void led(void);
-void ledSetBlinking(int duration_k_increments, int period_k_increments, double fill)   ;
-void ledBlinking()   ;
 void sensor() ;
 inline void sensor_mid() ;
 void sound() ;

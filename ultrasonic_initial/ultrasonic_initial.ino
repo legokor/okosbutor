@@ -782,6 +782,25 @@ void allzonetrigger()
 
 	//colorBlack=!(zone2==triggered); // le kell kezelni a posztamensledet is
 
+
+	/*
+	 * TO HANDLE SPOT LED:
+	 *
+	 * 	curS=((curS+dS)>255)?(255):(((curS+dS)<0)?(0):(curS+dS));
+	 *
+	 * 	finS = 0.255, a leddel egyutt hivodik meg. )lehet gyorsabb lefutasu
+	 *
+	 *
+	 */
+
+
+
+
+
+
+
+
+
 }
 
 

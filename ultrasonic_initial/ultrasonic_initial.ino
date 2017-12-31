@@ -78,6 +78,10 @@ void timingISR(void)
 	{
 		digitalWrite(chargeGreen,0);
 	}
+	else if (k>TIMEOUT_30s && (Calibrated!=Done))
+	{
+		ucalibrate=true;
+	}
 
 	if(k<TIMEOUT_5s && (nyomogomb==PushedAgain))
 	{
@@ -828,7 +832,7 @@ void allzonetrigger()
 	switch (zone2)
 		{
 		case idle :
-			if(zonetrig(iZone2Radius,2))
+			if(zonetrig(iZone2Radius,2)|| (zone1==triggered))
 			{
 				zone2=triggered;
 				Serial.println("zone 2 T'D -> spot, strip");
@@ -840,8 +844,9 @@ void allzonetrigger()
 			digitalWrite(posztamensLed,1); //PWM LABRA
 			ledstrip=Automatic;
 			colorPalette=2;
-			if(!zonetrig(iZone2Radius,2))
 			colorBlack=false;
+
+			if(!zonetrig(iZone2Radius,2))
 			{
 				zone2=leaved;
 				colorBlack=true;
@@ -1117,8 +1122,9 @@ void loop()
 		//Serial.print("\t z1tr?: ");Serial.print(zonetrig(iZone1Radius));
 		//Serial.print("\t z2tr?: ");Serial.print(zonetrig(iZone2Radius));
 
-		//Serial.print("\t cvol:\t");Serial.print(curVol);
-		//Serial.print("\t fvol:\t");Serial.print(finVol);
+		Serial.print("\t cblac:\t");Serial.print(colorBlack);
+		Serial.print("\t cblue:\t");Serial.print(curB);
+		Serial.print("\t fblue:\t");Serial.print(finB);
 
 
 	/*

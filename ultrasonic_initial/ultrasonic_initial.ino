@@ -64,6 +64,8 @@ void timingISR(void)
 	  usound=false;
 	  uzone=false;
 	  ucalibrate=false;
+	  indicatorGreen.state=IndicatorOff;
+	  indicatorRed.state=IndicatorOff;
 
 	}
 

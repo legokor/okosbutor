@@ -537,18 +537,18 @@ void sound()
 			if(iMinZone1<25)
 			{
 				finVol = SOUND_MAX_VOL_ZONE1;
-				colorPalette=7;
+				//colorPalette=7;
 			}
 			else if (iMinZone1<45)
 			{
 				finVol = SOUND_MID_VOL_ZONE1;
-				colorPalette=5;
+				//colorPalette=5;
 
 			}
 			else // useless: if(iMinZone1<75)
 			{
 				finVol = SOUND_LOW_VOL_ZONE1;
-				colorPalette=6;
+				//colorPalette=6;
 
 			}
 			break;
@@ -690,9 +690,9 @@ void allzonetrigger()
 		if(zonetrig(iZone1Radius,1))
 		{
 			//ha az 1. zonat triggereljuk...
-			colorPalette=7;
 			digitalWrite(onboardLed,1);//led, teszthez
 			zone1=triggered;
+			colorPalette=7;
 
 			digitalWrite(mutePin,0);
 			myDFPlayer.next();

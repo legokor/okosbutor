@@ -1,5 +1,9 @@
 //source is the 5fb709 commit.
 
+//extern SensorsToRead
+
+//#define Sensor3db //ha a 3 szenzoros
+
 #include "global_time.h"
 #include "Arduino.h"
 
@@ -17,9 +21,17 @@ bool colorBlack = false;
 #define bluPin  3	 //b
 #define posztamensLed 11 //ABLE TO PWM 9 vagy 10 v 11
 
+#ifdef Sensor3db
 //3 sensor version:
 #define chargeGreen 17		//A3 - bal also = fekete
 #define chargeRed 	18		//A4 - bal felso = barna
+
+#else
+
+#define chargeGreen 18		//A4 - bal felso = barna
+#define chargeRed 	17		//A3 - bal also = fekete
+#endif
+
 
 #define curB OCR2B	//curB
 #define curR OCR0B

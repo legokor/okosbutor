@@ -21,10 +21,10 @@ bool colorBlack = false;
 #define chargeGreen 17		//A3 - bal also = fekete
 #define chargeRed 	18		//A4 - bal felso = barna
 
-#define curB OCR2B
+#define curB OCR2B	//curB
 #define curR OCR0B
 #define curG OCR0A
-#define curS OCR2A
+#define curS OCR2A //curS
 
 
 unsigned char finR=0;
@@ -43,6 +43,7 @@ unsigned char colorPalette=0;
 
 #define u8ColorPalettesCount 8
 unsigned char u8LedSpeed = 1;
+unsigned char u8SpotSpeed = 2;
 bool bContinousLight = false;
 int colorNum=0;
 

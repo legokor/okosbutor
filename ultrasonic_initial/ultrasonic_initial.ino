@@ -189,6 +189,10 @@ void blinkIndicators()
 			}
 			break;
 
+		case Waiting:
+			indicatorGreen.state=IsOn;
+			break;
+
 		case IsOn:
 			//Serial.println("on_red");
 			digitalWrite(chargeRed,1);
@@ -206,6 +210,9 @@ void blinkIndicators()
 			{
 				indicatorRed.state=ToBlink;
 			}
+			break;
+
+		default:
 			break;
 		}//end of switch red led
 
@@ -226,6 +233,10 @@ void blinkIndicators()
 		}
 		break;
 
+	case Waiting:
+		indicatorGreen.state=IsOn;
+		break;
+
 	case IsOn:
 		digitalWrite(chargeGreen,1);
 		if(k>(indicatorGreen.LitUpAt+indicatorGreen.onTime))
@@ -240,6 +251,8 @@ void blinkIndicators()
 		{
 			indicatorGreen.state=ToBlink;
 		}
+		break;
+	default:
 		break;
 	}//end of switch green
 
@@ -402,12 +415,6 @@ void led(void){               //may increase an int to perform other tasks
   	  break;
   	  //case automatic
 
-  	 // case Manual:
-  		  //TODO: mukodesi mod megadasa
-  //		  finR = rgb[colorPalette][x][0];	//a megfelelo palettából az x-edik szín r,g,b azaz 0,1,2 byte-ok
-  //		  finG = rgb[colorPalette][x][1];
-  //		  finB = rgb[colorPalette][x][2];
-
   	  case BlinkingStart:
   		  break;
   	  default:
@@ -422,11 +429,11 @@ void led(void){               //may increase an int to perform other tasks
   		  break;
   	  }//end switch
 
-  	//spot lednek:
-  	dS=(0<(finS-curS))?(u8LedSpeed):(-u8LedSpeed);
-  	if(0 == (finS-curS)){dS=0;}
-  	if()
 
+  	//spot lednek:
+  	dS=(0<(finS-curS))?(u8SpotSpeed):(-u8SpotSpeed);
+  	if(0 == (finS-curS)){dS=0;}
+  	curS=((curS+dS)>255)?(255):(((curS+dS)<0)?(0):(curS+dS));
 
 
   }
@@ -572,7 +579,11 @@ void sound()
 		}
 
 		*/
-	break;
+
+		break;
+	default:
+		break;
+
 	}
 
   //SOUND FADING PART
@@ -668,6 +679,8 @@ void allzonetrigger()
 		break;
 
 	case triggered:
+		finS=255;
+
 		if(!zonetrig(iZone1Radius,1))
 		{
 			zone1=leaved;
@@ -682,10 +695,12 @@ void allzonetrigger()
 
 		if(k>iZone1TimeoutStart+TIMEOUT_10s)
 		{
-			Serial.println("zone 1 10s elapsed --> small timeout");
+			Serial.println("zone 1 10s elapsed --> small timeout: finVol becames 0");
 
 			//5s-nel tobb ido telt el
 			finVol=0;
+			//finS=170;
+
 			digitalWrite(onboardLed,0);
 			zone1=smallTimeout;
 			//halkulas elkezdodik, meg nem allitjuk meg
@@ -750,7 +765,8 @@ void allzonetrigger()
 			break;
 
 		case triggered:
-			digitalWrite(posztamensLed,1); //PWM LABRA
+			//digitalWrite(posztamensLed,1); //PWM LABRA
+			//finS=170;
 			ledstrip=Automatic;
 			colorPalette=2;
 			colorBlack=false;
@@ -765,17 +781,28 @@ void allzonetrigger()
 			break;
 
 		case leaved :
+			//finS=140;
+
 			if(k>iZone2TimeoutStart+TIMEOUT_10s)
 			{
 				Serial.println("zone 2 10s timeout");
-				digitalWrite(posztamensLed,0);
+				//digitalWrite(posztamensLed,0);
 				//HALVANYODJON
+				//finS=0;
 				zone2=idle;
 			}
 			if(zonetrig(iZone2Radius,2))
 			{
 				zone2=triggered;
 			}
+			break;
+
+		case smallTimeout:
+			zone2=idle;
+			break;
+
+		case bigTimeout:
+			zone2=idle;
 			break;
 		}
 
@@ -787,16 +814,28 @@ void allzonetrigger()
 	 *
 	 * 	curS=((curS+dS)>255)?(255):(((curS+dS)<0)?(0):(curS+dS));
 	 *
-	 * 	finS = 0.255, a leddel egyutt hivodik meg. )lehet gyorsabb lefutasu
+	 * 	finS = 0..255, a leddel egyutt hivodik meg. )lehet gyorsabb lefutasu
 	 *
 	 *
 	 */
 
 
-
-
-
-
+	if(zone1==triggered)
+	{
+		finS=255;
+	}
+	else if (zone1 ==smallTimeout)
+	{
+		finS=190;
+	}
+	else if (zone1 ==bigTimeout)
+	{
+		finS=0;
+	}
+	/*else if (zone2 ==idle)
+	{
+		finS=0;
+	}*/
 
 
 
@@ -816,8 +855,8 @@ inline void initialCalibrate()
 	case NotYet:
 
 		Serial.println("Initial calibrate");
-
-		digitalWrite(posztamensLed, 1);
+		curS=255;
+		//digitalWrite(posztamensLed, 1);
 		digitalWrite(onboardLed, 1);
 		digitalWrite(chargeGreen, 0);
 		digitalWrite(chargeRed, 1);
@@ -863,7 +902,8 @@ inline void initialCalibrate()
 		digitalWrite(chargeGreen, 1);
 		digitalWrite(chargeRed, 0);
 		Calibrated=Done;
-		digitalWrite(posztamensLed,0);
+		//digitalWrite(posztamensLed,0);
+		curS=0;
 		//Serial.println("poszta ki");
 		break;
 	}
@@ -888,7 +928,6 @@ inline void calibrate()
 		}
 		//cmOffsets[j]=iSumToCalibrate/SamplesToCalibrate;
 		cmOffsets[j]=(iSumToCalibrate/SamplesToCalibrate-4>0)?(iSumToCalibrate/SamplesToCalibrate-4):(0);
-
 	}
 
 
@@ -949,9 +988,14 @@ void setup()
 		//com0B[1:0]=10b Clear OC0B on Compare Match when up-counting. Set OC0B on Compare Match when down-counting.
 		TCCR0B = _BV(CS00);
 		//CS0[2:0]=001b clk i/o / 4^cs0=
-		TCCR2A = _BV(COM2B1) | _BV(WGM00);
+		TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM00);
+		// TCCR2A bits 7:6 controls the pin 11 (OCR2A) for posztamensled: COM2A1 toggled: function override.
+		//COM2A1[1:0]=10b Clear OC2A on Compare Match, set OC2A at BOTTOM (non-inverting mode)
+
 		TCCR2B = _BV(CS20);
-		// OCR2B = 125; //R
+
+		//example:
+		//OCR2B = 125; //R
 		//OCR0A = 50;  //B   //compare values
 		//OCR0B = 100; //G
   /*
@@ -1049,8 +1093,8 @@ void loop()
 		//Serial.print("\t z2tr?: ");Serial.print(zonetrig(iZone2Radius));
 
 		Serial.print("\t cblac:\t");Serial.print(colorBlack);
-		Serial.print("\t cblue:\t");Serial.print(curB);
-		Serial.print("\t fblue:\t");Serial.print(finB);
+		Serial.print("\t cSpot:\t");Serial.print(curS);
+		Serial.print("\t fSpot:\t");Serial.print(finS);
 
 
 	/*

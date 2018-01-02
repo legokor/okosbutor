@@ -376,7 +376,10 @@ inline void calcColorDifference()
 	dB=(0<(finB-curB))?(u8LedSpeed):(-u8LedSpeed);
 		if(0 == (finB-curB)){dB=0;}
 
-	 if(dR || dG || dB){
+
+
+	 if(dR || dG || dB) /*|| ((finR-curR)<u8LedSpeed || (finG-curG)<u8LedSpeed || (finB-curB)<u8LedSpeed*/*)
+	 {
 		 bColorSettled=false;
 	 }
 	 else
@@ -855,25 +858,25 @@ void allzonetrigger()
 	if(zone1==triggered)
 	{
 		finS=255;
-		u8LedSpeed=1;
+		//u8LedSpeed=1;
 
 	}
 	else if (zone1 ==smallTimeout)
 	{
 		finS=190;
-		u8LedSpeed=1;
+		//u8LedSpeed=1;
 	}
 	else if (zone1 ==bigTimeout)
 	{
 		finS=0;
-		u8LedSpeed=1;
+		//u8LedSpeed=1;
 	}
 	else if (zone1 ==idle && zone2 ==idle)
 	{
 		finS=0;
 		colorBlack=true;
 		bColorSettled=true;
-		u8LedSpeed=10;
+		//u8LedSpeed=10;
 	}
 
 

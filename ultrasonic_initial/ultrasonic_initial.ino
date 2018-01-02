@@ -355,11 +355,6 @@ inline void calcColorDifference()
 	dB=(0<(finB-curB))?(u8LedSpeed):(-u8LedSpeed);
 		if(0 == (finB-curB)){dB=0;}
 
-		//spot lednek:
-	dS=(0<(finS-curS))?(u8LedSpeed):(-u8LedSpeed);
-		if(0 == (finS-curS)){dS=0;}
-
-
 	 if(dR || dG || dB){
 		 bColorSettled=false;
 	 }
@@ -377,7 +372,13 @@ void led(void){               //may increase an int to perform other tasks
   	  {
   	  case Automatic:
   		calcColorDifference();
-  		if(!bColorSettled)
+  		if(colorBlack)
+		  {                 //ha nincs senki kozelben sotetbe valt
+			  finR = 0;
+			  finG = 0;
+			  finB = 0;
+		  }
+  		else if(!bColorSettled)
   		{
   			if((k>(iColorSteppedAt+iLedStepTime)))
   			{
@@ -385,29 +386,19 @@ void led(void){               //may increase an int to perform other tasks
 				curG=((curG+dG)>255)?(255):(((curG+dG)<0)?(0):(curG+dG));
 				curB=((curB+dB)>255)?(255):(((curB+dB)<0)?(0):(curB+dB));
 
-
 				iColorSteppedAt=k;
   			}
   		}
   		else
   		{	//color settled
-  			if(colorBlack)
-  			  {                 //ha nincs senki kozelben sotetbe valt
-  				  finR = 0;
-  				  finG = 0;
-  				  finB = 0;
-  			  }
-  			  else //if(k>(iColorSettledAt+iFinalColorStepTime))
-  			  {
-  				  Serial.println("color chg");
-  				x=(x<6)?(x+1):(0);				//x ertek cirkulalas 0->6
-  				finR = rgb[colorPalette][x][0];	//a megfelelo palettából az x-edik szín r,g,b azaz 0,1,2 byte-ok
-  				finG = rgb[colorPalette][x][1];
-				finB = rgb[colorPalette][x][2];
-					//a zona valt ColorPalette-t
-	  			bColorSettled=false;
-  			  }
-  		  }
+			  Serial.println("color chg");
+			x=(x<6)?(x+1):(0);				//x ertek cirkulalas 0->6
+			finR = rgb[colorPalette][x][0];	//a megfelelo palettából az x-edik szín r,g,b azaz 0,1,2 byte-ok
+			finG = rgb[colorPalette][x][1];
+			finB = rgb[colorPalette][x][2];
+				//a zona valt ColorPalette-t
+			bColorSettled=false;
+		  }
   	  break;
   	  //case automatic
 
@@ -430,6 +421,14 @@ void led(void){               //may increase an int to perform other tasks
 
   		  break;
   	  }//end switch
+
+  	//spot lednek:
+  	dS=(0<(finS-curS))?(u8LedSpeed):(-u8LedSpeed);
+  	if(0 == (finS-curS)){dS=0;}
+  	if()
+
+
+
   }
 
 

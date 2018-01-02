@@ -300,7 +300,7 @@ void buttonRead()
 		else if(bButtonPushed)
 		{
 			pushedAgainAt=k;
-			//colorPalette=(colorPalette==(u8ColorPalettesCount-1))?(0):(colorPalette+1);
+							//color Palette=(colorPalette==(u8ColorPalettesCount-1))?(0):(colorPalette+1);
 			ubattery=true;
 			uindicator=true;
 			indicatorGreen.state=ToBlink;
@@ -520,7 +520,7 @@ void sound()
 {
 
   //felkapcsolas a zone triggernel
-  //itt csak hangero
+  //itt csak hangero es colorpalette
 
 	switch (zone1)
 	{
@@ -529,7 +529,7 @@ void sound()
 		if(iMinZone1<25)
 		{
 			finVol = SOUND_MAX_VOL_ZONE1;
-			colorPalette=0;
+			colorPalette=7;
 		}
 		else if (iMinZone1<45)
 		{
@@ -540,7 +540,7 @@ void sound()
 		else // useless: if(iMinZone1<75)
 		{
 			finVol = SOUND_LOW_VOL_ZONE1;
-			colorPalette=5;
+			colorPalette=6;
 
 		}
 		break;
@@ -668,7 +668,7 @@ void allzonetrigger()
 		if(zonetrig(iZone1Radius,1))
 		{
 			//ha az 1. zonat triggereljuk...
-			colorPalette=0;
+			colorPalette=7;
 			digitalWrite(onboardLed,1);//led, teszthez
 			zone1=triggered;
 
@@ -679,7 +679,7 @@ void allzonetrigger()
 		break;
 
 	case triggered:
-		finS=255;
+		//finS=255;
 
 		if(!zonetrig(iZone1Radius,1))
 		{
@@ -768,7 +768,6 @@ void allzonetrigger()
 			//digitalWrite(posztamensLed,1); //PWM LABRA
 			//finS=170;
 			ledstrip=Automatic;
-			colorPalette=2;
 			colorBlack=false;
 
 			if(!zonetrig(iZone2Radius,2))
@@ -832,10 +831,10 @@ void allzonetrigger()
 	{
 		finS=0;
 	}
-	/*else if (zone2 ==idle)
+	else if (zone1 ==idle && zone2 ==idle)
 	{
 		finS=0;
-	}*/
+	}
 
 
 
@@ -1097,15 +1096,15 @@ void loop()
 		Serial.print("\t fSpot:\t");Serial.print(finS);
 
 
-	/*
-	 * working
+
+	 //* working
 		Serial.print("\t r: ");Serial.print(finR);
 		Serial.print(": ");Serial.print(curR);
 		Serial.print("\t g: ");Serial.print(finG);
 		Serial.print(": ");Serial.print(curG);
 		Serial.print("\t b: ");Serial.print(finB);
-		Serial.print(": ");Serial.print(curB);
-	*/
+		Serial.print(": ");Serial.println(curB);
+
 
 		//Serial.print("\t fV: ");Serial.print(finVol);
 		//Serial.print("\t sIter: ");Serial.print(iSensorIterator);

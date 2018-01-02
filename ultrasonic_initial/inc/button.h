@@ -15,10 +15,10 @@ extern long int k;
 
 int buttonVal=0;
 //int buttonCounter=0;
-int pushStartedAt=0;
-int pushReleasedAt=0;
-int pushedAgainAt=0;
-int pushDelay=0;
+long int pushStartedAt=0;
+long int pushReleasedAt=0;
+long int pushedAgainAt=0;
+long int pushDelay=0;
 
 bool bButtonPushed=false;
 bool repeatedPush=false;

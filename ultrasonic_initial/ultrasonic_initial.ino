@@ -83,6 +83,7 @@ void timingISR(void)
 	else if (k>TIMEOUT_30s && (Calibrated!=Done))
 	{
 		ucalibrate=true;
+		digitalWrite(chargeGreen,0);
 	}
 
 	if(k<TIMEOUT_5s && (nyomogomb==PushedAgain))
@@ -378,7 +379,7 @@ inline void calcColorDifference()
 
 
 
-	 if(dR || dG || dB) /*|| ((finR-curR)<u8LedSpeed || (finG-curG)<u8LedSpeed || (finB-curB)<u8LedSpeed*/*)
+	 if(dR || dG || dB) /*|| ((finR-curR)<u8LedSpeed || (finG-curG)<u8LedSpeed || (finB-curB)<u8LedSpeed*/
 	 {
 		 bColorSettled=false;
 	 }
@@ -858,25 +859,20 @@ void allzonetrigger()
 	if(zone1==triggered)
 	{
 		finS=255;
-		//u8LedSpeed=1;
-
 	}
 	else if (zone1 ==smallTimeout)
 	{
 		finS=190;
-		//u8LedSpeed=1;
 	}
 	else if (zone1 ==bigTimeout)
 	{
 		finS=0;
-		//u8LedSpeed=1;
 	}
 	else if (zone1 ==idle && zone2 ==idle)
 	{
 		finS=0;
 		colorBlack=true;
 		bColorSettled=true;
-		//u8LedSpeed=10;
 	}
 
 
@@ -1001,7 +997,7 @@ void inline sensorValueAveraging()
 		}
 		else
 		{
-			cmSamples[i][iSampleIterator]=cmSamples[i][0];
+			cmSamples[i][iSampleIterator]=cmOffsets[i];
 		}
 	}
 }

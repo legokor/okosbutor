@@ -1,6 +1,5 @@
 //source is the 5fb709 commit.
 
-//extern SensorsToRead
 
 #define Sensor3db //ha a 3 szenzoros
 

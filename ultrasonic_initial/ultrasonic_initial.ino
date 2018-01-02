@@ -807,8 +807,6 @@ void allzonetrigger()
 			if(!zonetrig(iZone2Radius,2))
 			{
 				zone2=leaved;
-				colorBlack=true;
-				bColorSettled=true;
 				iZone2TimeoutStart=k;
 						//Serial.println("now timeout started");
 			}
@@ -857,18 +855,25 @@ void allzonetrigger()
 	if(zone1==triggered)
 	{
 		finS=255;
+		u8LedSpeed=1;
+
 	}
 	else if (zone1 ==smallTimeout)
 	{
 		finS=190;
+		u8LedSpeed=1;
 	}
 	else if (zone1 ==bigTimeout)
 	{
 		finS=0;
+		u8LedSpeed=1;
 	}
 	else if (zone1 ==idle && zone2 ==idle)
 	{
 		finS=0;
+		colorBlack=true;
+		bColorSettled=true;
+		u8LedSpeed=10;
 	}
 
 

@@ -545,6 +545,13 @@ void sound()
 		}
 		break;
 
+	case leaved:
+		finVol = SOUND_MID_VOL_ZONE2;
+		break;
+	case smallTimeout:
+		finVol = SOUND_LOW_VOL_ZONE2;
+		break;
+
 	case idle:
 
 		finVol=0;

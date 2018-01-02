@@ -2,7 +2,7 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2018-01-02 18:58:33
+//This file has been generated on 2018-01-02 19:01:01
 
 #include "Arduino.h"
 #include "inc/battery.h"

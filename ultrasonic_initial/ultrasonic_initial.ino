@@ -393,13 +393,7 @@ void led(void){               //may increase an int to perform other tasks
   	  {
   	  case Automatic:
   		calcColorDifference();
-  		if(colorBlack)
-		  {                 //ha nincs senki kozelben sotetbe valt
-			  finR = 0;
-			  finG = 0;
-			  finB = 0;
-		  }
-  		else if(!bColorSettled)
+  		if(!bColorSettled)
   		{
   			if((k>(iColorSteppedAt+iLedStepTime)))
   			{
@@ -407,21 +401,37 @@ void led(void){               //may increase an int to perform other tasks
 				curG=((curG+dG)>255)?(255):(((curG+dG)<0)?(0):(curG+dG));
 				curB=((curB+dB)>255)?(255):(((curB+dB)<0)?(0):(curB+dB));
 
+
 				iColorSteppedAt=k;
   			}
   		}
   		else
   		{	//color settled
-			  Serial.println("color chg");
-			x=(x<6)?(x+1):(0);				//x ertek cirkulalas 0->6
-			finR = rgb[colorPalette][x][0];	//a megfelelo palettából az x-edik szín r,g,b azaz 0,1,2 byte-ok
-			finG = rgb[colorPalette][x][1];
-			finB = rgb[colorPalette][x][2];
-				//a zona valt ColorPalette-t
-			bColorSettled=false;
-		  }
+  			if(colorBlack)
+  			  {                 //ha nincs senki kozelben sotetbe valt
+  				  finR = 0;
+  				  finG = 0;
+  				  finB = 0;
+  			  }
+  			  else //if(k>(iColorSettledAt+iFinalColorStepTime))
+  			  {
+  				  Serial.println("color chg");
+  				x=(x<6)?(x+1):(0);				//x ertek cirkulalas 0->6
+  				finR = rgb[colorPalette][x][0];	//a megfelelo palettából az x-edik szín r,g,b azaz 0,1,2 byte-ok
+  				finG = rgb[colorPalette][x][1];
+				finB = rgb[colorPalette][x][2];
+					//a zona valt ColorPalette-t
+	  			bColorSettled=false;
+  			  }
+  		  }
   	  break;
   	  //case automatic
+
+  	 // case Manual:
+  		  //TODO: mukodesi mod megadasa
+  //		  finR = rgb[colorPalette][x][0];	//a megfelelo palettából az x-edik szín r,g,b azaz 0,1,2 byte-ok
+  //		  finG = rgb[colorPalette][x][1];
+  //		  finB = rgb[colorPalette][x][2];
 
   	  case BlinkingStart:
   		  break;
@@ -798,6 +808,7 @@ void allzonetrigger()
 			{
 				zone2=leaved;
 				colorBlack=true;
+				bColorSettled=true;
 				iZone2TimeoutStart=k;
 						//Serial.println("now timeout started");
 			}

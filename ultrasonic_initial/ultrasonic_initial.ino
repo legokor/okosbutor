@@ -992,7 +992,14 @@ void inline sensorValueAveraging()
 	iSampleIterator=(iSampleIterator>SamplesToCalibrate-1)?(0):(iSampleIterator+1);
 	for(int i=0;i<SensorsToRead;i++)
 	{
-		cmSamples[i][iSampleIterator]=cmAveraged[i];
+		if(cmAveraged[i]>1 && cmAveraged[i]<350)
+		{
+			cmSamples[i][iSampleIterator]=cmAveraged[i];
+		}
+		else
+		{
+			cmSamples[i][iSampleIterator]=cmSamples[i][0];
+		}
 	}
 }
 
@@ -1132,13 +1139,15 @@ void loop()
 		//Serial.print("\t z1tr?: ");Serial.print(zonetrig(iZone1Radius));
 		//Serial.print("\t z2tr?: ");Serial.print(zonetrig(iZone2Radius));
 
+		/*
 		Serial.print("\t cblac:\t");Serial.print(colorBlack);
 		Serial.print("\t cSpot:\t");Serial.print(curS);
 		Serial.print("\t fSpot:\t");Serial.print(finS);
-
+		 */
 
 
 	 //* working
+
 		Serial.print("\t r: ");Serial.print(finR);
 		Serial.print(": ");Serial.print(curR);
 		Serial.print("\t g: ");Serial.print(finG);

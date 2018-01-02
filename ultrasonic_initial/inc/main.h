@@ -53,4 +53,6 @@ bool nextSound=false;
 
 int finVol=0;
 int curVol=0;
+bool bSoundButtonMuted=false;
+
 #endif

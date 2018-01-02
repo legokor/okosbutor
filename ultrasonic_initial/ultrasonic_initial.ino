@@ -322,6 +322,7 @@ void buttonRead()
 	case PushedAgain:
 		if(!bButtonPushed)
 		{
+			myDFPlayer.next();
 			nyomogomb=NotPushed;
 		}
 		break;
@@ -330,6 +331,11 @@ void buttonRead()
 	case LongPush:
 		if(!bButtonPushed)
 		{
+			bSoundButtonMuted=!bSoundButtonMuted;
+			if(bSoundButtonMuted)
+			{
+
+			}
 			nyomogomb=NotPushed;
 		}
 		break;
@@ -521,76 +527,85 @@ void sound()
 
   //felkapcsolas a zone triggernel
   //itt csak hangero es colorpalette
-
-	switch (zone1)
+	if(!bSoundButtonMuted)
 	{
-	case triggered:
-		// iMinZone1 biztosan kisebb mint iZoneRad, hisz triggered.
-		if(iMinZone1<25)
-		{
-			finVol = SOUND_MAX_VOL_ZONE1;
-			colorPalette=7;
-		}
-		else if (iMinZone1<45)
-		{
-			finVol = SOUND_MID_VOL_ZONE1;
-			colorPalette=5;
-
-		}
-		else // useless: if(iMinZone1<75)
-		{
-			finVol = SOUND_LOW_VOL_ZONE1;
-			colorPalette=6;
-
-		}
-		break;
-
-	case leaved:
-		finVol = SOUND_MID_VOL_ZONE2;
-		break;
-	case smallTimeout:
-		finVol = SOUND_LOW_VOL_ZONE2;
-		break;
-
-	case idle:
-
-		finVol=0;
-
-		/*// if zone2 triggered
-		switch (zone2)
+		// sound not muted by button
+		switch (zone1)
 		{
 		case triggered:
-			if(iMinZone2<85)
+			// iMinZone1 biztosan kisebb mint iZoneRad, hisz triggered.
+			if(iMinZone1<25)
 			{
-				finVol = SOUND_MAX_VOL_ZONE2+SOUND_OFFSET_VOL_ZONE2;
-				colorPalette=6;
-
-			}
-			else if (iMinZone2<100)
-			{
-				finVol = SOUND_MID_VOL_ZONE2+SOUND_OFFSET_VOL_ZONE2;
-				colorPalette=6;
-
-			}
-			else // useless: if(iMinZone1<50)
-			{
-				finVol = SOUND_LOW_VOL_ZONE2+SOUND_OFFSET_VOL_ZONE2;
+				finVol = SOUND_MAX_VOL_ZONE1;
 				colorPalette=7;
+			}
+			else if (iMinZone1<45)
+			{
+				finVol = SOUND_MID_VOL_ZONE1;
+				colorPalette=5;
+
+			}
+			else // useless: if(iMinZone1<75)
+			{
+				finVol = SOUND_LOW_VOL_ZONE1;
+				colorPalette=6;
 
 			}
 			break;
-		case timeouting:
+
+		case leaved:
+			finVol = SOUND_MID_VOL_ZONE2;
 			break;
+		case smallTimeout:
+			finVol = SOUND_LOW_VOL_ZONE2;
+			break;
+
 		case idle:
+
+			finVol=0;
+
+			/*// if zone2 triggered
+			switch (zone2)
+			{
+			case triggered:
+				if(iMinZone2<85)
+				{
+					finVol = SOUND_MAX_VOL_ZONE2+SOUND_OFFSET_VOL_ZONE2;
+					colorPalette=6;
+
+				}
+				else if (iMinZone2<100)
+				{
+					finVol = SOUND_MID_VOL_ZONE2+SOUND_OFFSET_VOL_ZONE2;
+					colorPalette=6;
+
+				}
+				else // useless: if(iMinZone1<50)
+				{
+					finVol = SOUND_LOW_VOL_ZONE2+SOUND_OFFSET_VOL_ZONE2;
+					colorPalette=7;
+
+				}
+				break;
+			case timeouting:
+				break;
+			case idle:
+				break;
+			}
+
+			*/
+
 			break;
+		default:
+			break;
+
 		}
+	}
+	else
+	{
+		// sound muted by button
 
-		*/
-
-		break;
-	default:
-		break;
-
+		finVol=0;
 	}
 
   //SOUND FADING PART
@@ -937,7 +952,8 @@ inline void calibrate()
 	}
 
 
-	Serial.println("Calibrated with:");
+	Serial.println("\n\n\n------------------------------------------------------------------------------------");
+	Serial.println("\n\n\nCalibrated with:");
 		Serial.print(cmOffsets[0]);Serial.print("\t");
 		Serial.print(cmOffsets[1]);Serial.print("\t");
 		Serial.print(cmOffsets[2]);Serial.print("\t");

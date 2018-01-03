@@ -478,7 +478,7 @@ void sensor()
 
 	//2. szenzor
 	cm[1][iSensorArrayIterator]=sensor2.distanceRead();
-	if(cm[1][iSensorArrayIterator]==0)
+	if(cm[1][iSensorArrayIterator]<5)
 	{
 		cm[1][iSensorArrayIterator]=401;
 	}
@@ -487,7 +487,7 @@ void sensor()
 
 	//1. szenzor
 	cm[0][iSensorArrayIterator]=sensor1.distanceRead();
-	if(cm[0][iSensorArrayIterator]==0)
+	if(cm[0][iSensorArrayIterator]<5)
 	{
 		cm[0][iSensorArrayIterator]=401;
 	}
@@ -497,7 +497,7 @@ void sensor()
 	delayMicroseconds(14000); // seems no effect, max 1.8m
 
 	cm[2][iSensorArrayIterator]=sensor3.distanceRead();
-	if(cm[2][iSensorArrayIterator]==0)
+	if(cm[2][iSensorArrayIterator]<5)
 	{
 		cm[2][iSensorArrayIterator]=401;
 	}
@@ -505,7 +505,7 @@ void sensor()
 	#if SensorsToRead==4
 
 	cm[3][iSensorArrayIterator]=sensor4.distanceRead();
-	if(cm[3][iSensorArrayIterator]==0)
+	if(cm[3][iSensorArrayIterator]<5)
 	{
 		cm[3][iSensorArrayIterator]=401;
 	}
@@ -744,7 +744,7 @@ void allzonetrigger()
 		break;
 
 	case smallTimeout:
-		if(k>iZone1TimeoutStart+TIMEOUT_20s)
+		if(k>iZone1TimeoutStart+TIMEOUT_15s)
 		{
 			Serial.println("zone 1 15s elapsed --> big timeout");
 
@@ -755,7 +755,7 @@ void allzonetrigger()
 		//ha 10s utan jonnek vissza - folytat
 		else if(zonetrig(iZone1Radius,1))
 		{
-			myDFPlayer.start();	// zone 2 goes idle, music stop
+			//myDFPlayer.start();	// zone 2 goes idle, music stop
 			digitalWrite(mutePin,1);	//mute off
 			zone1=triggered;
 		}

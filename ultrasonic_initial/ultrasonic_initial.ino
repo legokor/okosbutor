@@ -22,6 +22,7 @@ void timingISR(void)
 	usensor = true;
 	usensormid = true;
 	ubutton = true;
+	uzone=true;
 
 
 
@@ -68,7 +69,7 @@ void timingISR(void)
 	  indicatorRed.state=IndicatorOff;
 
 	}
-
+/* 4 szenzoros beteg
 	if(k<TIMEOUT_20s && (nyomogomb==ShortPush) && (Calibrated!=Done))
 	{
 	  ucalibrate=true;
@@ -80,7 +81,9 @@ void timingISR(void)
 	{
 		digitalWrite(chargeGreen,0);
 	}
-	else if (k>TIMEOUT_30s && (Calibrated!=Done))
+	else
+		*/
+		if (k>TIMEOUT_10s && (Calibrated!=Done))
 	{
 		ucalibrate=true;
 		digitalWrite(chargeGreen,0);

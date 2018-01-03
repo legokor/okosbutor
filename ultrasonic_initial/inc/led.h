@@ -1,7 +1,7 @@
 //source is the 5fb709 commit.
 
 
-#define Sensor3db //ha a 3 szenzoros
+//#define Sensor3db //ha a 3 szenzoros
 
 #include "global_time.h"
 #include "Arduino.h"

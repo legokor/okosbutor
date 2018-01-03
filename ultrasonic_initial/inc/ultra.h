@@ -22,7 +22,7 @@
 /*					For calibrating:			 		*/
 //////////////////////////////////////////////////////////
 #define SamplesToCalibrate 20
-#define SensorsToRead 3
+#define SensorsToRead 4
 #define sensorValuesToAverage 3
 
 //works with 3^^

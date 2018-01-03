@@ -550,12 +550,12 @@ void sound()
 		{
 		case triggered:
 			// iMinZone1 biztosan kisebb mint iZoneRad, hisz triggered.
-			if(iMinZone1<25)
+			if(iMinZone1<45)
 			{
 				finVol = SOUND_MAX_VOL_ZONE1;
 				//colorPalette=7;
 			}
-			else if (iMinZone1<45)
+			else if (iMinZone1<60)
 			{
 				finVol = SOUND_MID_VOL_ZONE1;
 				//colorPalette=5;
@@ -572,7 +572,7 @@ void sound()
 		case leaved:
 			finVol = SOUND_MID_VOL_ZONE2;
 			break;
-		case smallTimeout:
+		case bigTimeout:
 			finVol = SOUND_LOW_VOL_ZONE2;
 			break;
 

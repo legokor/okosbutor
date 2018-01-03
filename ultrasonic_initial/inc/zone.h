@@ -22,8 +22,8 @@
 */
 
 
-#define iZone1Radius 60 // [cm] -  dont get confused with Sharp values!
-#define iZone2Radius 120
+#define iZone1Radius 80 // [cm] -  dont get confused with Sharp values!
+#define iZone2Radius 130
 
 
 ///////////// TIMEOUT VARIABLES /////

@@ -711,7 +711,8 @@ void allzonetrigger()
 			colorPalette=7;
 
 			digitalWrite(mutePin,0);
-			myDFPlayer.next();
+			//myDFPlayer.next();
+			myDFPlayer.enableLoopAll(); // maybe?
 			Serial.println("zone 1 T'D -> zene");
 		}
 		break;

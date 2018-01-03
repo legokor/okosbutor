@@ -740,7 +740,6 @@ void allzonetrigger()
 			Serial.println("zone 1 10s elapsed --> small timeout: finVol becames 0");
 
 			//5s-nel tobb ido telt el
-			finVol=0;
 			//finS=170;
 
 			digitalWrite(onboardLed,0);

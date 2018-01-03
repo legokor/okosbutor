@@ -628,11 +628,11 @@ void sound()
 
 	if 		(curVol < finVol)		// hangosabb lesz
 	{
-		curVol = ((curVol + 1) > finVol) ? (finVol) : (curVol + 1);
+		curVol = ((curVol + 3) > finVol) ? (finVol) : (curVol + 3);
 		myDFPlayer.volume(curVol);
 		digitalWrite(mutePin, 0);
 
-			//Serial.println("vol++");
+			Serial.println("vol+=3");
 	}
 	else if	(curVol > finVol)		// halkabb lesz
 	{

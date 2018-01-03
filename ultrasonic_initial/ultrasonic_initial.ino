@@ -69,7 +69,7 @@ void timingISR(void)
 	  indicatorRed.state=IndicatorOff;
 
 	}
-/* 4 szenzoros beteg
+// 4 szenzoros beteg
 	if(k<TIMEOUT_20s && (nyomogomb==ShortPush) && (Calibrated!=Done))
 	{
 	  ucalibrate=true;
@@ -82,7 +82,7 @@ void timingISR(void)
 		digitalWrite(chargeGreen,0);
 	}
 	else
-		*/
+
 		if (k>TIMEOUT_10s && (Calibrated!=Done))
 	{
 		ucalibrate=true;
@@ -337,7 +337,7 @@ void buttonRead()
 	case LongPush:
 		if(!bButtonPushed)
 		{
-			bSoundButtonMuted=!bSoundButtonMuted;
+			//bSoundButtonMuted=!bSoundButtonMuted;
 			if(bSoundButtonMuted)
 			{
 
@@ -546,33 +546,29 @@ void sound()
 
   //felkapcsolas a zone triggernel
   //itt csak hangero es colorpalette
-	if(!bSoundButtonMuted)
-	{
+
 		// sound not muted by button
 		switch (zone1)
 		{
 		case triggered:
 			// iMinZone1 biztosan kisebb mint iZoneRad, hisz triggered.
-			if(iMinZone1<45)
-			{
+			/*if(iMinZone1<45)
+			{*/
 				finVol = SOUND_MAX_VOL_ZONE1;
 				//colorPalette=7;
-			}
-			else if (iMinZone1<60)
-			{
-				finVol = SOUND_MID_VOL_ZONE1;
-				//colorPalette=5;
-
-			}
+			/*}
 			else // useless: if(iMinZone1<75)
 			{
 				finVol = SOUND_LOW_VOL_ZONE1;
 				//colorPalette=6;
 
-			}
+			}*/
 			break;
 
 		case leaved:
+			finVol = SOUND_MAX_VOL_ZONE2;
+			break;
+		case smallTimeout:
 			finVol = SOUND_MID_VOL_ZONE2;
 			break;
 		case bigTimeout:
@@ -580,7 +576,6 @@ void sound()
 			break;
 
 		case idle:
-
 			finVol=0;
 
 			/*// if zone2 triggered
@@ -619,23 +614,18 @@ void sound()
 			break;
 
 		}
-	}
-	else
-	{
-		// sound muted by button
 
-		finVol=0;
-	}
+
 
   //SOUND FADING PART
 
 	if 		(curVol < finVol)		// hangosabb lesz
 	{
-		curVol = ((curVol + 3) > finVol) ? (finVol) : (curVol + 3);
+		curVol = ((curVol + 2) > finVol) ? (finVol) : (curVol + 2);
 		myDFPlayer.volume(curVol);
 		digitalWrite(mutePin, 0);
 
-			Serial.println("vol+=3");
+			Serial.println("vol+=2");
 	}
 	else if	(curVol > finVol)		// halkabb lesz
 	{
@@ -643,12 +633,13 @@ void sound()
 		myDFPlayer.volume(curVol);
 		digitalWrite(mutePin, 0);
 
-			//Serial.println("vol--");
+			Serial.println("vol--");
 	}
 
 	if (0 == curVol)
 	{				//ha 0 a hangero, akkor mute-ol
 			//Serial.println("to mute");
+		myDFPlayer.pause();
 		digitalWrite(mutePin, 1);
 	}
 }
@@ -714,8 +705,7 @@ void allzonetrigger()
 			colorPalette=7;
 
 			digitalWrite(mutePin,0);
-			//myDFPlayer.next();
-			myDFPlayer.enableLoopAll(); // maybe?
+			myDFPlayer.next();
 			Serial.println("zone 1 T'D -> zene");
 		}
 		break;
@@ -737,7 +727,7 @@ void allzonetrigger()
 
 		if(k>iZone1TimeoutStart+TIMEOUT_10s)
 		{
-			Serial.println("zone 1 10s elapsed --> small timeout: finVol becames 0");
+			Serial.println("zone 1 10s elapsed --> small timeout");
 
 			//5s-nel tobb ido telt el
 			//finS=170;
@@ -754,12 +744,11 @@ void allzonetrigger()
 		break;
 
 	case smallTimeout:
-		if(k>iZone1TimeoutStart+TIMEOUT_15s)
+		if(k>iZone1TimeoutStart+TIMEOUT_20s)
 		{
 			Serial.println("zone 1 15s elapsed --> big timeout");
 
 			//mar eltelt 10s de 15 meg nem: megall
-			myDFPlayer.pause();
 			digitalWrite(mutePin,0);	//mute
 			zone1=bigTimeout;
 		}
@@ -1150,15 +1139,11 @@ void loop()
 
 	 //* working
 
-		Serial.print("\t r: ");Serial.print(finR);
-		Serial.print(": ");Serial.print(curR);
-		Serial.print("\t g: ");Serial.print(finG);
-		Serial.print(": ");Serial.print(curG);
-		Serial.print("\t b: ");Serial.print(finB);
-		Serial.print(": ");Serial.println(curB);
 
 
-		//Serial.print("\t fV: ");Serial.print(finVol);
+
+		Serial.print("\t fV: ");Serial.print(finVol);
+		Serial.print("\t cV: ");Serial.print(curVol);
 		//Serial.print("\t sIter: ");Serial.print(iSensorIterator);
 
 

@@ -69,7 +69,7 @@ void timingISR(void)
 	  indicatorRed.state=IndicatorOff;
 
 	}
-// 4 szenzoros beteg
+		// 4 szenzoros beteg
 	if(k<TIMEOUT_20s && (nyomogomb==ShortPush) && (Calibrated!=Done))
 	{
 	  ucalibrate=true;
@@ -289,8 +289,13 @@ void buttonRead()
 		}
 		else if(k>(pushStartedAt+BUTTON_TIME_5s))
 		{
-					//u8LedSpeed=(u8LedSpeed==1)?(4):(1);
 			//myDFPlayer.randomAll();
+
+			/*
+			 * Nemitas funkcio lehet jo. Kibekkelheto, de 4 percig tart, ha az offseteket beallitom mondjuk 4-5-re.
+			 * Azutan ujra meg kellene bokodni.
+			 *
+			 */
 			nyomogomb=LongPush;
 					Serial.println("now pushed 5s long");
 		}
@@ -315,7 +320,7 @@ void buttonRead()
 			myDFPlayer.next();
 			Serial.println("double push");
 			nyomogomb=PushedAgain;
-					// Serial.println("pushed twice - switch palette");
+							// Serial.println("pushed twice - switch palette");
 		}
 		break;
 	case ShortPush:
@@ -337,11 +342,17 @@ void buttonRead()
 	case LongPush:
 		if(!bButtonPushed)
 		{
-			//bSoundButtonMuted=!bSoundButtonMuted;
-			if(bSoundButtonMuted)
-			{
-
-			}
+			/*
+			 *
+			 * Sound mute volt itt de engem osszekevert. Lehet hogy nem volt semmi hiba,
+			 * csak a teszteles soran nem hallottam semmit. Pedig jo feature lett volna.
+			 *
+			 * Jo lett volna lenemitani egy idore.
+			 * Ki lehet bekkelni: kalibralasnal (initial) eltakarjuk a szenzorokat, ezzel
+			 * 4 percig kussolasban lesz. Vagy hosszabb idore eltakarjuk, pl hatizsakot
+			 * odateszek.
+			 *
+			 */
 			nyomogomb=NotPushed;
 		}
 		break;
@@ -382,7 +393,7 @@ inline void calcColorDifference()
 
 
 
-	 if(dR || dG || dB) /*|| ((finR-curR)<u8LedSpeed || (finG-curG)<u8LedSpeed || (finB-curB)<u8LedSpeed*/
+	 if(dR || dG || dB)
 	 {
 		 bColorSettled=false;
 	 }
@@ -404,6 +415,11 @@ void led(void){               //may increase an int to perform other tasks
   		{
   			if((k>(iColorSteppedAt+iLedStepTime)))
   			{
+  				/*
+  				 * StepTime lehet hogy nagyon lelassitja, lehet hogy ki kellene venni.
+  				 * Sot, baromsag a letezese, ha ISR-ben ritkabban hivom meg, akkor ez
+  				 * automatikusan noni fog.
+  				 */
 				curR=((curR+dR)>255)?(255):(((curR+dR)<0)?(0):(curR+dR));
 				curG=((curG+dG)>255)?(255):(((curG+dG)<0)?(0):(curG+dG));
 				curB=((curB+dB)>255)?(255):(((curB+dB)<0)?(0):(curB+dB));
@@ -431,14 +447,7 @@ void led(void){               //may increase an int to perform other tasks
 	  			bColorSettled=false;
   			  }
   		  }
-  	  break;
-  	  //case automatic
-
-  	 // case Manual:
-  		  //TODO: mukodesi mod megadasa
-  //		  finR = rgb[colorPalette][x][0];	//a megfelelo palettából az x-edik szín r,g,b azaz 0,1,2 byte-ok
-  //		  finG = rgb[colorPalette][x][1];
-  //		  finB = rgb[colorPalette][x][2];
+  	  break;   //case automatic - ezt ki is lehetne venni
 
   	  case BlinkingStart:
   		  break;
@@ -456,6 +465,12 @@ void led(void){               //may increase an int to perform other tasks
 
 
   	//spot lednek:
+
+  	  /*
+  	   * A valtasi sebesseg megfelelo (ellentetben a strip-pel, az lassu)
+  	   *
+  	   */
+
   	dS=(0<(finS-curS))?(u8SpotSpeed):(-u8SpotSpeed);
   	if(0 == (finS-curS)){dS=0;}
   	curS=((curS+dS)>255)?(255):(((curS+dS)<0)?(0):(curS+dS));
@@ -472,6 +487,14 @@ void led(void){               //may increase an int to perform other tasks
 
 void sensor()
 {
+	/*
+	 *
+	 * A 4 szenzoros szettnel bejottek 2 erteku (2cm) beolvasott adatok, ahogy az 5 cm-t ide beirtam, ez megjavult.
+	 *
+	 *
+	 */
+
+
 	//hanyadik szenzort olvassuk be
 	iSensorArrayIterator=(iSensorArrayIterator<SensorsToRead-1)?(iSensorArrayIterator+1):(0);
 	delayMicroseconds(10000);// seems no effect, max 1.8m..2.1m
@@ -518,6 +541,12 @@ void sensor()
 
 inline void sensor_mid()
 {
+	/*
+	 *
+	 * Lehetne a maximumerteket is venni nagyobb robosztussag erdekeben.
+	 *
+	 */
+
 	for(int i=0;i<SensorsToRead;i++)
 	{
 		if(
@@ -551,18 +580,24 @@ void sound()
 		switch (zone1)
 		{
 		case triggered:
-			// iMinZone1 biztosan kisebb mint iZoneRad, hisz triggered.
-			/*if(iMinZone1<45)
-			{*/
-				finVol = SOUND_MAX_VOL_ZONE1;
-				//colorPalette=7;
-			/*}
-			else // useless: if(iMinZone1<75)
-			{
-				finVol = SOUND_LOW_VOL_ZONE1;
-				//colorPalette=6;
 
-			}*/
+			/*
+			 *
+			 * A szenzorok szuk latoszoge miatt ha koncentrikus korben mozgok a posztamens korul, akkor is valtozik a hangero,
+			 * ha nem megyek tavolabb, csak mas szogben leszek a koriven.
+			 *
+			 * Az interaktivitast csokkenti, de igy az 1. zonan belul konstans hangero van, timeoutig. Ha nagyobb latoszogu
+			 * szenzort hasznalnank, lehetne tobb szintet megkulonboztetni.
+			 *
+			 * A hangero csokkentese vegen sajnos az utolso 3-5 volume hirtelen szunik meg a pause hatasara. Csak akkor kellene
+			 * pause-olni ha a hangero mar zero.
+			 *
+			 */
+
+
+				finVol = SOUND_MAX_VOL_ZONE1;
+
+
 			break;
 
 		case leaved:
@@ -577,37 +612,11 @@ void sound()
 
 		case idle:
 			finVol=0;
-
-			/*// if zone2 triggered
-			switch (zone2)
-			{
-			case triggered:
-				if(iMinZone2<85)
-				{
-					finVol = SOUND_MAX_VOL_ZONE2+SOUND_OFFSET_VOL_ZONE2;
-					colorPalette=6;
-
-				}
-				else if (iMinZone2<100)
-				{
-					finVol = SOUND_MID_VOL_ZONE2+SOUND_OFFSET_VOL_ZONE2;
-					colorPalette=6;
-
-				}
-				else // useless: if(iMinZone1<50)
-				{
-					finVol = SOUND_LOW_VOL_ZONE2+SOUND_OFFSET_VOL_ZONE2;
-					colorPalette=7;
-
-				}
-				break;
-			case timeouting:
-				break;
-			case idle:
-				break;
-			}
-
-			*/
+			/*
+			 *
+			 * Zone2 itt mar nem jatszik, itt volt korabban.
+			 *
+			 */
 
 			break;
 		default:
